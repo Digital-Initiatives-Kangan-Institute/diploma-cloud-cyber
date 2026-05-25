@@ -32,6 +32,18 @@ All of that is your CBA work. This pack is the inputs. Populate the supplied CBA
 
 All figures below are in **Australian Dollars (AUD)**, exclusive of GST, at 2026 price levels.
 
+### Scope of the consulting engagement vs scope of the CBA
+
+The **MTS consulting engagement scope** (see `internal-lms-migration-role-brief-S1-CL1-AT1.md` § Scope of the MTS consulting engagement) covers the cloud infrastructure only. LMS application installation, data migration, cutover, and organisational change management are **YAT in-house IT's responsibility**.
+
+The **CBA scope is different and broader.** The Business Case is for the YAT board; the board is approving the *whole change*, not just the MTS share. So the CBA must include both:
+
+- **MTS-priced costs** — what YAT will pay MTS for consulting work (one-off project labour + ongoing infrastructure support)
+- **AWS-direct costs** — what YAT will pay AWS (compute, database, network, storage, monitoring, support tier)
+- **YAT-internal costs** — what YAT bears as in-house cost: YAT IT staff time during the project + application deployment + data migration + cutover + organisational change management + decommissioning
+
+A CBA that omits YAT-internal cost categories gives the board an unrealistic basis for decision-making and will be marked as incomplete. The Action Plan (§10 of the Business Case) distributes responsibility for who does what; the CBA totals the cost of doing it all.
+
 ## 2. Common assumptions
 
 | Assumption | Value | Source |
@@ -95,10 +107,22 @@ At minimum, your AWS line items must cover:
 
 ### 4.2 One-off project costs you must include for the cloud option
 
-- MTS labour to architect, build, cutover, and hand over the migrated environment.
-- YAT ICT staff time spent on the migration project.
-- Parallel running of on-prem and cloud during cutover.
-- Decommissioning of the on-prem LMS server + secure data destruction.
+The one-off project costs split across **three cost-bearers**. Your CBA must include line items for each — totalled together they are the Year-1 outlay for Option B.
+
+**MTS-priced (one-off):**
+
+- MTS consulting labour to design, build, HA-harden, and hand over the cloud infrastructure (the AT2 + AT3 consulting work end-to-end)
+
+**YAT-internal (one-off) — handled by YAT IT in-scenario:**
+
+- **Project oversight + acceptance** — YAT ICT staff time during the migration project (requirements coordination, attendance at MTS milestone meetings, acceptance testing of the infrastructure handover). Indicative: ~0.30 FTE × 6 months
+- **LMS application deployment** — YAT IT effort to install the DOODLE LMS application onto the new AWS infrastructure once MTS hands it over. Indicative: ~80–120 hours
+- **Data migration** — YAT IT effort to extract the MySQL database from the on-prem LMS and load it into AWS RDS, including data transformation and post-migration verification. Indicative: ~60–100 hours
+- **Cutover** — parallel running of on-prem and cloud during the transition window (~1–2 months of dual-running infrastructure cost), DNS switch, user redirection, post-cutover incident response ramp. Indicative effort: ~40–60 hours plus the parallel-running infrastructure cost
+- **Organisational change management** — Change Advisory Board (CAB) process per YAT's documented change-management procedure, end-user communications (staff + students), training collateral preparation and delivery, post-cutover support ramp. Indicative: ~80–120 hours of YAT ICT + Administrative staff time
+- **Decommissioning** — on-prem LMS server hardware retirement, secure data destruction (per Privacy Act / records management obligations), facility reclamation. Indicative: ~$2,500 in materials + ~16 hours of YAT ICT time
+
+Apply the $115k/FTE/year rate from §2 to convert FTE-fractions and hours to dollars (1 FTE-year ≈ 1,820 productive hours).
 
 ### 4.3 Out-year operational cost changes you should consider
 

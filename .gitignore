@@ -1,6 +1,6 @@
 .DS_Store
-original_materials/
-templates/
+/original_materials/
+/templates/
 
 # Python bytecode
 __pycache__/

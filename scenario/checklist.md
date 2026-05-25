@@ -72,6 +72,10 @@
   - [ICTCLD502 AC 5] organisational procedures
 - [x] **Security baseline / incident response** — ✅ Authored 2026-05-23 (7-section combined policy; Essential Eight baseline mapped to YAT controls; 4-tier severity definitions; 6-stage NIST-style response process; external notification obligations). See `internal-security-and-incident-response.md`.
   - [ICTCLD502 AC 5] organisational procedures
+- [-] **Records Management Policy** — ⏳ Placeholder authored 2026-05-25; content to be authored later. Backs the "save and store documentation per organisational policies" requirement at the cluster scale (records vs working docs, filing locations, naming + version control, retention cross-ref, disposal). See `internal-records-management-policy.md`.
+  - [ICTCLD401 PC 4.3] save and store user documentation per organisational policies and procedures
+  - [ICTCLD502 AC 5] organisational procedures
+  - [ICTICT517 AC 3] organisational policies and procedures for ICT changes (tangential)
 
 ---
 
@@ -103,6 +107,46 @@
   - [ICTICT517 KE 1] action plan key sections
   - [ICTICT517 FS Numeracy] financial implications of changes
   - Supports the AT1 CBA work (port of 517 AT3 Part 1)
+
+- [x] **LMS cloud architecture design (baseline, for AT2 implementation)** — ✅ Authored 2026-05-25 as `.md` scaffold. Specifies the AT2 baseline architecture (single-AZ, single-instance ASG behind ALB, single-AZ RDS-MySQL, basic monitoring) for student implementation. Deliberately not HA — leaves HA hardening for AT3. **TBD before live delivery:** topology diagrams (draw.io or similar), formal design-document layout for intranet rendering, final review against current AWS catalogue. See `internal-lms-cloud-architecture-design-S1-CL1-AT2.md`.
+  - [ICTCLD502 AC 3] information and data sources required to design and implement cloud infrastructure
+  - [ICTCLD502 AC 5] business and functionality requirements
+  - Implements the workload defined in [ICTCLD401 PC 1.8]; supplied to student as the design they implement in AT2
+
+---
+
+## Intranet — Templates (downloadable blank templates for students to fill in)
+
+Per Tim 2026-05-25: student-fillable templates live in `scenario/templates/`. These are the blank documents the YAT intranet exposes for download — distinct from the workspace-level institutional Word templates (which are gitignored).
+
+- [-] **Business Case template** — ⏳ Empty placeholder file in place (`templates/template-business-case.md`). Referenced from AT1. Content TBD.
+- [-] **Board Presentation Deck template** — ⏳ Placeholder file in place (`templates/template-business-case-pptx.md`). Referenced from AT1. Content TBD.
+- [-] **Feedback Record template** — ⏳ Placeholder file in place (`templates/template-feedback-record.md`). Referenced from AT1 (and reused at the AT3 closure meeting). Content TBD.
+- [-] **Change Request Form template** — ⏳ Placeholder authored 2026-05-25 (`templates/template-change-request-form.md`). Operationalises the 13-step `internal-change-management-procedure.md`. Used heavily in AT3 closure; referenced from AT1 action plan + AT2 cutover. Content TBD.
+  - [ICTICT517 PC 3.1] action plan consistent with organisational procedures
+  - [ICTCLD401 PC 4.3] save documentation per org procedures
+  - [ICTCLD502 PC 5.3] obtain final sign off
+- [-] **HA Design template (student-produced output, AT3)** — ⏳ Placeholder authored 2026-05-25 (`templates/template-ha-design-S1-CL1-AT3.md`). Mirrors the AT2 baseline design's shape but student-authored. Carries the bulk of 502's design-production PCs. Content TBD.
+  - [ICTCLD502 PC 1.1, 2.1–2.5, 3.1–3.5] · [ICTCLD502 PE 1, PE 2]
+- [-] **Closure Pack template (AT3 deliverable)** — ⏳ Placeholder authored 2026-05-25 (`templates/template-closure-pack-S1-CL1-AT3.md`). Single consolidated deliverable for AT3 — consolidates AT1 + AT2 + AT3, submitted via change-management procedure, with stakeholder feedback meeting + final sign-off. Content TBD.
+  - [ICTCLD502 PC 5.1, 5.2, 5.3] · [ICTCLD401 PC 4.3] · [ICTICT517 PC 3.3]
+- [-] **Security Responsibilities Matrix template (AT3 sub-deliverable)** — ⏳ Placeholder authored 2026-05-25 (`templates/template-security-responsibilities-matrix-S1-CL1-AT3.md`). Sub-deliverable inside the closure pack mapping each architecture component to its security-responsibility owner. Covers Group 2 at project-closure scale. Content TBD.
+  - [ICTCLD401 PC 1.2, 1.7] · [ICTCLD401 KE 7] · [ICTCLD502 PC 1.3] (all reinforced beyond AT2)
+- [x] **Deployment Report template** — ✅ Authored 2026-05-25. Full template covering Cover / §1 Exec Summary / §2 Engagement Context / §3 Scope / §4 Build Narrative (4.1–4.8) / §5 Configuration Decisions (C1–C8 from supplied design) / §6 Testing & Validation / §7 Operational Handover / §8 Knowledge Evidence (Q1–Q6 covering 401 KE 5–10) / Appendix A — Build Evidence (17 named screenshots) / Appendix B — Configuration Exports / Appendix C — Test Evidence / Appendix D — Reflections (2 FS-evidencing prompts). UoC traceability map in authoring header. TBD for live delivery: confirm KE/reflection question wording, transfer to Word for student download. See `templates/template-deployment-report-S1-CL1-AT2.md`.
+  - [ICTCLD401 KE 5, 6, 7, 8, 9, 10] (Knowledge Evidence appendix)
+  - [ICTCLD401 FS Learning, Planning and organising, Self-management] (Reflections appendix)
+  - Plus the PCs evidenced through the report body — see the authoring header's UoC traceability map
+
+---
+
+## Intranet — Document Archive (exemplars — nice-to-have, not assessment-critical)
+
+Per Tim 2026-05-25: the YAT intranet hosts a Document Archive of past MTS deliverables so students learn that whenever they need to produce a business document they should look for prior examples to model from. Exemplars are a nice-to-have learning aid; assessments can run without them. To be authored as a batch, separately from assessment-task authoring.
+
+- [-] **Example previous Business Case** — ⏳ Placeholder file in place (`exemplars/internal-document-exemplar-business-case.md`). Content TBD.
+- [-] **Example previous Board Presentation Deck** — ⏳ Placeholder file in place (`exemplars/internal-presentation-exemplar-business-case.md`). Content TBD.
+- [-] **Example previous Deployment Report** — ⏳ Scaffold authored 2026-05-25 (`exemplars/internal-document-exemplar-deployment-report.md`). Content TBD.
+- [-] **Example previous Closure Pack** — ⏳ Placeholder authored 2026-05-25 (`exemplars/internal-document-exemplar-closure-pack.md`). Referenced from AT3 (when drafted). Content TBD.
 
 ---
 
