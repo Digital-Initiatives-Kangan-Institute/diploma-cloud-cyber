@@ -7,10 +7,10 @@ Standing rules for how I (Claude) operate inside this project. Loaded at the sta
 In addition to these rules, the following are required reading for any session working on cluster assessment authoring:
 
 - **`documentaion/project_overview.md`** — project goals, scope, operating principles, delivery context (AWS Academy, scenario architecture)
-- **`documentaion/process.md`** — the canonical step-by-step cluster development process (Steps 1–7 as of 2026-05-24). This is the handover document — follow it
+- **`documentaion/process.md`** — the canonical step-by-step cluster development process (Steps 1–7 documented for S1-CL1; AT2 + AT3 followed the Step 6/7 pattern per the same conventions). This is the handover document — follow it
 - **Memory entries** (auto-loaded):
-  - `cluster_authoring_conventions.md` — UoC traceability rule + KE evidencing locations + template workflow + scenario reference rules
-  - `s1cl1_at1_in_flight.md` — state snapshot of the pilot cluster's current work
+  - `cluster_authoring_conventions.md` — UoC traceability rule (incl. mandatory self-audit for free-floating criteria) + KE evidencing locations + template workflow + scenario reference rules + cross-AT shape comparability
+  - `s1cl1_in_flight.md` — state snapshot of the pilot cluster (all three ATs at v1.0 as of 2026-05-26)
   - `scenario_location.md` — scenario lives at `<repo_root>/scenario/` and is shared across the course
   - `project_reuse_permissions.md` — multi-TAFE-collab origin and Kangan's reuse rights
 

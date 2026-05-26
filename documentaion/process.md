@@ -324,15 +324,27 @@ The validator:
 
 ---
 
+## Post-Step-7 work (S1-CL1 progress, for pattern reference)
+
+Steps 6 + 7 are repeated **per AT** in the cluster, not once per cluster. S1-CL1 has applied the pattern to AT1, AT2, AT3:
+
+- **AT1** (Business Case + presentation) — Project Assessment template; Part A written + Part B observed presentation. v1.0 committed.
+- **AT2** (Cloud Foundation Build) — Project Assessment template **single-task** (no Part split — "implementation is a project even if the deliverable is written" per Tim 2026-05-25). v1.0 committed.
+- **AT3** (HA Hardening) — Project Assessment template; Part A (HA Design — student-authored) + Part B (HA Deployment Report). v1.0 committed.
+
+AT3-specific operational artefact authored during the process: a **CloudFormation template** (`scenario/assessor-resources/at2-baseline-cloudformation.{md → yaml}`) — assessor distributes to students at start of AT3 day to deploy a consistent AT2 baseline (since AWS Academy labs reset between sessions). The `scenario/assessor-resources/` folder convention was established for this; intended for assessor-only operational artefacts.
+
 ## What has NOT been defined yet
 
-Do not invent steps beyond this point. As of 2026-05-24, the work after Step 7 is:
+As of 2026-05-26, S1-CL1 has reached the end of Step 7 for all three ATs. Remaining work:
 
-> **Pending: Tim's lock-in of AT1 assessor doc + derivation of AT1 student doc + drafting AT2 and AT3 assessor + student docs + the per-UoC mapping document (workspace `templates/Assessment Mapping Tool.docx`) + stakeholder review.**
+1. **Per-UoC mapping documents** — uses workspace `templates/Assessment Mapping Tool.docx`. One per UoC in the cluster (three for S1-CL1). Tim has started edits to the three mapping docx files; not yet locked in. Maps each PC/PE/KE/FS/AC of each UoC to where in the cluster's ATs it is evidenced.
+2. **Operational delivery artefacts** — see memory `s1cl1_in_flight.md` § Pending — operational / pre-delivery for the running list (CloudFormation YAML, Records Management Policy content, AT1 templates, exemplars batch).
+3. **Pre-validation pass** — run the institutional Pre-Validation Tool over each AT.
+4. **Stakeholder review** of the full cluster.
+5. **Apply the same Steps 1–7 pattern to remaining clusters** (S1-CL2, S1-CL3, S2-CL1 through S2-CL4).
 
-The per-UoC mapping document (waypoint item 3 per Tim 2026-05-24) is the next major artefact after the AT documents themselves — it maps each PC/PE/KE/FS/AC of each UoC to where in the cluster's ATs it is evidenced.
-
-If you reach this point on a new cluster and Step 7 passes, **stop and report to Tim**. Do not continue to drafting the mapping document, the delivery plan, learner-resource authoring, or anything else not documented above.
+If you are picking this up on a new cluster, follow Steps 1–7 in order against that cluster's UoCs. Read `s1cl1_in_flight.md` as the worked example of the end state.
 
 ---
 
