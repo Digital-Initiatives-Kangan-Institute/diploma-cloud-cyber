@@ -3,7 +3,9 @@
 /original-materials/
 /templates/
 
-# Per-Topic copies of AWS decks (licensed "do not distribute"; large binaries — kept local, named in teaching.md)
+# Raw AWS source decks — kept local because of their SIZE and FILE COUNT (1GB+, many files), not licensing.
+# Cited by module/slide in slide_plan.md. The assembled, curated Topic decks (topic_NN/Topic_NN_Slides.pptx)
+# ARE tracked — they're small, and the repo is the instructor-to-instructor channel for finished materials.
 **/source_slides/
 
 # Python bytecode

@@ -2,7 +2,7 @@
 
 **Audience:** an LLM agent picking up the cluster **delivery-planning** task. Not a human-facing document. Sister document to `process.md` (which covers the assessment-creation process).
 
-**Status:** Active (2026-05-31). Records the **lean delivery-planning process** — see *The process (lean — follow this)* below — proven on S1-CL1 (Topic 1 worked end-to-end as the pattern). Written *as the work was performed and confirmed with Tim*, not invented ahead. When picking this up: read what exists, then continue from where the recorded work stops (the remaining Topics through Steps 2–3), surfacing each proposed next step to Tim before acting.
+**Status:** Active (2026-05-31). The process is in *The process* below; proven on S1-CL1 (Topic 1 worked end-to-end). When picking this up, continue from where the recorded work stops (remaining Topics, Steps 2 and 3), surfacing each proposed next step to Tim.
 
 **Relationship to `process.md`:** `process.md` records how the cluster's **assessment artefacts** are created (Steps 1–7: UoC validation → consolidation → audit → assessment plan → scenario → assessor templates → student templates). This document records how a cluster's **delivery plan** is produced — the trainer-facing schedule that sequences delivery and assessment across sessions. The two processes share inputs (the consolidated UoC, the assessment plan, the scenario) but produce different outputs.
 
@@ -23,7 +23,7 @@
 ## Input state (S1-CL1)
 
 - Cluster folder: `S1-CL1-Cloud-Design-Build/`
-- `delivery/` now holds **`topic_01/` … `topic_22/`** (each with `coverage.md` / `teaching.md` / `exercises.md` / `source_slides/`) plus `planning/` (the retained spine, session scaffold, and deck catalogue).
+- `delivery/` now holds **`topic_01/` … `topic_22/`** (each with `coverage.md` + `slide_plan.md` + `source_slides/`) plus `planning/` (the retained spine, session scaffold, and deck catalogue).
 - Available inputs: the three populated AT `.docx` (source of truth), `consolidated_uoc.md`, `assessments/assessment_plan.md`, the shared `scenario/` + the YAT website, and the per-UoC mapping docs under `mappings/`.
 - Institutional template: `templates/Delivery_Plan_Template_v0.1.docx`.
 
@@ -71,9 +71,7 @@ The basic approach for the cluster (per Tim 2026-05-31). Each Topic / competency
 
 ---
 
-## The process (lean — follow this)
-
-> **This is the proven process** (settled 2026-05-31 after a working-pattern review). It produced usable materials with far less overhead than the first-pass route recorded under "First-pass working notes" below. That earlier route — a fine per-AT decomposition → a granular deck catalogue mapped to it → a grouping pass → a terminology rename — turned out to be **scaffolding**: the assessment's own structure hands you the teaching units and their components directly.
+## The process
 
 **Model:** `AT → Topic → component`. A **Topic** is the delivery unit (one `topic_NN/` folder — the level you build materials for and schedule into sessions; aligns with the Delivery Plan template's "Topic and description" field). A Topic's **components** (C1, C2, …) are the things it covers, defined *inside* its `coverage.md`, derived straight from the AT — there is no separate decomposition document.
 
@@ -82,11 +80,14 @@ The basic approach for the cluster (per Tim 2026-05-31). Each Topic / competency
 **Per-Topic folder:**
 ```
 topic_NN/
-├── coverage.md     — UoC + AT alignment (the spec)
-├── teaching.md     — [AWS] deck-slice refs + [BESPOKE] slide content (==== between slides)
-├── exercises.md    — [AWS] activity refs + [BESPOKE] exercise write-ups
-└── source_slides/  — only the decks this Topic OWNS
+├── coverage.md          — UoC + AT alignment (the spec) — kept
+├── Topic_NN_Slides.pptx — the assembled deck — THE ARTEFACT OF RECORD
+├── slide_plan.md        — the build sheet: teach + exercise slides interleaved, in deck order
+│                          ([AWS Mx Sy] = copy that slide · [BESPOKE] = build from its content block)
+│                          — DISPOSABLE: a working aid; delete once the deck is assembled
+└── source_slides/       — only the decks this Topic OWNS (git-ignored)
 ```
+The deck is built **once**, in PowerPoint, from the plan. Don't keep the plan synced to the deck slide-by-slide — it's about to be deleted; the deck is the source of truth.
 
 ### Step 1 — Break the AT into Topics
 **Purpose:** from the assessment itself, identify the conceptual **Topics** — coherent teaching units anchored to the AT's own structure (deliverable sections, appendix/KE questions, marking criteria; the natural movements of producing the deliverable).
@@ -99,25 +100,25 @@ topic_NN/
 **Method:** list the Topic's components C1..Cn (from the AT); per component, the UoC it **teaches** (full `[UNIT SECTION num]` tags) + the **AT alignment** (which criteria / deliverable sections / appendix questions it prepares for); distinguish *taught here* vs *applied (taught earlier)*; state what's out of scope (covered elsewhere); end with a coverage checklist. **Only UoC + AT cross-references** — nothing pointing at working drafts, so the file stands alone when those are deleted.
 **Result (S1-CL1):** Topics 1 & 2 done as the pattern.
 
-### Step 3 — Build teaching + exercises (reuse-first)
-**Purpose:** produce the canonical teaching + practice materials.
-**Method:**
-- **`teaching.md`** — per component: reference the **AWS deck slice** that covers it (deck named; slide-ranges pinned later) and/or author **bespoke slide content** (slides separated by a `====` rule) only for gaps.
-- **`exercises.md`** — per component: reference an existing **AWS activity** where one fits and/or write up a **bespoke exercise** only for gaps. Practice is set on the **practice scenario** and mirrors the AT's form (builds the skill without rehearsing the real answers).
-- **Owns vs borrows:** copy a deck into `topic_NN/source_slides/` only in the one Topic that **owns** it (primary teaching material); borrowers cite "deck + slides" without copying — stops the same decks bloating every Topic.
+### Step 3 — Build the slide plan, then the deck (reuse-first)
+**Purpose:** write the build sheet (`slide_plan.md`), then assemble the single Topic deck from it. The **deck is the canonical artefact**; the plan is a working aid, deleted when the deck is done.
+**Method:** walk the Topic's components top-to-bottom; for each, **teach then its exercise**, interleaved in deck order:
+- **Teach slides:** pin the **AWS deck slice** that covers the component (`[AWS Mx Sy]`) and/or author **bespoke slide content** (`[BESPOKE]`, content block inline) only for gaps. The AT sets the depth ceiling.
+- **Exercise slide(s):** an existing **AWS activity** where one fits (`[EX] [AWS Mx Sy]`) and/or a **bespoke exercise** (`[EX] [BESPOKE]`) on the **practice scenario**, mirroring the AT's form (builds the skill without rehearsing the real answers).
+- One document for both teaching and exercise planning — no separate exercises file (it duplicated the source of truth). Flag any supporting artefact an exercise needs (e.g. a sizing sheet to publish on the website) inline in the slide plan.
+- **Owns vs borrows:** copy a deck into `topic_NN/source_slides/` only in the one Topic that **owns** it; borrowers cite "deck + slides" without copying — stops the same decks bloating every Topic.
+
+**Slide-build rules (apply as you place each slide):**
+- **The plan holds briefs, not finished copy.** A `[BESPOKE]` block is the *substance* of a slide; write the actual title + bullets at build time (drafted on demand as the deck is assembled).
+- **Student-facing slides stay in-world** — same rule as the intranet. No course/assessment language *on the slide*: no "AT1 / Appendix 2 / Business Case §x", and nothing that tips **which system is the assessed one** (students practise on the Accounting System; the real engagement is handed out later). Put the UoC / AT / appendix mapping in the **speaker/trainer notes** only.
+- **No forward references in an exercise** — it may use only what's been taught *by that point in the deck*. If an exercise needs a service or concept from a later component, reorder, or re-cast it onto things already known (e.g. classify *described* services, not yet-unnamed AWS products).
+- **Reused activities must respect the depth ceiling** — a large AWS activity often runs far deeper than the AT needs; drop it for this Topic (it belongs to a later, deeper one) rather than overshoot.
+
 **Tempo bands** (for later session-sizing; a Topic may span >1 session): ~15–20 min teach / 40–45 activity = 3 small components per class · ~20–30 / 60–70 = 2 medium · ~30–40 / 140–150 = 1 big/practical-heavy.
-**Result (S1-CL1):** Topic 1 complete (coverage + teaching + exercises) — reuse-first, bespoke only for the gaps AWS leaves (non-AWS standards; the Appendix-2-form capstone). Pattern proven.
+**Result (S1-CL1):** Topic 1 deck built end-to-end (opener → 5 components, each *teach → exercise → takeaways* → close), reuse-first off ACF M1/M2/M3/M9 with bespoke only for the gaps; exercises run on the Accounting practice scenario. Pattern proven; the plan is now disposable.
 
 ### Still to do (S1-CL1)
 Work the remaining Topics through Steps 2–3 · pin AWS deck slide-ranges · size Topics against the tempo bands and lay them onto S2–S28 (deferred until the materials reveal each Topic's real footprint).
-
-### What was scaffolding (skip next cluster)
-The AT's structure gives Topics + components directly, so next time skip:
-- a **fine per-AT decomposition** (~18–19 items each);
-- a **granular deck catalogue** mapped item-by-item — its *strategic* read (AWS covers AT2/AT3, AT1 mostly bespoke, reuse-first) is the keeper and is now baked into the Topic files; the item-by-item mapping was not used;
-- a **chunk↔Topic terminology rename** — overhead from carrying two layers.
-
-The three **chunk-inventory decomposition drafts are now deleted** (value extracted into the Topic files). Retained in `…/delivery/planning/` for now: the **deck catalogue** (handy when pinning slide-ranges), the **session bookend scaffold**, and the **Topic sequence / spine** — these stay until superseded by the per-Topic files + a delivery index. The "First-pass working notes" section below is the original step-by-step route, kept only as a record of what to skip; it can be deleted entirely.
 
 ---
 
@@ -126,15 +127,3 @@ The three **chunk-inventory decomposition drafts are now deleted** (value extrac
 1. **The `.docx` is the source of truth for each AT, not the `.md`.** The markdown companions were an intermediate step toward the institutional `.docx`; downstream edits may have landed only in the `.docx`. Extract from the `.docx`. (Per Tim 2026-05-31.)
 2. **`docx_to_text` extraction on Windows.** The repo's `scripts/validate_uoc.py` has a reusable `docx_to_text(Path)`. Printing its output straight to the Windows console fails on non-cp1252 glyphs (e.g. `☐` ballot box); and native Python doesn't resolve bash's `/tmp`. Write the extracted text to a file under `tempfile.gettempdir()` with `encoding='utf-8'`, then read it.
 3. **`.pptx` extraction + long paths.** No shared pptx helper exists; slide text lives in `ppt/slides/slideN.xml` as `<a:t>` elements (namespace `http://schemas.openxmlformats.org/drawingml/2006/main`) — iterate them per slide, ordered by N. **Two Windows traps:** (a) the AWS deck folder has deeply-nested duplicate directories that push paths past the 260-char `MAX_PATH` limit — `zipfile.ZipFile` then fails even though MSYS `find`/`cp` see the file (the `\\?\` long-path prefix did **not** reliably work); (b) native Python doesn't resolve MSYS `/tmp`. **Fix that worked:** `cp` the needed decks (via bash, which handles long paths) into a short **Windows-addressable** dir such as `/c/Users/<u>/AppData/Local/Temp/<x>`, then point Python at the `C:/Users/.../Temp/<x>` form.
-
----
-
-## Changelog
-
-- **2026-05-31:** Initial scaffold created. Framing, prerequisites, working rules, and S1-CL1 input state recorded. No process steps defined yet — to be filled in as the work is performed.
-- **2026-05-31 (later):** Added Semester 1 structure (planning context) — 18-week / 2-term semester; CL1 weeks 1–8 (104h, 32 × 3h sessions), CL2+CL3 in parallel weeks 9–18 (84h / 56h). Tim-provided figures; teaching hours are goals.
-- **2026-05-31 (later):** Added delivery strategy (teach / practice / assess cycle); recorded CL1 session bookend scaffold at `S1-CL1-Cloud-Design-Build/delivery/cl1-delivery-sessions-draft.md` (S1 onboarding, S2–S28 teaching/practice/AT1+AT2, S29 AT3 prep, S30 AT3 practical, S31–S32 catch-up).
-- **2026-05-31 (later):** Recorded **Step 1 — Decompose each AT into teachable topics**, performed for all three S1-CL1 ATs (AT1 19 topics, AT2 18, AT3 18; drafts in `delivery/at<n>-topic-decomposition-draft.md`). Added quirks: `.docx` is source of truth; `docx_to_text` encoding/tempdir gotcha.
-- **2026-05-31 (later):** Recorded **Step 2 — Catalogue existing teaching materials** and **Step 3 — Group into teaching units** (AWS deck catalogue + the full 22-unit cluster sequence). Added the tempo bands to Step 3 and a `.pptx`-extraction/long-path quirk.
-- **2026-05-31 (later):** **Terminology settled — `AT → Topic → chunk`.** Renamed the coarse teaching units (formerly "chunks") to **Topics** and the fine items (formerly "topics") to **chunks**, to align with the Delivery Plan template's "Topic" field. Steps 1–3 reworded. Spine renamed `cl1-teaching-chunks-draft.md` → `cl1-teaching-topics-draft.md`; the `at<n>` decomposition drafts re-cast as **chunk inventories** with terminology banners. All delivery working drafts moved to `delivery/planning/`. **Practice scenario settled:** YAT Accounting & Office Administration system (Ledgerline) as a peer engagement in the AT1 intranet state.
-- **2026-05-31 (later):** **Process rewritten to the lean version.** After a working-pattern review, the proven process is recorded at the top (`## The process (lean — follow this)`): `AT → Topic → component`, with each Topic specced in `coverage.md` then built as `teaching.md` + `exercises.md` (reuse-first), components derived straight from the AT. The original fine-decomposition → catalogue → grouping → rename route is demoted to "First-pass working notes (superseded scaffolding)" and recorded as *what to skip next cluster*. Per-Topic file convention set (`coverage.md` / `teaching.md` / `exercises.md` / `source_slides/`) and the owns-vs-borrows rule for decks. **Topic 1 completed as the worked pattern.** Tim deleted the three chunk-inventory decomposition drafts (value extracted); deck catalogue, session scaffold, and Topic spine retained in `planning/`.

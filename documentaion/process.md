@@ -2,7 +2,7 @@
 
 **Audience:** an LLM agent picking up the cluster refactor task. Not a human-facing document.
 
-**Status:** records the steps completed for **S1-CL1 Cloud Design and Build** as of 2026-05-22. The process beyond Step 2 is **not yet defined** and must not be invented. After S1-CL1 is reviewed by Tim + stakeholders, the process will be extended.
+**Status:** Steps 1-7 below define the assessment-creation process, applied end-to-end on S1-CL1 (all three ATs at v1.0). Follow them for a new cluster; see `s1cl1_in_flight.md` for the worked end state.
 
 **Prerequisites you must read before acting:**
 - `CLAUDE.md` (repo root) — working rules. Rule 1: nothing recorded as decided without Tim's explicit approval. Rule 5: no unilateral git operations.
@@ -782,11 +782,3 @@ def main():
 if __name__ == "__main__":
     main()
 ```
-
----
-
-## Changelog
-
-- **2026-05-22:** Initial document. Records Steps 1–2 as performed for S1-CL1 Cloud Design and Build.
-- **2026-05-22 (later):** Added Steps 3 (audit existing standalone assessments) and 4 (synthesise cluster assessment plan), as performed for S1-CL1. Added quirks 7–10 covering source-AT quality issues. Updated post-process endpoint to reflect stakeholder review now follows Step 4 rather than Step 2.
-- **2026-05-24:** Added Steps 5 (author cluster scenario materials), 6 (author per-AT assessor template content), 7 (author per-AT student template content). Added quirks 11–15 covering: cluster ATs consolidating per-unit ATs; bidirectional UoC traceability rule; questions-in-context convention; Project vs Written template selection; scenario reference framing. Updated post-process endpoint to reflect work continuing through AT authoring + the per-UoC mapping document as the next major artefact. Refer to memory entries `cluster_authoring_conventions.md` and `s1cl1_at1_in_flight.md` for current state.
