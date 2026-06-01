@@ -81,13 +81,13 @@ The basic approach for the cluster (per Tim 2026-05-31). Each Topic / competency
 ```
 topic_NN/
 ├── coverage.md          — UoC + AT alignment (the spec) — kept
-├── Topic_NN_Slides.pptx — the assembled deck — THE ARTEFACT OF RECORD
 ├── slide_plan.md        — the build sheet: teach + exercise slides interleaved, in deck order
-│                          ([AWS Mx Sy] = copy that slide · [BESPOKE] = build from its content block)
-│                          — DISPOSABLE: a working aid; delete once the deck is assembled
-└── source_slides/       — only the decks this Topic OWNS (git-ignored)
+│                          ([BESPOKE] = author from brief · [AWS Mx Sy] = AWS slide to reuse · [EX] = exercise)
+│                          — DISPOSABLE: a working aid; delete once the deck is built
+├── Topic_NN_Slides.pptx — the generated Kangan-branded deck — THE ARTEFACT OF RECORD
+└── source_slides/       — the AWS slides this Topic reuses, isolated by the human (git-ignored)
 ```
-The deck is built **once**, in PowerPoint, from the plan. Don't keep the plan synced to the deck slide-by-slide — it's about to be deleted; the deck is the source of truth.
+The deck is **generated** from the plan by a per-Topic Kangan build script, then the human adds the reused images back into the placeholders. The plan isn't kept synced to the deck — it's disposable; the deck is the source of truth.
 
 ### Step 1 — Break the AT into Topics
 **Purpose:** from the assessment itself, identify the conceptual **Topics** — coherent teaching units anchored to the AT's own structure (deliverable sections, appendix/KE questions, marking criteria; the natural movements of producing the deliverable).
@@ -100,13 +100,18 @@ The deck is built **once**, in PowerPoint, from the plan. Don't keep the plan sy
 **Method:** list the Topic's components C1..Cn (from the AT); per component, the UoC it **teaches** (full `[UNIT SECTION num]` tags) + the **AT alignment** (which criteria / deliverable sections / appendix questions it prepares for); distinguish *taught here* vs *applied (taught earlier)*; state what's out of scope (covered elsewhere); end with a coverage checklist. **Only UoC + AT cross-references** — nothing pointing at working drafts, so the file stands alone when those are deleted.
 **Result (S1-CL1):** Topics 1 & 2 done as the pattern.
 
-### Step 3 — Build the slide plan, then the deck (reuse-first)
-**Purpose:** write the build sheet (`slide_plan.md`), then assemble the single Topic deck from it. The **deck is the canonical artefact**; the plan is a working aid, deleted when the deck is done.
-**Method:** walk the Topic's components top-to-bottom; for each, **teach then its exercise**, interleaved in deck order:
-- **Teach slides:** pin the **AWS deck slice** that covers the component (`[AWS Mx Sy]`) and/or author **bespoke slide content** (`[BESPOKE]`, content block inline) only for gaps. The AT sets the depth ceiling.
-- **Exercise slide(s):** an existing **AWS activity** where one fits (`[EX] [AWS Mx Sy]`) and/or a **bespoke exercise** (`[EX] [BESPOKE]`) on the **practice scenario**, mirroring the AT's form (builds the skill without rehearsing the real answers).
-- One document for both teaching and exercise planning — no separate exercises file (it duplicated the source of truth). Flag any supporting artefact an exercise needs (e.g. a sizing sheet to publish on the website) inline in the slide plan.
-- **Owns vs borrows:** copy a deck into `topic_NN/source_slides/` only in the one Topic that **owns** it; borrowers cite "deck + slides" without copying — stops the same decks bloating every Topic.
+### Step 3 — Slide plan → deck (Kangan-branded, generated)
+**Purpose:** turn the coverage into a slide plan, then **generate** the Kangan-branded Topic deck from it. The **deck is the canonical artefact**; the plan is a working aid, deleted when the deck is done.
+
+**The slide-creation process (settled 2026-06-01):**
+1. **`slide_plan.md`** — walk the Topic's components top-to-bottom; for each, **teach then its exercise**, in deck order. Mark each slide `[BESPOKE]` (content brief inline), `[AWS Mx Sy]` (an AWS deck slide to reuse), or `[EX]` (exercise). The plan **identifies up front exactly which AWS slides the Topic needs** (deck + slide numbers, via `aws-deck-catalogue-draft.md`). Flag any supporting artefact an exercise needs (e.g. a sizing sheet to publish) inline.
+2. **(human) isolate the AWS slides** — copy the needed AWS slides into `topic_NN/source_slides/included_aws_slides.pptx` (git-ignored).
+3. **(agent) generate the deck** — a per-Topic build script (`scripts/build_kangan_topicNN_deck.py`) authors **every** slide — bespoke *and* AWS-sourced — fresh into the **Kangan brand layouts** (title / divider / content / activity / takeaways / table; see `kangan-branding.md`). Each image/diagram (raster or vector) is rendered as a **labelled placeholder box**, not extracted. Output `Topic_NN_Slides.pptx`.
+4. **(human) add the images back** — transfer the real images from `source_slides/` into the placeholder slots in PowerPoint.
+
+**Why authored-with-placeholders, not re-skinned:** re-skinning the AWS deck in place mis-sizes text and can't carry vector diagrams; authoring fresh into the Kangan layouts gives a clean, consistent deck, and the placeholders make the (few) images a quick manual paste. (Raster images *can* be auto-extracted, but the clean authored layout is worth the manual image step.)
+
+**Brand:** teaching decks wear **Kangan/BKI** branding (gold `#EDAB0C` + charcoal, Roboto), **not** the in-world YAT case-study brand — see `kangan-branding.md`. Brand helpers + layouts live in `scripts/build_kangan_topic_deck.py`; per-Topic builders import them.
 
 **Slide-build rules (apply as you place each slide):**
 - **The plan holds briefs, not finished copy.** A `[BESPOKE]` block is the *substance* of a slide; write the actual title + bullets at build time (drafted on demand as the deck is assembled).
@@ -116,9 +121,9 @@ The deck is built **once**, in PowerPoint, from the plan. Don't keep the plan sy
 
 **Tempo bands** (for later session-sizing; a Topic may span >1 session): ~15–20 min teach / 40–45 activity = 3 small components per class · ~20–30 / 60–70 = 2 medium · ~30–40 / 140–150 = 1 big/practical-heavy.
 
-**Before committing a deck — size check.** Decks are git-tracked (the repo is the instructor-to-instructor channel), so keep them small enough for plain git. Run `python scripts/inspect_deck.py <deck>` — it reports the deck size and its largest internal objects. If it's large (guideline: warns over 25 MB), find what's driving it and optimise *before* committing: bloat usually rides in on pasted AWS slides (uncompressed images of *any* type, embedded video/audio, dragged-in masters). Fix with PowerPoint > Compress Pictures (whole deck, 150 ppi, delete cropped areas) or by dropping the offending object, then re-run the check. Don't assume the culprit — diagnose it; it won't be the same thing every time.
+**Before the deck is final — size check** (run it after the human has added the images back). Decks are git-tracked (the repo is the instructor-to-instructor channel), so keep them small enough for plain git. Run `python scripts/inspect_deck.py <deck>` — it reports the deck size and its largest internal objects. If it's large (guideline: warns over 25 MB), find what's driving it and optimise *before* committing: bloat usually rides in on pasted AWS slides (uncompressed images of *any* type, embedded video/audio, dragged-in masters). Fix with PowerPoint > Compress Pictures (whole deck, 150 ppi, delete cropped areas) or by dropping the offending object, then re-run the check. Don't assume the culprit — diagnose it; it won't be the same thing every time.
 
-**Result (S1-CL1):** Topic 1 deck built end-to-end (opener → 5 components, each *teach → exercise → takeaways* → close), reuse-first off ACF M1/M2/M3/M9 with bespoke only for the gaps; exercises run on the Accounting practice scenario. Pattern proven; the plan is now disposable.
+**Result (S1-CL1):** Topics 1–3 built this way — Topic 1 (mixed: bespoke + AWS images, authored with placeholders), Topic 2 (all bespoke), Topic 3 (mixed: the two AWS Pricing-Calculator slides). All Kangan-branded; each opener → components (*teach → exercise → takeaways*) → close; exercises run on the Accounting practice scenario.
 
 ### Still to do (S1-CL1)
 Work the remaining Topics through Steps 2–3 · pin AWS deck slide-ranges · size Topics against the tempo bands and lay them onto S2–S28 (deferred until the materials reveal each Topic's real footprint).
