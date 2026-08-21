@@ -11,7 +11,7 @@ instrument never goes stale; the intranet is referred to by name, as in CL2/CL3)
 CL2 AT1 generator's mechanics.
 
 AT1 = Business Case: YAT LMS Cloud Migration (ICTICT517 + ICTCLD401 + ICTCLD502) — two parts:
-  Part A  Business Case      (written; sections 1-11 + Sign-off + Appendices 1-4)
+  Part A  Business Case      (written; sections 1-12 + Sign-off + Appendices 1-3)
   Part B  Presentation       (observed; presented to the role-played YAT board)
 
 The assessor instrument carries the task instructions, the Marking Guide, the Business Case
@@ -22,21 +22,31 @@ student-facing content.
 Usage:  python scripts/s1_cl1/build_s1_cl1_at1_assessor.py [output.docx]
 Default: S1-CL1-Cloud-Design-Build/assessments/AT1/AT1-BusinessCase-Assessor.docx
 """
+import re
 import sys
 from pathlib import Path
 
 from docx import Document  # noqa: E402
+from docx.opc.constants import RELATIONSHIP_TYPE as RT  # noqa: E402
+from docx.oxml.ns import qn  # noqa: E402
+from docx.oxml import OxmlElement  # noqa: E402
+from docx.shared import Pt, RGBColor  # noqa: E402
 
 TEMPLATE = str(Path(__file__).resolve().parents[2] / "kangan-templates" / "Project Assessment - Assessor.docx")
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # content-repo scripts/ (brand + registry)  # noqa: E402
 sys.path.insert(0, str(next(d / "scripts" for d in Path(__file__).resolve().parents if (d / "scripts" / "helpers" / "__init__.py").exists())))  # umbrella scripts/ (engine)  # noqa: E402
 from helpers.docx_tables import add_section_row, clear_table_rows, find_instruction_row, set_cell_content  # noqa: E402
+from helpers.instrument_layout import add_hyperlink, render_benchmark, render_prose, set_cell_rich  # noqa: E402
 
 
 # ---------- content ----------
 
 CHECK = "☐ Yes  ☐ No"  # marking-guide Satisfactory? cell (matches the Kangan template)
+
+# Base URL of the scenario site — the single place it is declared. Each link below appends its
+# own path. If the site moves, change this line and regenerate.
+SITE = "https://yat.timbaird.com"
 
 DETAILS = {
     "qualification": "ICT50220 Diploma of Information Technology",
@@ -83,7 +93,7 @@ RESOURCES = [
 
 CRITERIA = [
     'To receive a Satisfactory outcome for this assessment the student must:',
-    'Achieve Satisfactory on every criterion in the Part A Marking Guide (Business Case — covers Business Case sections §1–§11, Sign-off, and Appendices 1–4)',
+    'Achieve Satisfactory on every criterion in the Part A Marking Guide (Business Case — covers Business Case sections §1–§12, Sign-off, and Appendices 1–3)',
     'Achieve Satisfactory on every criterion in the Part B Marking Guide (Presentation — covers the observed presentation event including Q&A, feedback capture, and sign-off)',
     'Submit all required artefacts:',
     'Completed Business Case (.docx) with all three appendices populated',
@@ -130,55 +140,69 @@ MARKING_B = [
 ]
 
 # Shared prose — the 'Instructions to Student' body (single-sourced; the student builder imports it).
+
+
+
+
 PROSE = [
-    ('The engagement and your role', 'Assessor text'),
+    ('The engagement and your role', 'Heading 2'),
     ("YAT College is a Registered Training Organisation (RTO) based at 175 Cremorne Street, Cremorne VIC. YAT's mission-critical Learning Management System (LMS) — running on a single on-premises Windows Server 2016 / MySQL / DOODLE stack — is at the end of its hardware life and falls short of YAT's strategic availability target of 99.9%. YAT's ICT staff are highly capable on their current environment but lack cloud experience, which is why MTS has been engaged.", 'Assessor text'),
     ('You are an MP Tech Solutions (MTS) consultant reporting to Pat Lin (MTS Senior Consultant). Pat liaises with Sam Walker (YAT ICT Manager) for sign-offs. Sam will receive your Business Case and is your primary YAT-side stakeholder.', 'Assessor text'),
     ('AT1 is the analysis and planning phase of the engagement. The work you produce in AT1 flows into AT2 and AT3 of this cluster — the action plan approved at the end of AT1 becomes the brief for the build work in AT2.', 'Assessor text'),
     ('Part A — Business Case', 'Heading 2'),
-    ("Using the YAT Business Case template (download from the intranet's Templates section), populate every section. The Business Case is the primary written deliverable and must contain:", 'Assessor text'),
-    ('§1 Executive Summary — a one-page summary of your recommendation (write last)', 'Assessor text'),
-    ('§2 Engagement context — who you are, the engagement, the decision being asked of the board', 'Assessor text'),
-    ("§3 Strategic Alignment Analysis — analyse YAT's ICT Strategic Plan against the industry environment and organisational objectives", 'Assessor text'),
-    ("§4 Current State of YAT's ICT — synthesised summary from the intranet materials (synthesis, not verbatim reproduction)", 'Assessor text'),
-    ('§5 Gap Analysis — gaps, improvement opportunities, proposed changes', 'Assessor text'),
-    ('§6 Options Considered and Evaluation — workload definition, options assessed (in-house renewal vs cloud migration to AWS), initial impact and difficulty assessment', 'Assessor text'),
-    ('§7 Cost-Benefit Analysis — assumptions, summary tables for both options, avoided-downtime benefit, comparison summary, Year-1 cash-flow comparison, sensitivity analysis. The detailed line items live in Appendix 1 of the same document.', 'Assessor text'),
-    ('§8 Risk and Impact Assessment — intangibles comparison and risk register for the recommended option', 'Assessor text'),
-    ('§9 Recommendation — your chosen option with rationale', 'Assessor text'),
-    ("§10 Action Plan — prioritised changes, implementation schedule, standards / targets / success metrics, implementation methods, alignment with YAT's change-management procedure, risk register", 'Assessor text'),
-    ('§11 Next Steps and Decision Requested — what you are asking the board to decide today', 'Assessor text'),
-    ('§12 Feedback — the board feedback you received, your response, and the resulting action; completed during/after your presentation', 'Assessor text'),
-    ('Sign-off block — completed during/after your presentation', 'Assessor text'),
-    ('Appendix 1 — CBA detailed line items — every cost line you researched and computed', 'Assessor text'),
-    ('Appendix 2 — Knowledge Evidence — short-answer responses linking your work to underlying cloud and evaluation principles', 'Assessor text'),
-    ('Appendix 3 — Supporting Research — AWS Pricing Calculator export, citations', 'Assessor text'),
+    ('Use the YAT Business Case template:', 'Assessor text'),
+    ('YAT intranet — Templates, where the Business Case template is available to download', f'link|{SITE}/intranet/s1-cl1-at1/templates'),
+    ('Refer to the Business Case MTS produced for a previous YAT engagement as an exemplar — read it before you start yours, as a reference for what a YAT Business Case looks like in style, depth and length:', 'Assessor text'),
+    ('Business Case — LMS Replacement (2022)', f'link|{SITE}/intranet/s1-cl1-at1/projects/lms-replacement/business-case'),
+    ('Populate every section of the Business Case template. The Business Case is the primary written deliverable and must contain:', 'Assessor text'),
+    ('§1 Executive Summary — a one-page summary of your recommendation (write last)', 'item'),
+    ('§2 Engagement context — who you are, the engagement, the decision being asked of the board', 'item'),
+    ("§3 Strategic Alignment Analysis — analyse YAT's ICT Strategic Plan against the industry environment and organisational objectives", 'item'),
+    ("§4 Current State of YAT's ICT — synthesised summary from the intranet materials (synthesis, not verbatim reproduction)", 'item'),
+    ('§5 Gap Analysis — gaps, improvement opportunities, proposed changes', 'item'),
+    ('§6 Options Considered and Evaluation — workload definition, options assessed (in-house renewal vs cloud migration to AWS), initial impact and difficulty assessment', 'item'),
+    ('§7 Cost-Benefit Analysis — assumptions, summary tables for both options, avoided-downtime benefit, comparison summary, Year-1 cash-flow comparison, sensitivity analysis. The detailed line items live in Appendix 1 of the same document.', 'item'),
+    ('§8 Risk and Impact Assessment — intangibles comparison and risk register for the recommended option', 'item'),
+    ('§9 Recommendation — your chosen option with rationale', 'item'),
+    ("§10 Action Plan — prioritised changes, implementation schedule, standards / targets / success metrics, implementation methods, alignment with YAT's change-management procedure, risk register", 'item'),
+    ('§11 Next Steps and Decision Requested — what you are asking the board to decide today', 'item'),
+    ('§12 Feedback — the board feedback you received, your response, and the resulting action; completed during/after your presentation', 'item'),
+    ('Sign-off block — completed during/after your presentation', 'item'),
+    ('Appendix 1 — CBA detailed line items — every cost line you researched and computed', 'item'),
+    ('Appendix 2 — Knowledge Evidence — short-answer responses linking your work to underlying cloud and evaluation principles', 'item'),
+    ('Appendix 3 — Supporting Research — AWS Pricing Calculator export, citations', 'item'),
     ('You will need to research AWS pricing yourself using the AWS Pricing Calculator (see Appendix 1 of the Business Case template for the structure your AWS line items must follow). YAT-internal cost figures for the on-prem option are provided in the scenario materials on the intranet.', 'Assessor text'),
-    ('Resources for Part A — available on the YAT intranet', 'Assessor text'),
-    ("The YAT Business Case template (download from the intranet's Templates section)", 'Assessor text'),
-    ('The YAT scenario materials — strategic plan, current ICT environment description, organisational policies, role brief, ICT manager consultation notes, reference materials', 'Assessor text'),
-    ('The YAT Document Archive containing examples of previous business cases produced by MTS for YAT — review at least one example before starting your own as a reference for what a YAT business case looks like', 'Assessor text'),
-    ('Resources for Part A — external', 'Assessor text'),
-    ('AWS Pricing Calculator (calculator.aws) — to research the AWS cost line items for the cloud option', 'Assessor text'),
-    ('AWS Academy Cloud Foundations [104469] + AWS Academy Cloud Architecting [172221] — authorised lab environments', 'Assessor text'),
+    ('Resources for Part A — available on the YAT intranet', 'Heading 3'),
+    ('ICT Strategic Plan', f'link|{SITE}/intranet/s1-cl1-at1/ict/strategic-plan'),
+    ('Current ICT environment description', f'link|{SITE}/intranet/s1-cl1-at1/ict/environment-overview'),
+    ('Engagement Role Brief', f'link|{SITE}/intranet/s1-cl1-at1/projects/lms-cloud-infrastructure/role-brief'),
+    ('ICT Manager Consultation Notes', f'link|{SITE}/intranet/s1-cl1-at1/projects/lms-cloud-infrastructure/consultation-notes'),
+    ('Organisational policies', f'link|{SITE}/intranet/s1-cl1-at1/policies'),
+    ('Reference materials', f'link|{SITE}/intranet/s1-cl1-at1/reference'),
+    ('Resources for Part A — external', 'Heading 3'),
+    ('AWS Pricing Calculator (calculator.aws) — to research the AWS cost line items for the cloud option', 'item'),
+    ('AWS Academy Cloud Foundations [104469] + AWS Academy Cloud Architecting [172221] — authorised lab environments', 'item'),
     ('Part A is submitted to the LMS as the populated Business Case (.docx) with all three appendices completed.', 'Assessor text'),
     ('Part B — Presentation to the YAT board', 'Heading 2'),
-    ("Using the YAT Board Presentation Deck template (download from the intranet's Templates section), prepare a deck that walks the YAT board through your Business Case. The deck is 8–10 slides plus speaker notes; each slide walks the board through one section of the Business Case.", 'Assessor text'),
-    ('Review at least one example of a previous board presentation deck from the YAT Document Archive on the intranet — these accompany the previous business cases referenced for Part A — as a reference for what a YAT board presentation looks like in style, depth, and length.', 'Assessor text'),
+    ('Use the YAT Board Presentation Deck template:', 'Assessor text'),
+    ('YAT intranet — Templates, where the Board Presentation Deck template is available to download', f'link|{SITE}/intranet/s1-cl1-at1/templates'),
+    ('Refer to the presentation deck from the same previous YAT engagement as an exemplar — read it before you start yours, as a reference for what a YAT board presentation looks like in style, depth and length:', 'Assessor text'),
+    ('Business Case Presentation — LMS Replacement (2022)', f'link|{SITE}/intranet/s1-cl1-at1/projects/lms-replacement/business-case-presentation'),
+    ('Prepare a deck that walks the YAT board through your Business Case. The deck is 8–10 slides plus speaker notes; each slide walks the board through one section of the Business Case.', 'Assessor text'),
     ('You will deliver the presentation to the YAT board, role-played by your assessor (as Sam Walker, YAT ICT Manager, and/or Pat Lin, MTS Senior Consultant) and a peer (as a board member).', 'Assessor text'),
-    ('The presentation event', 'Assessor text'),
-    ('Duration: 10–15 minutes of presenting + 5 minutes of board questions, feedback, and sign-off', 'Assessor text'),
-    ('Format: in-person on campus or via video conference (confirm with your assessor)', 'Assessor text'),
-    ('Required artefacts at the event:', 'Assessor text'),
-    ('The completed Business Case submitted to the board at least 48 hours in advance', 'Assessor text'),
-    ('The deck with populated speaker notes', 'Assessor text'),
-    ('Your Business Case §12 Feedback section ready to be populated during/after the meeting', 'Assessor text'),
-    ('A printed or shared sign-off sheet for the board to sign at the end (the Sign-off block from the Business Case)', 'Assessor text'),
-    ('During the event you will:', 'Assessor text'),
-    ('Walk the board through your Business Case using the deck', 'Assessor text'),
-    ("Answer the board's questions during Q&A (the assessor's questions probe both the analysis and your underlying knowledge of cloud and evaluation principles)", 'Assessor text'),
-    ('Capture board feedback in Business Case §12', 'Assessor text'),
-    ("Obtain the board's sign-off on the action plan in Business Case §10", 'Assessor text'),
+    ('The presentation event', 'Heading 3'),
+    ('Duration: 10–15 minutes of presenting + 5 minutes of board questions, feedback, and sign-off', 'item'),
+    ('Format: in-person on campus or via video conference (confirm with your assessor)', 'item'),
+    ('Required artefacts at the event:', 'Heading 3'),
+    ('The completed Business Case submitted to the board at least 48 hours in advance', 'bullet'),
+    ('The deck with populated speaker notes', 'bullet'),
+    ('Your Business Case §12 Feedback section ready to be populated during/after the meeting', 'bullet'),
+    ('A printed or shared sign-off sheet for the board to sign at the end (the Sign-off block from the Business Case)', 'bullet'),
+    ('During the event you will:', 'Heading 3'),
+    ('Walk the board through your Business Case using the deck', 'bullet'),
+    ("Answer the board's questions during Q&A (the assessor's questions probe both the analysis and your underlying knowledge of cloud and evaluation principles)", 'bullet'),
+    ('Capture board feedback in Business Case §12', 'bullet'),
+    ("Obtain the board's sign-off on the action plan in Business Case §10", 'bullet'),
     ('Part B is submitted to the LMS as the presentation deck (.pptx) with populated speaker notes. The §12 Feedback section and the signed Sign-off block are completed within the Business Case.', 'Assessor text'),
     ('Tips for success', 'Heading 2'),
     ('Start with the scenario. Read the YAT intranet end-to-end before you start writing — particularly the ICT Strategic Plan, the current ICT environment, the role brief, and the ICT manager consultation notes.', 'Assessor text'),
@@ -667,15 +691,10 @@ def build(path):
 
     # ---- Instructions to Student (shared prose) ----
     doc.add_paragraph("Instructions to Student", style="Heading 1")
-    for text, style in PROSE:
-        doc.add_paragraph(text, style=style)
+    render_prose(doc, PROSE)
 
     # ---- Assessor-only body (Benchmark + Observation + reverse-map) ----
-    for kind, payload in ASSESSOR_BODY:
-        if kind == "tbl":
-            render_table(doc, payload)
-        else:
-            doc.add_paragraph(payload, style=STYLE[kind])
+    render_benchmark(doc, ASSESSOR_BODY, render_table, STYLE)
 
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     doc.save(path)

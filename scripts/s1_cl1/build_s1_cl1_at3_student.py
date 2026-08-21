@@ -26,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_s1_cl1_at3_assessor as a  # noqa: E402  (shared DETAILS + CHECK — single source of truth)
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # content-repo scripts/ (brand + registry)  # noqa: E402
 sys.path.insert(0, str(next(d / "scripts" for d in Path(__file__).resolve().parents if (d / "scripts" / "helpers" / "__init__.py").exists())))  # umbrella scripts/ (engine)  # noqa: E402
+from helpers.instrument_layout import render_benchmark, render_flat_prose  # noqa: E402
 from helpers.docx_tables import add_section_row, clear_table_rows, find_instruction_row, set_cell_content  # noqa: E402
 
 from docx import Document  # noqa: E402
@@ -124,6 +125,35 @@ MARKING_NOTE = ('Note: §2 (Engagement Context), §3 (Scope of Deployment), §5 
                 '(Document quality).')
 
 # Detailed student instructions (second person; no benchmark / UoC). Emitted after the marking table.
+# Base URL of the scenario site — the single place it is declared; each link appends its path.
+SITE = "https://yat.timbaird.com"
+
+HEADINGS = {
+    'The engagement — picking up where AT2 left off': False,
+    'Scope of your work in this assessment': False,
+    'Part 1 — HA Design (Part A)': False,
+    'Part A — HA Design': False,
+    'Part B — HA Deployment Report': False,
+    'Part 2 — HA Deployment Report (Part B)': False,
+    'The two parts of this assessment': False,
+    'Resources on the YAT intranet': False,
+    'Maintenance window framing': True,
+    'What you do during the window': True,
+    'What you document in the Deployment Report': False,
+    'AT2 baseline starting state': False,
+    'Submit': False,
+    'Tips for success': True,
+}
+
+LINKS = [
+    ('YAT intranet — Templates, where the HA Design and HA Deployment Report templates are available to download', f'link|{SITE}/intranet/s1-cl1-at3/templates'),
+    ('Supplied cloud architecture baseline design — the AT2 state you are hardening', f'link|{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/cloud-architecture-baseline'),
+    ('LMS Cloud Migration Requirements — the availability and recovery targets you design against', f'link|{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/migration-requirements'),
+    ('LMS server status (post-cutover) — the running production state', f'link|{SITE}/intranet/s1-cl1-at3/ict/lms-server-status-post-cutover'),
+    ('Deployment Report — LMS Replacement (2022), as an exemplar', f'link|{SITE}/intranet/s1-cl1-at3/projects/lms-replacement/deployment-report'),
+    ('Records Management policy — how the report is filed at handover', f'link|{SITE}/intranet/s1-cl1-at3/policies/records-management'),
+]
+
 INSTRUCTIONS = [
     'The engagement — picking up where AT2 left off',
     'YAT College is migrating their mission-critical Learning Management System (LMS) from on-premises to AWS. You are an MTS Consultant on this engagement, reporting to Pat Lin (MTS Senior Consultant). Sam Walker (YAT ICT Manager) is your primary YAT-side stakeholder.',
@@ -132,6 +162,8 @@ INSTRUCTIONS = [
     'The LMS application is already deployed (by YAT IT after the AT2 handover) and is running in production on the AWS infrastructure you built in AT2. Your AT3 work is HA hardening of the existing running infrastructure — Multi-AZ database, cross-AZ compute, HA-tuned monitoring, and so on — performed in-place during the simulated maintenance window. No application re-deployment, data migration, or cutover is required: those happened in earlier phases.',
     "What remains YAT IT's responsibility post-handover: re-validating the LMS application against your HA-hardened infrastructure (e.g. verifying DOODLE behaves correctly during a Multi-AZ database failover, tuning session-affinity at the application layer if needed). That re-validation is out of MTS scope for this assessment per the LMS Migration Role Brief on the YAT intranet.",
     'Your AT3 deliverable stops at HA-hardened infrastructure handed over to YAT IT. You design the HA improvements, implement them in-place, run the simulations, capture feedback, obtain sign-off, file the documentation — and the engagement closes.',
+    'Resources on the YAT intranet',
+    *LINKS,
     'Part 1 — HA Design (Part A)',
     "Download the HA Design template from the YAT intranet's Templates section. The template mirrors the same section structure as the AT2 supplied design (internal-lms-cloud-architecture-design-S1-CL1-AT2.md) — so you have a worked example of what a good design looks like, and you know exactly what shape your design needs to take.",
     'Cover in your design:',
@@ -271,8 +303,7 @@ def build(path):
 
     # ---- Detailed task instructions (student prose; NO marking benchmark / UoC) ----
     doc.add_paragraph("Instructions", style="Heading 1")
-    for text in INSTRUCTIONS:
-        doc.add_paragraph(text, style="Assessor text")
+    render_flat_prose(doc, INSTRUCTIONS, HEADINGS)
 
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     doc.save(path)

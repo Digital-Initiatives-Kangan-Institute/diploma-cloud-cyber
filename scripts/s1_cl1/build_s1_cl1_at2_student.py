@@ -22,6 +22,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import build_s1_cl1_at2_assessor as a  # noqa: E402  (shared content — single source of truth)
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # content-repo scripts/ (brand + registry)  # noqa: E402
 sys.path.insert(0, str(next(d / "scripts" for d in Path(__file__).resolve().parents if (d / "scripts" / "helpers" / "__init__.py").exists())))  # umbrella scripts/ (engine)  # noqa: E402
+from helpers.instrument_layout import render_prose, set_cell_rich  # noqa: E402
 from helpers.docx_tables import clear_table_rows, find_instruction_row, set_cell_content  # noqa: E402
 
 from docx import Document  # noqa: E402
@@ -33,51 +34,51 @@ TEMPLATE = str(Path(__file__).resolve().parents[2] / "kangan-templates" / "Proje
 
 # NOTE (evergreen): the committed doc named the intranet URL — " (https://www.placeholder.com.au)".
 OVERVIEW = [
-    'You are being assessed on the implementation of a supplied AWS cloud architecture for the YAT LMS migration, and the production of a Deployment Report documenting your build.',
-    'This is an open-book practical assessment. You may use the YAT intranet, AWS Academy lab environments, AWS documentation, course reference materials, and external research (which must be cited) throughout.',
-    'AT2 is the second of three assessment tasks in the S1-CL1 Cloud Design and Build cluster. It builds on AT1 (the Business Case engagement) and feeds into AT3 (HA hardening and project closure). You continue in the same MTS consultant role across all three.',
-    'Submission: the completed Deployment Report (.docx) with all appendices populated, submitted via the LMS.',
-    'The assessment will not proceed if for any reason it is not safe to do so. The assessor must advise you of the reason for suspending the assessment, what safety action should be taken, and of revised arrangements when it is safe to resume.',
-    'There is zero tolerance for plagiarism, cheating and collusion. You will be expected to make a declaration that all work is your own prior to submission. Refer to the Training and Assessment Policy for further information.',
+    ('You are being assessed on the implementation of a supplied AWS cloud architecture for the YAT LMS migration, and the production of a Deployment Report documenting your build.', 'p'),
+    ('This is an open-book practical assessment. You may use the YAT intranet, AWS Academy lab environments, AWS documentation, course reference materials, and external research (which must be cited) throughout.', 'p'),
+    ('AT2 is the second of three assessment tasks in the S1-CL1 Cloud Design and Build cluster. It builds on AT1 (the Business Case engagement) and feeds into AT3 (HA hardening and project closure). You continue in the same MTS consultant role across all three.', 'p'),
+    ('Submission: the completed Deployment Report (.docx) with all appendices populated, submitted via the LMS.', 'p'),
+    ('The assessment will not proceed if for any reason it is not safe to do so. The assessor must advise you of the reason for suspending the assessment, what safety action should be taken, and of revised arrangements when it is safe to resume.', 'p'),
+    ('There is zero tolerance for plagiarism, cheating and collusion. You will be expected to make a declaration that all work is your own prior to submission. Refer to the Training and Assessment Policy for further information.', 'p'),
 ]
 
 TASKS = [
-    "Following the YAT board's approval of the action plan in your AT1 Business Case engagement, you took a period of planned annual leave. During that time MTS Senior Architecture worked with YAT IT to translate the approved direction into a detailed technical design — the YAT LMS Cloud Architecture — Baseline Design — which has been approved by Pat Lin and Sam Walker and is now your build specification.",
-    'You have returned to MTS to lead the foundation-build phase of the engagement. Your task has two parts that combine into a single deliverable:',
-    'Implement the supplied AWS architecture for the YAT LMS migration foundation build, in the AWS Academy lab environment authorised for this engagement.',
-    'Produce a Deployment Report documenting your build, using the YAT-provided Deployment Report template. The report includes Configuration Decision justifications (where the supplied design left choices to you), testing outcomes, an operational handover for YAT IT, written responses to six Knowledge Evidence questions about your own build, and four appendices of evidence (build screenshots, configuration exports, test results, reflections).',
-    "The Deployment Report is your single submitted deliverable. All build evidence (screenshots, configuration exports, test results) is captured in the report's appendices — there is no separate portfolio submission.",
-    'This phase is the foundation build only. The architecture is intentionally non-HA at this stage — HA hardening is the next phase (AT3) and is out of scope here.',
+    ("Following the YAT board's approval of the action plan in your AT1 Business Case engagement, you took a period of planned annual leave. During that time MTS Senior Architecture worked with YAT IT to translate the approved direction into a detailed technical design — the YAT LMS Cloud Architecture — Baseline Design — which has been approved by Pat Lin and Sam Walker and is now your build specification.", 'p'),
+    ('You have returned to MTS to lead the foundation-build phase of the engagement. Your task has two parts that combine into a single deliverable:', 'p'),
+    ('Implement the supplied AWS architecture for the YAT LMS migration foundation build, in the AWS Academy lab environment authorised for this engagement.', 'b'),
+    ('Produce a Deployment Report documenting your build, using the YAT-provided Deployment Report template. The report includes Configuration Decision justifications (where the supplied design left choices to you), testing outcomes, an operational handover for YAT IT, written responses to six Knowledge Evidence questions about your own build, and four appendices of evidence (build screenshots, configuration exports, test results, reflections).', 'b'),
+    ("The Deployment Report is your single submitted deliverable. All build evidence (screenshots, configuration exports, test results) is captured in the report's appendices — there is no separate portfolio submission.", 'p'),
+    ('This phase is the foundation build only. The architecture is intentionally non-HA at this stage — HA hardening is the next phase (AT3) and is out of scope here.', 'p'),
 ]
 
 # NOTE (evergreen): the committed doc named the intranet URL in the first header — " (download from the YAT intranet)"
 # does NOT contain the URL; there is no URL in the student Resources list, so nothing is dropped here.
 RESOURCES = [
-    'Provided to you (download from the YAT intranet)',
-    'YAT LMS Cloud Architecture — Baseline Design (intranet Engagement Documents section) — the design you implement',
-    'Deployment Report template (intranet Templates section) — the template you fill in',
-    'Example previous Deployment Report (intranet Document Archive section) — review at least one before starting your own',
-    'All other scenario materials (LMS application spec, current ICT environment, organisational policies, your AT1 Business Case)',
-    'Provided externally',
-    'AWS Academy lab access — Cloud Foundations [104469] + Cloud Architecting [172221]',
-    'You supply',
-    'Computer with web browser',
-    'Word-processing software (Microsoft Word or equivalent)',
-    'A screenshot tool',
+    ('Provided to you (download from the YAT intranet)', 'h'),
+    ('YAT LMS Cloud Architecture — Baseline Design (intranet Engagement Documents section) — the design you implement', 'b'),
+    ('Deployment Report template (intranet Templates section) — the template you fill in', 'b'),
+    ('Example previous Deployment Report (intranet Document Archive section) — review at least one before starting your own', 'b'),
+    ('All other scenario materials (LMS application spec, current ICT environment, organisational policies, your AT1 Business Case)', 'b'),
+    ('Provided externally', 'h'),
+    ('AWS Academy lab access — Cloud Foundations [104469] + Cloud Architecting [172221]', 'b'),
+    ('You supply', 'h'),
+    ('Computer with web browser', 'b'),
+    ('Word-processing software (Microsoft Word or equivalent)', 'b'),
+    ('A screenshot tool', 'b'),
 ]
 
 CRITERIA = [
-    'To receive a Satisfactory result for AT2 you must:',
-    'Achieve Satisfactory on every criterion in the Assessment Criteria table (below)',
-    'Submit a completed Deployment Report (.docx) with every section and every appendix populated, using the YAT-provided Deployment Report template',
+    ('To receive a Satisfactory result for AT2 you must:', 'p'),
+    ('Achieve Satisfactory on every criterion in the Assessment Criteria table (below)', 'b'),
+    ('Submit a completed Deployment Report (.docx) with every section and every appendix populated, using the YAT-provided Deployment Report template', 'b'),
 ]
 
 RESULTS = [
-    'If you are deemed not satisfactory for this assessment, you will be given one (1) more attempt at this assessment (or part thereof), or your teacher/assessor will negotiate a further assessment with you. The second attempt must be completed within 10 working days from the date your feedback is given.',
+    ('If you are deemed not satisfactory for this assessment, you will be given one (1) more attempt at this assessment (or part thereof), or your teacher/assessor will negotiate a further assessment with you. The second attempt must be completed within 10 working days from the date your feedback is given.', 'p'),
 ]
 
 SUBMIT = [
-    'Submit the completed Deployment Report (.docx) to the LMS by the due date. The report includes all four appendices populated; no separate files are submitted.',
+    ('Submit the completed Deployment Report (.docx) to the LMS by the due date. The report includes all four appendices populated; no separate files are submitted.', 'p'),
 ]
 
 # Single-part marking criteria (A1-A13; second person; no UoC traceability line).
@@ -104,10 +105,10 @@ PART1_STUDENT = [
     ("Using AWS Academy, implement the architecture exactly as specified in the supplied design. The design is opinionated where it matters — region, network topology, IAM model, service categories, security controls, tagging — and intentionally silent where you must demonstrate professional judgement (specific instance types, sizing, scaling thresholds, etc.). The supplied design's §14 Configuration decisions left to the implementer enumerates the eight decisions you must make and justify (C1 through C8).", 'Assessor text'),
     ('For each of those configuration decisions, make a deliberate, justified choice based on the YAT LMS workload as described in the LMS Application Specification on the YAT intranet. You will document the choice and rationale in §5 of your Deployment Report.', 'Assessor text'),
     ('Important constraints on the build:', 'Assessor text'),
-    ('The deployment is single-AZ and non-HA by design. HA hardening is the next phase (AT3). Do not pre-empt that work — Multi-AZ database, cross-AZ subnets, cross-Region backup copies, failure simulation, DR runbook are all out of scope for this phase.', 'Assessor text'),
-    ('All security, encryption, tagging, and naming conventions in the supplied design are mandatory. These are non-negotiable.', 'Assessor text'),
-    ("Take the screenshots listed in Appendix A of the Deployment Report template as you go, not at the end. Trying to recreate the state for a screenshot after you've moved on is painful and sometimes impossible.", 'Assessor text'),
-    ('Test outcomes (§6 of the template) require you to actually run the tests — do not fabricate. Screenshot the test evidence as you run.', 'Assessor text'),
+    ('The deployment is single-AZ and non-HA by design. HA hardening is the next phase (AT3). Do not pre-empt that work — Multi-AZ database, cross-AZ subnets, cross-Region backup copies, failure simulation, DR runbook are all out of scope for this phase.', 'bullet'),
+    ('All security, encryption, tagging, and naming conventions in the supplied design are mandatory. These are non-negotiable.', 'bullet'),
+    ("Take the screenshots listed in Appendix A of the Deployment Report template as you go, not at the end. Trying to recreate the state for a screenshot after you've moved on is painful and sometimes impossible.", 'bullet'),
+    ('Test outcomes (§6 of the template) require you to actually run the tests — do not fabricate. Screenshot the test evidence as you run.', 'bullet'),
 ]
 
 
@@ -123,20 +124,20 @@ def build(path):
 
     # ---- Table 1: Student instructions ----
     t_instr = doc.tables[1]
-    set_cell_content(find_instruction_row(t_instr, "Assessment overview"), OVERVIEW)
-    set_cell_content(find_instruction_row(t_instr, "Task"), TASKS)
+    set_cell_rich(find_instruction_row(t_instr, "Assessment overview"), OVERVIEW)
+    set_cell_rich(find_instruction_row(t_instr, "Task"), TASKS)
     set_cell_content(find_instruction_row(t_instr, "Time allowed"), "")
     set_cell_content(find_instruction_row(t_instr, "Location"), "")
-    set_cell_content(find_instruction_row(t_instr, "Resources required"), RESOURCES)
-    set_cell_content(find_instruction_row(t_instr, "Assessment criteria"), CRITERIA)
-    set_cell_content(find_instruction_row(t_instr, "Results"), RESULTS)
+    set_cell_rich(find_instruction_row(t_instr, "Resources required"), RESOURCES)
+    set_cell_rich(find_instruction_row(t_instr, "Assessment criteria"), CRITERIA)
+    set_cell_rich(find_instruction_row(t_instr, "Results"), RESULTS)
     # 'Important information' is left as the template's standard text.
     # add a 'How To Submit' row at the end (matching the table style)
     submit_row = t_instr.add_row()
     set_cell_content(submit_row.cells[0], "How To Submit")
     for r in submit_row.cells[0].paragraphs[0].runs:
         r.bold = True
-    set_cell_content(submit_row.cells[1], SUBMIT)
+    set_cell_rich(submit_row.cells[1], SUBMIT)
 
     # ---- drop the template's marking-guide intro line (the authored student copy omits it) ----
     for p in doc.paragraphs:
@@ -163,8 +164,7 @@ def build(path):
 
     # ---- Detailed task instructions (shared prose; NO marking benchmark / UoC) ----
     doc.add_paragraph("Instructions", style="Heading 1")
-    for text, style in (a.PROSE_INTRO + PART1_STUDENT + a.PROSE_PART2_TIPS):
-        doc.add_paragraph(text, style=style)
+    render_prose(doc, a.PROSE_INTRO + PART1_STUDENT + a.PROSE_PART2_TIPS)
 
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     doc.save(path)

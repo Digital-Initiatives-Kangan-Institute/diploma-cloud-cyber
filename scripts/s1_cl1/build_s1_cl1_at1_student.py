@@ -29,53 +29,53 @@ TEMPLATE = str(Path(__file__).resolve().parents[2] / "kangan-templates" / "Proje
 # ---------- student-facing content (second person; no UoC traceability) ----------
 
 OVERVIEW = [
-    'You are being assessed on the production and presentation of a Business Case for the YAT LMS Cloud Migration. The assessment is split into two parts (Parts A and B — see Task(s) to be assessed below):',
-    'Part A (written): the Business Case document, including its three appendices (CBA detail, Knowledge Evidence responses, supporting research)',
-    'Part B (observed): the Business Case presentation delivered to the role-played YAT board, with sign-off captured from the role-played YAT ICT Manager',
-    'This is an open-book assessment. You may use the YAT intranet, the AWS Pricing Calculator, AWS Academy lab environments, course reference materials, and external research (which must be cited) throughout. Where the Business Case requires synthesis (e.g. the current-state summary in §4), you must produce content in your own words — verbatim reproduction of intranet material is not satisfactory.',
-    'Reasonable adjustment for this assessment may include extending the time allowed, varying the location or format of the presentation event (e.g. in-person vs video conference), allowing you to present to a recorded audience for asynchronous assessment where appropriate, or providing one-on-one verbal explanation of board questions where needed.',
-    'Teacher/assessor support level: the teacher/assessor may clarify task requirements and the scenario but must not guide you to specific recommendations or correct answers. During the presentation, the teacher/assessor (in the role of the YAT ICT Manager) may ask substantive questions but must not coach you through your responses.',
-    'Submission: Part A (Business Case) is submitted via the LMS as a .docx with all three appendices populated. Part B (presentation deck) is submitted via the LMS as a .pptx. The §12 Feedback section and the signed Sign-off block are completed within Part A.',
-    'The assessment will not proceed if for any reason it is not safe to do so. The assessor must advise you of the reason for suspending the assessment, and what safety action should be taken and of revised arrangements for the assessment when it is safe to do so.',
-    'There is a zero tolerance for plagiarism, cheating and collusion. You will be expected to make a declaration that all work is your own prior to submission. Refer to the Training and Assessment Policy for further information.',
+    ('You are being assessed on the production and presentation of a Business Case for the YAT LMS Cloud Migration. The assessment is split into two parts (Parts A and B — see Task(s) to be assessed below):', 'p'),
+    ('Part A (written): the Business Case document, including its three appendices (CBA detail, Knowledge Evidence responses, supporting research)', 'b'),
+    ('Part B (observed): the Business Case presentation delivered to the role-played YAT board, with sign-off captured from the role-played YAT ICT Manager', 'b'),
+    ('This is an open-book assessment. You may use the YAT intranet, the AWS Pricing Calculator, AWS Academy lab environments, course reference materials, and external research (which must be cited) throughout. Where the Business Case requires synthesis (e.g. the current-state summary in §4), you must produce content in your own words — verbatim reproduction of intranet material is not satisfactory.', 'p'),
+    ('Reasonable adjustment for this assessment may include extending the time allowed, varying the location or format of the presentation event (e.g. in-person vs video conference), allowing you to present to a recorded audience for asynchronous assessment where appropriate, or providing one-on-one verbal explanation of board questions where needed.', 'p'),
+    ('Teacher/assessor support level: the teacher/assessor may clarify task requirements and the scenario but must not guide you to specific recommendations or correct answers. During the presentation, the teacher/assessor (in the role of the YAT ICT Manager) may ask substantive questions but must not coach you through your responses.', 'p'),
+    ('Submission: Part A (Business Case) is submitted via the LMS as a .docx with all three appendices populated. Part B (presentation deck) is submitted via the LMS as a .pptx. The §12 Feedback section and the signed Sign-off block are completed within Part A.', 'p'),
+    ('The assessment will not proceed if for any reason it is not safe to do so. The assessor must advise you of the reason for suspending the assessment, and what safety action should be taken and of revised arrangements for the assessment when it is safe to do so.', 'p'),
+    ('There is a zero tolerance for plagiarism, cheating and collusion. You will be expected to make a declaration that all work is your own prior to submission. Refer to the Training and Assessment Policy for further information.', 'p'),
 ]
 
 TASKS = [
-    'In this project, you take on the role of a consultant from MP Tech Solutions (MTS) engaged by YAT College to lead a migration of their mission-critical Learning Management System (LMS) to the cloud. AT1 is the analysis and planning phase of that engagement — you will produce a Business Case for the migration and present it to the YAT board for approval of the action plan.',
-    'There are two parts to this assessment (Parts A and B). Each part is individually assessed as Satisfactory / Not Yet Satisfactory.',
-    'Part A — Business Case',
-    "Produce a written Business Case for the YAT LMS Cloud Migration using YAT's standard Business Case template.",
-    'Part B — Presentation to the YAT board',
-    'Prepare a slide deck and present your Business Case to the YAT board to seek approval of the action plan in Business Case §10.',
+    ('In this project, you take on the role of a consultant from MP Tech Solutions (MTS) engaged by YAT College to lead a migration of their mission-critical Learning Management System (LMS) to the cloud. AT1 is the analysis and planning phase of that engagement — you will produce a Business Case for the migration and present it to the YAT board for approval of the action plan.', 'p'),
+    ('There are two parts to this assessment (Parts A and B). Each part is individually assessed as Satisfactory / Not Yet Satisfactory.', 'p'),
+    ('Part A — Business Case', 'h'),
+    ("Produce a written Business Case for the YAT LMS Cloud Migration using YAT's standard Business Case template.", 'p'),
+    ('Part B — Presentation to the YAT board', 'h'),
+    ('Prepare a slide deck and present your Business Case to the YAT board to seek approval of the action plan in Business Case §10.', 'p'),
 ]
 
 RESOURCES = [
-    'Teacher/assessor supplied resources',
-    "Access to the YAT intranet — provided as the engagement's reference site",
-    'AWS Academy lab access — Cloud Foundations [104469] + Cloud Architecting [172221]',
-    'Student supplied resources',
-    'Computer with web browser',
-    'Word-processing and presentation software (e.g. Microsoft Word + PowerPoint, or equivalents)',
+    ('Teacher/assessor supplied resources', 'h'),
+    ("Access to the YAT intranet — provided as the engagement's reference site", 'b'),
+    ('AWS Academy lab access — Cloud Foundations [104469] + Cloud Architecting [172221]', 'b'),
+    ('Student supplied resources', 'h'),
+    ('Computer with web browser', 'b'),
+    ('Word-processing and presentation software (e.g. Microsoft Word + PowerPoint, or equivalents)', 'b'),
 ]
 
 CRITERIA = [
-    'To receive a Satisfactory outcome for this assessment you must:',
-    'Achieve Satisfactory on every criterion in the Part A Marking Guide (Business Case — covers Business Case sections §1–§11, Sign-off, and Appendices 1–4)',
-    'Achieve Satisfactory on every criterion in the Part B Marking Guide (Presentation — covers the observed presentation event including Q&A, feedback capture, and sign-off)',
-    'Submit all required artefacts:',
-    'Completed Business Case (.docx) with all three appendices populated',
-    'Presentation deck (.pptx) with populated speaker notes',
-    'Completed §12 Feedback section within the Business Case',
-    'Signed Sign-off block from the role-played YAT ICT Manager (within the Business Case)',
+    ('To receive a Satisfactory outcome for this assessment you must:', 'p'),
+    ('Achieve Satisfactory on every criterion in the Part A Marking Guide (Business Case — covers Business Case sections §1–§12, Sign-off, and Appendices 1–3)', 'b'),
+    ('Achieve Satisfactory on every criterion in the Part B Marking Guide (Presentation — covers the observed presentation event including Q&A, feedback capture, and sign-off)', 'b'),
+    ('Submit all required artefacts:', 'h'),
+    ('Completed Business Case (.docx) with all three appendices populated', 'b'),
+    ('Presentation deck (.pptx) with populated speaker notes', 'b'),
+    ('Completed §12 Feedback section within the Business Case', 'b'),
+    ('Signed Sign-off block from the role-played YAT ICT Manager (within the Business Case)', 'b'),
 ]
 
 RESULTS = [
-    'If you are deemed not satisfactory for any of the observations, you will be given one (1) more attempt at this assessment (or part thereof) or your teacher/assessor will negotiate a further assessment with you. The second attempt must be completed within 10 working days from the date your feedback is given.',
+    ('If you are deemed not satisfactory for any of the observations, you will be given one (1) more attempt at this assessment (or part thereof) or your teacher/assessor will negotiate a further assessment with you. The second attempt must be completed within 10 working days from the date your feedback is given.', 'p'),
 ]
 
 SUBMIT = [
-    'Part A is submitted to the LMS as the populated Business Case (.docx) with all three appendices completed.',
-    'Part B is submitted to the LMS as the presentation deck (.pptx or equivalent) with populated speaker notes. The §12 Feedback section and the signed Sign-off block are completed within the Business Case.',
+    ('Part A is submitted to the LMS as the populated Business Case (.docx) with all three appendices completed.', 'p'),
+    ('Part B is submitted to the LMS as the presentation deck (.pptx or equivalent) with populated speaker notes. The §12 Feedback section and the signed Sign-off block are completed within the Business Case.', 'p'),
 ]
 
 MARKING_A = [
@@ -121,20 +121,20 @@ def build(path):
 
     # ---- Table 1: Student instructions ----
     t_instr = doc.tables[1]
-    set_cell_content(find_instruction_row(t_instr, "Assessment overview"), OVERVIEW)
-    set_cell_content(find_instruction_row(t_instr, "Task"), TASKS)
+    a.set_cell_rich(find_instruction_row(t_instr, "Assessment overview"), OVERVIEW)
+    a.set_cell_rich(find_instruction_row(t_instr, "Task"), TASKS)
     set_cell_content(find_instruction_row(t_instr, "Time allowed"), "")
     set_cell_content(find_instruction_row(t_instr, "Location"), "")
-    set_cell_content(find_instruction_row(t_instr, "Resources required"), RESOURCES)
-    set_cell_content(find_instruction_row(t_instr, "Assessment criteria"), CRITERIA)
-    set_cell_content(find_instruction_row(t_instr, "Results"), RESULTS)
+    a.set_cell_rich(find_instruction_row(t_instr, "Resources required"), RESOURCES)
+    a.set_cell_rich(find_instruction_row(t_instr, "Assessment criteria"), CRITERIA)
+    a.set_cell_rich(find_instruction_row(t_instr, "Results"), RESULTS)
     # 'Important information' is left as the template's standard text.
     # add a 'How to Submit' row at the end (matching the table style)
     submit_row = t_instr.add_row()
     set_cell_content(submit_row.cells[0], "How to Submit")
     for r in submit_row.cells[0].paragraphs[0].runs:
         r.bold = True
-    set_cell_content(submit_row.cells[1], SUBMIT)
+    a.set_cell_rich(submit_row.cells[1], SUBMIT)
 
     # ---- drop the template's marking-guide intro line (the authored student copy omits it) ----
     for p in doc.paragraphs:
@@ -167,8 +167,7 @@ def build(path):
 
     # ---- Detailed task instructions (shared prose; NO marking benchmark / UoC) ----
     doc.add_paragraph("Instructions", style="Heading 1")
-    for text, style in a.PROSE:
-        doc.add_paragraph(text, style=style)
+    a.render_prose(doc, a.PROSE)
 
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     doc.save(path)

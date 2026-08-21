@@ -31,10 +31,14 @@ TEMPLATE = str(Path(__file__).resolve().parents[2] / "kangan-templates" / "Proje
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # content-repo scripts/ (brand + registry)  # noqa: E402
 sys.path.insert(0, str(next(d / "scripts" for d in Path(__file__).resolve().parents if (d / "scripts" / "helpers" / "__init__.py").exists())))  # umbrella scripts/ (engine)  # noqa: E402
+from helpers.instrument_layout import render_benchmark, render_prose, set_cell_rich  # noqa: E402
 from helpers.docx_tables import add_section_row, clear_table_rows, find_instruction_row, set_cell_content  # noqa: E402
 
 
 # ---------- content ----------
+
+# Base URL of the scenario site — the single place it is declared; each link appends its path.
+SITE = "https://yat.timbaird.com"
 
 CHECK = "☐ Yes  ☐ No"  # marking-guide Satisfactory? cell (matches the Kangan template)
 
@@ -81,6 +85,7 @@ TASKS = [
 RESOURCES = [
     'Teacher/assessor supplied resources',
     'Access to the YAT intranet — supplying the supplied baseline design, the Deployment Report template, the example previous deployment report, and all other scenario materials',
+    'Supplied baseline design, LMS application spec, role brief and records-management policy — linked in the Instructions to Student below',
     'AWS Academy lab access — Cloud Foundations [104469] + Cloud Architecting [172221]',
     'Deployment Report Benchmark (later in this document) for marking the submitted report',
     'Student supplied resources',
@@ -131,12 +136,17 @@ PROSE_INTRO = [
     ('You have returned to MTS, and your assignment is the foundation build phase of the engagement: stand up the supplied architecture in the AWS Academy lab environment, then hand it over to YAT IT with a Deployment Report.', 'Assessor text'),
     ('Scope of your work in this assessment', 'Heading 2'),
     ("Per the LMS Migration Role Brief on the YAT intranet (§ Scope of the MTS consulting engagement), your assessment scope is cloud infrastructure provisioning only. The following activities are YAT in-house IT's responsibility, not yours:", 'Assessor text'),
-    ('LMS application installation on the AWS infrastructure you build', 'Assessor text'),
-    ('Migration of the MySQL database from on-prem to the AWS RDS instance', 'Assessor text'),
-    ('Cutover from legacy to new (DNS switch, parallel running, decommissioning)', 'Assessor text'),
-    ('Organisational change management around the cutover (CAB process, end-user communications, training)', 'Assessor text'),
-    ('Ongoing application support post-handover', 'Assessor text'),
+    ('LMS application installation on the AWS infrastructure you build', 'bullet'),
+    ('Migration of the MySQL database from on-prem to the AWS RDS instance', 'bullet'),
+    ('Cutover from legacy to new (DNS switch, parallel running, decommissioning)', 'bullet'),
+    ('Organisational change management around the cutover (CAB process, end-user communications, training)', 'bullet'),
+    ('Ongoing application support post-handover', 'bullet'),
     ('Your AT2 deliverable stops at infrastructure ready for application deployment. You hand the infrastructure over to YAT IT with the Deployment Report — they take it from there. Do not install the LMS application, migrate production data, or perform cutover activities as part of this assessment.', 'Assessor text'),
+    ('Resources on the YAT intranet', 'Heading 2'),
+    ('Supplied cloud architecture baseline design — the design you build', f'link|{SITE}/intranet/s1-cl1-at2/projects/lms-cloud-infrastructure/cloud-architecture-baseline'),
+    ('LMS Application Specification — the workload your configuration decisions must suit', f'link|{SITE}/intranet/s1-cl1-at2/ict/lms-application-spec'),
+    ('LMS Migration Role Brief — the scope of the MTS engagement', f'link|{SITE}/intranet/s1-cl1-at2/projects/lms-cloud-infrastructure/role-brief'),
+    ('Records Management policy — how the report is filed at handover', f'link|{SITE}/intranet/s1-cl1-at2/policies/records-management'),
 ]
 
 PART1_ASSESSOR = [
@@ -144,29 +154,33 @@ PART1_ASSESSOR = [
     ("Using AWS Academy, implement the architecture exactly as specified in the supplied design. The design is opinionated where it matters (region, network topology, IAM model, service categories, security controls, tagging) and intentionally silent where you must demonstrate professional judgement. The supplied design's §14 Configuration decisions left to the implementer enumerates the eight decisions you must make and justify (C1 through C8).", 'Assessor text'),
     ('For each of those configuration decisions, make a deliberate, justified choice based on the YAT LMS workload as described in the LMS Application Specification on the YAT intranet. You will document the choice and rationale in §5 of your Deployment Report.', 'Assessor text'),
     ('Important constraints on the build:', 'Assessor text'),
-    ('The deployment is single-AZ and non-HA by design. HA hardening is the next phase (AT3). Do not pre-empt that work.', 'Assessor text'),
-    ('All security, encryption, tagging, and naming conventions in the supplied design are mandatory. These are non-negotiable.', 'Assessor text'),
-    ('Take the screenshots listed in Appendix A of the Deployment Report template as you go, not at the end.', 'Assessor text'),
-    ('Test outcomes (§6 of the template) require you to actually run the tests — do not fabricate.', 'Assessor text'),
+    ('The deployment is single-AZ and non-HA by design. HA hardening is the next phase (AT3). Do not pre-empt that work.', 'bullet'),
+    ('All security, encryption, tagging, and naming conventions in the supplied design are mandatory. These are non-negotiable.', 'bullet'),
+    ('Take the screenshots listed in Appendix A of the Deployment Report template as you go, not at the end.', 'bullet'),
+    ('Test outcomes (§6 of the template) require you to actually run the tests — do not fabricate.', 'bullet'),
 ]
 
 PROSE_PART2_TIPS = [
     ('Part 2 — Produce the Deployment Report', 'Heading 2'),
-    ("Download the Deployment Report template from the YAT intranet's Templates section. Populate every section and every appendix. The template provides explicit prompts in each section — follow them.", 'Assessor text'),
+    ('Use the YAT Deployment Report template:', 'Assessor text'),
+    ('YAT intranet — Templates, where the Deployment Report template is available to download', f'link|{SITE}/intranet/s1-cl1-at2/templates'),
+    ('Refer to the Deployment Report MTS produced for a previous YAT engagement as an exemplar — read it before you start yours, as a reference for what a completed report looks like in style, depth and structure:', 'Assessor text'),
+    ('Deployment Report — LMS Replacement (2022)', f'link|{SITE}/intranet/s1-cl1-at2/projects/lms-replacement/deployment-report'),
+    ('Populate every section and every appendix of the Deployment Report template. The template provides explicit prompts in each section — follow them.', 'Assessor text'),
     ('Your report covers:', 'Assessor text'),
-    ('§1 Executive Summary (write this last)', 'Assessor text'),
-    ('§2 Engagement Context (referring back to your AT1 Business Case + the supplied design)', 'Assessor text'),
-    ("§3 Scope of Deployment (what's in this phase, what's deferred to AT3)", 'Assessor text'),
-    ('§4 Build Narrative (chronological account by layer — IAM, network, compute, ALB, DB, storage, security, monitoring)', 'Assessor text'),
-    ('§5 Configuration Decisions (justifications for the eight points the design left to you — C1 through C8)', 'Assessor text'),
-    ('§6 Testing and Validation (results from the tests in §6 of the template)', 'Assessor text'),
-    ("§7 Operational Handover (information YAT IT needs to operate the environment, including filing the report per YAT's records procedures)", 'Assessor text'),
-    ('§8 Knowledge Evidence Responses (six contextual questions about choices in your own build)', 'Assessor text'),
-    ('Appendix A — Build Evidence (17 named AWS console screenshots — the template lists them explicitly)', 'Assessor text'),
-    ('Appendix B — Configuration Exports (IAM policies, security group rules, VPC config, etc.)', 'Assessor text'),
-    ('Appendix C — Test Evidence (logs, screenshots of test outcomes)', 'Assessor text'),
-    ('Appendix D — Reflections (two short reflective responses on the build experience)', 'Assessor text'),
-    ('Before starting your own report, review at least one Example previous Deployment Report from the YAT intranet\'s Document Archive section. The example shows what a completed report looks like in style, depth, and structure — model your work on it.', 'Assessor text'),
+    ('§1 Executive Summary (write this last)', 'item'),
+    ('§2 Engagement Context (referring back to your AT1 Business Case + the supplied design)', 'item'),
+    ("§3 Scope of Deployment (what's in this phase, what's deferred to AT3)", 'item'),
+    ('§4 Build Narrative (chronological account by layer — IAM, network, compute, ALB, DB, storage, security, monitoring)', 'item'),
+    ('§5 Configuration Decisions (justifications for the eight points the design left to you — C1 through C8)', 'item'),
+    ('§6 Testing and Validation (results from the tests in §6 of the template)', 'item'),
+    ("§7 Operational Handover (information YAT IT needs to operate the environment, including filing the report per YAT's records procedures)", 'item'),
+    ('§8 Knowledge Evidence Responses (six contextual questions about choices in your own build)', 'item'),
+    ('Appendix A — Build Evidence (17 named AWS console screenshots — the template lists them explicitly)', 'item'),
+    ('Appendix B — Configuration Exports (IAM policies, security group rules, VPC config, etc.)', 'item'),
+    ('Appendix C — Test Evidence (logs, screenshots of test outcomes)', 'item'),
+    ('Appendix D — Reflections (two short reflective responses on the build experience)', 'item'),
+
     ('Tips for success', 'Heading 2'),
     ('Review the example past Deployment Report first. It shows what good looks like and saves you guessing about depth and structure.', 'Assessor text'),
     ('Read the supplied design end-to-end before building — including the "out of scope" section (§13) and the "configuration decisions left to the implementer" section (§14). The build is faster when you know the constraints upfront.', 'Assessor text'),
@@ -521,15 +535,10 @@ def build(path):
 
     # ---- Instructions to Student (shared prose; assessor Part 1 variant) ----
     doc.add_paragraph("Instructions to Student", style="Heading 1")
-    for text, style in (PROSE_INTRO + PART1_ASSESSOR + PROSE_PART2_TIPS):
-        doc.add_paragraph(text, style=style)
+    render_prose(doc, PROSE_INTRO + PART1_ASSESSOR + PROSE_PART2_TIPS)
 
     # ---- Assessor-only body (Benchmark + reverse-map) ----
-    for kind, payload in ASSESSOR_BODY:
-        if kind == "tbl":
-            render_table(doc, payload)
-        else:
-            doc.add_paragraph(payload, style=STYLE[kind])
+    render_benchmark(doc, ASSESSOR_BODY, render_table, STYLE)
 
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     doc.save(path)
