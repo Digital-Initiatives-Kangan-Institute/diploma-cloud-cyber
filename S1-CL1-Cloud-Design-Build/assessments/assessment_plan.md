@@ -1,8 +1,6 @@
 # S1-CL1 Cloud Design and Build — Cluster Assessment Plan
 
-> **STATUS: DRAFT.** Synthesis plan drawing the three units' existing standalone assessments + the
-> consolidated UoC into one integrated cluster assessment. Conforms to the assessment-plan format standard
-> (`docs/assessment-plan-format.md`).
+> **STATUS: CONTINUOUS IMPROVEMENT
 >
 > **Scenario binding:** maps to the **Semester-1 YAT** scenario — the cross-cluster source the `SR-*` below
 > are validated against; scenario sources are the YAT case study (from ICTICT517) + `scenario/`.
@@ -14,9 +12,12 @@
 
 ## 1. Integration approach
 
-**Goal:** one integrated cluster assessment that reads as a single project from first phase to submission,
-not three units stapled together — a single business scenario, a single stakeholder voice, a single
-artefact thread.
+**Goal — an ambition, not a constraint.** We aim for one integrated cluster assessment that reads as a
+single project from first phase to submission, not three units stapled together — a single business
+scenario, a single stakeholder voice, a single artefact thread — **as far as that is consistent with a
+good student experience.** Seamlessness is the lower priority: where making the cluster feel like one
+project would make the student's experience of it more stressful, more confusing or more fragile, we
+deviate. Integration is never a reason to require work that no UoC item demands.
 
 **Shape:** one continuous case-study project across the cluster in **three delivery phases**, each a
 teach → practise → assess cycle. Each AT bundles the practical work + documentation + feedback/sign-off
@@ -44,13 +45,9 @@ identify whether it is IaaS/PaaS/SaaS and explain why" (per QA-team preference).
 **YAT College** carries through AT1 → AT2 → AT3 — a single-campus RTO with a mission-critical LMS at end of
 life, migrating to the cloud; the student is a **professional consultant working for MTS** advising YAT.
 
-Chosen over the Llamazonia alternative (from 502 AT2) because ICTICT517's YAT content is the heaviest reuse
-asset of the three — it ships a full strategic plan, ICT goals, current ICT environment description, on-prem
-network diagram, stakeholder hierarchy (superior consultant + ICT manager + MTS), and a documented
-change-management procedure (a natural fit for the closure/sign-off group). 502 AT2's HA activities are
-largely scenario-agnostic and port to YAT with rename-only changes, and the "consultant advising an RTO"
-framing suits a Diploma-level professional assessment. *(The YAT structure can be reskinned to another
-industry without losing the assets if the RTO setting is too on-the-nose.)*
+The scenario supplies: a full strategic plan, ICT goals, a current ICT environment description, an on-prem
+network diagram, a stakeholder hierarchy (superior consultant + ICT manager + MTS), and a documented
+change-management procedure used as the closure/sign-off process.
 
 **Vehicle (per `scenario-flow.md`):** assess on the **YAT LMS cloud migration**; AWS Academy labs are the
 build environment. The testable scenario needs are the `SR-*` in §3 + the register in §6.
@@ -163,47 +160,18 @@ Condition each environmental requirement discharges.
 
 ## 7. Worklist
 
-**Modifications (rewrite existing content):** 401 AT2 Part 1.1 → YAT-specific solution-comparison items
-(carried from the AT1 action plan); Part 1.2 IAM cast → YAT ICT staff + consultants + students; 502 AT2
-rebrand Llamazonia → YAT-LMS throughout; fix the 401 AT1 Q12 DNS placeholder bug when reframing; cover-sheet
-clean-up across source ATs (remove "Note to assessment designer" text; fix the "QUESTIONINGASSSESMENT"
-header typo).
-
-**Additions (new authoring):** contextual reflective question sets per AT (hitting every KE); the AT1→AT2
-and AT2→AT3 bridging instructions + assessor checks; the AT3 consolidated closure pack; the Security
-Responsibilities Matrix (Group 2 sub-deliverable); the PC 4.3 "file per organisational procedures"
-instruction; a cluster-level front document framing the three-AT project.
-
-**Drops / set aside:** 517 AT5 MCQ quiz (drop — tangential to KE 1–4; reformulate any essential concept as a
-contextual question); keep 517 AT3 Part 1 CBA (already YAT) and the AWS Academy Module-10 lab pointer.
+None outstanding — all three ATs are authored, generated and approved.
 
 ---
 
 ## 8. Open questions / TBDs
 
-1. **Scenario** — YAT throughout (recommended) vs a reskinned alternative (RTO context close to Tim's
-   workplace).
-2. **517 AT5 MCQs** — drop entirely (recommended) or reformulate selectively as contextual AT1 questions.
-3. **AT2 web payload** — RESOLVED: the app tier serves a **placeholder page** (via the AT3 baseline
-   lab-pack); LMS application installation is **out of scope** (YAT in-house). No real app/stub is deployed —
-   the AT2/AT3 instruments explicitly exclude application-deployment work.
-4. **Oral Communication sufficiency** — two observation meetings (AT1 presentation + AT3 closure) cover all
-   three units' Oral FS; is a third mid-project check-in needed?
-5. **Pre-validation** — run the institutional Pre-Validation Tool over each AT before submission (downstream
-   gate).
+None outstanding.
 
 ---
 
 ## Changelog
 
-- **2026-05-22 → 2026-05-26 (v1–v2 + authoring):** initial 5-AT synthesis → restructured to **3 ATs**
-  (standalone questioning AT removed, KE embedded contextually; standalone closure AT folded into AT3);
-  YAT scenario chosen; AWS Academy labs confirmed; AT1/AT2/AT3 authored (Project Assessment template); the
-  502 PC reassignment (1.3, 4.1–4.3 → AT2); KE in BC Appendix + post-presentation Q&A. See git history for
-  the full evolution.
-- **2026-06-22 (reformat to the assessment-plan standard):** restructured to `docs/assessment-plan-format.md`
-  — per-AT **UoC coverage** as canonical tags (authoritative item→AT mapping, derived from the AT
-  benchmarks; all 106 PC/PE/KE/FS placed), §5 recast as coverage verification, and a new **§6 scenario
-  requirements register** (`SR-CL1-01…08`, AC-linked). No assessment-design change — only the plan's
-  structure + explicit scenario-requirement capture. The dense provenance, modifications and drop-list are
-  preserved (§4, §7).
+- **2026-05-26 (authoring):** AT1/AT2/AT3 authored on the institutional **Project Assessment template**.
+  AT1 evidences its KE in the **Business Case Appendix + post-presentation Q&A** (AT2/AT3 use contextual
+  reflective question sets).
