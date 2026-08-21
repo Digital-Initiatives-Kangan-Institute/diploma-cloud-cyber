@@ -267,6 +267,15 @@ def build(path):
                   "deferred to later sign-off gates.")
     add_response_placeholder(doc)
 
+    h1("12. Feedback")
+    add_guidance_text(doc, "Record the feedback received on this business case — one row per item of feedback, "
+                  "your response to it, and what you did as a result.")
+    add_template_table(doc, ["Feedback received", "From", "Your response", "Resulting action"],
+          [["", "", "", ""],
+           ["", "", "", ""],
+           ["", "", "", ""]],
+          widths=[5.0, 3.0, 4.0, 4.0])
+
     h1("Sign-off")
     add_template_table(doc, ["Role", "Name", "Date", "Signature"],
           [["Prepared by", "", "", ""],

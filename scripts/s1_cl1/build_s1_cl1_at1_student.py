@@ -30,12 +30,12 @@ TEMPLATE = str(Path(__file__).resolve().parents[2] / "kangan-templates" / "Proje
 
 OVERVIEW = [
     'You are being assessed on the production and presentation of a Business Case for the YAT LMS Cloud Migration. The assessment is split into two parts (Parts A and B — see Task(s) to be assessed below):',
-    'Part A (written): the Business Case document, including all four appendices (CBA detail, Knowledge Evidence responses, supporting research, Feedback Record)',
+    'Part A (written): the Business Case document, including its three appendices (CBA detail, Knowledge Evidence responses, supporting research)',
     'Part B (observed): the Business Case presentation delivered to the role-played YAT board, with sign-off captured from the role-played YAT ICT Manager',
     'This is an open-book assessment. You may use the YAT intranet, the AWS Pricing Calculator, AWS Academy lab environments, course reference materials, and external research (which must be cited) throughout. Where the Business Case requires synthesis (e.g. the current-state summary in §4), you must produce content in your own words — verbatim reproduction of intranet material is not satisfactory.',
     'Reasonable adjustment for this assessment may include extending the time allowed, varying the location or format of the presentation event (e.g. in-person vs video conference), allowing you to present to a recorded audience for asynchronous assessment where appropriate, or providing one-on-one verbal explanation of board questions where needed.',
     'Teacher/assessor support level: the teacher/assessor may clarify task requirements and the scenario but must not guide you to specific recommendations or correct answers. During the presentation, the teacher/assessor (in the role of the YAT ICT Manager) may ask substantive questions but must not coach you through your responses.',
-    'Submission: Part A (Business Case) is submitted via the LMS as a .docx with all four appendices populated. Part B (presentation deck) is submitted via the LMS as a .pptx. The completed Feedback Record and the signed Sign-off block are attached to Part A.',
+    'Submission: Part A (Business Case) is submitted via the LMS as a .docx with all three appendices populated. Part B (presentation deck) is submitted via the LMS as a .pptx. The §12 Feedback section and the signed Sign-off block are completed within Part A.',
     'The assessment will not proceed if for any reason it is not safe to do so. The assessor must advise you of the reason for suspending the assessment, and what safety action should be taken and of revised arrangements for the assessment when it is safe to do so.',
     'There is a zero tolerance for plagiarism, cheating and collusion. You will be expected to make a declaration that all work is your own prior to submission. Refer to the Training and Assessment Policy for further information.',
 ]
@@ -63,9 +63,9 @@ CRITERIA = [
     'Achieve Satisfactory on every criterion in the Part A Marking Guide (Business Case — covers Business Case sections §1–§11, Sign-off, and Appendices 1–4)',
     'Achieve Satisfactory on every criterion in the Part B Marking Guide (Presentation — covers the observed presentation event including Q&A, feedback capture, and sign-off)',
     'Submit all required artefacts:',
-    'Completed Business Case (.docx) with all four appendices populated',
+    'Completed Business Case (.docx) with all three appendices populated',
     'Presentation deck (.pptx) with populated speaker notes',
-    'Completed Feedback Record (attached as Business Case Appendix 4)',
+    'Completed §12 Feedback section within the Business Case',
     'Signed Sign-off block from the role-played YAT ICT Manager (within the Business Case)',
 ]
 
@@ -74,8 +74,8 @@ RESULTS = [
 ]
 
 SUBMIT = [
-    'Part A is submitted to the LMS as the populated Business Case (.docx) with all four appendices completed.',
-    'Part B is submitted to the LMS as the presentation deck (.pptx or equivalent) with populated speaker notes. The completed Feedback Record and the signed Sign-off block are attached to the Business Case (as Appendix 4 and the Sign-off block respectively).',
+    'Part A is submitted to the LMS as the populated Business Case (.docx) with all three appendices completed.',
+    'Part B is submitted to the LMS as the presentation deck (.pptx or equivalent) with populated speaker notes. The §12 Feedback section and the signed Sign-off block are completed within the Business Case.',
 ]
 
 MARKING_A = [
@@ -91,7 +91,7 @@ MARKING_A = [
     ['A10 - Executive Summary — one-page summary covering the recommendation, 5-year cost position, top 2–3 risks of the recommended option, and the asked-for decision. Numbers reconcile with A5'],
     ['A11 - Appendix 2 Knowledge Evidence — you answered all 9 KE questions (5 selection-style + 4 demonstration-style) with reference to specific sections of your own Business Case (not generic textbook answers)'],
     ['A12 - Appendix 3 Supporting Research — AWS Pricing Calculator export attached; external research sources cited with URLs and access dates'],
-    ['A13 - Appendix 4 Feedback Record — completed during/after the Part B presentation event using the YAT Feedback Record template; captures actual board feedback'],
+    ['A13 - §12 Feedback — completed during/after the Part B presentation event; one row per item of board feedback received, with your response and the resulting action'],
     ['A14 - Sign-off block — signed by the role-played YAT ICT Manager at the end of the Part B presentation event'],
     ['A15 - Document quality — Business Case uses plain English, appropriate vocabulary, terminology, diagrams, numerical information, formatting and structure relevant to a professional consulting deliverable for an RTO client'],
 ]
