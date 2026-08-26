@@ -157,7 +157,7 @@
     their AT1 comparison is balanced.
     Question to pose: "YAT's Ledgerline server was sized years ago — how would they have guessed how
     big to make it, and what does that cost them?"
-    UoC/AT1 tie: this is the on-prem baseline AT1's cost-benefit analysis (§7) argues against — you're
+    UoC/AT1 tie: this is the on-prem baseline AT1's cost-benefit analysis (§6) argues against — you're
     arming the "before" side of their comparison.
 - [BESPOKE] Cloud computing model
   - Software solutions:
@@ -179,7 +179,7 @@
     cost depends on the workload shape (Section 5).
     Question to pose: "Which of Ledgerline's headaches does 'infrastructure as software' remove — and
     which does it NOT?"
-    UoC/AT1 tie: the "after" side of AT1's cost-benefit; also feeds §3 strategic alignment (why moving
+    UoC/AT1 tie: the "after" side of AT1's cost-benefit; also feeds §2 strategic alignment (why moving
     aligns with the business).
 - [BESPOKE] Cloud computing deployment models
   kicker: where an application runs
@@ -218,7 +218,7 @@
     them to show literacy, but the genuine decision is on-prem vs public cloud.
     Question to pose: "Why would a small RTO like YAT choose PUBLIC cloud over building its own PRIVATE
     cloud?" (scale, cost, no data centre to run).
-    UoC/AT1 tie: KE 11; and this binary framing IS the spine of AT1's §6 Options Considered.
+    UoC/AT1 tie: KE 11; and this binary framing IS the spine of AT1's §5 Options Considered.
 - [EX] Which deployment model?
   - YAT is considering moving Ledgerline off its on-prem server.
   - Which deployment model fits a cloud version of Ledgerline — and why is that the right fit for YAT?
@@ -241,7 +241,7 @@
     client-specific.
     No-leakage note: this is practice reasoning on Ledgerline; the same skill is assessed later on the
     LMS in AT1 — comparable, not identical.
-    UoC/AT1 tie: rehearses AT1 Appendix 2 Q2 and §6 in contextual form.
+    UoC/AT1 tie: rehearses AT1 Appendix 2 Q2 and §5 in contextual form.
 - [TAKEAWAYS] Section 1 · Cloud literacy
   - Cloud computing = on-demand IT resources over the internet, pay-as-you-go.
   - It lets you treat infrastructure as software, not hardware.
@@ -292,7 +292,7 @@
     architectures MIX models — Ledgerline could be IaaS app + PaaS database + SaaS email at once.
     Question to pose: "In our Ledgerline sketch, which piece is IaaS and which is PaaS — and why did
     the designer choose PaaS for the database?" (RDS = offload patching/backups/DR).
-    UoC/AT1 tie: KE 3 → AT1 Appendix 2 Q1 and §6 (articulating the cloud option).
+    UoC/AT1 tie: KE 3 → AT1 Appendix 2 Q1 and §5 (articulating the cloud option).
 - [EX] Classify the service models
   - For each, name the service model and say why:
     - Office 365
@@ -500,8 +500,8 @@
     Misconception to pre-empt: that this is the only correct architecture. It's the COMMON pattern, not
     a law — but it's the one they should recognise and reason about.
     Question to pose: "Point at each box and tell me: IaaS or PaaS — and why did the designer pick that?"
-    UoC/AT1 tie: KE 2 + KE 3 together; this integrated picture underpins AT1's §6 options and the
-    services that get priced in §7.
+    UoC/AT1 tie: KE 2 + KE 3 together; this integrated picture underpins AT1's §5 options and the
+    services that get priced in §6.
 - [BESPOKE] Activity: AWS Management Console
   - We'll log in to the AWS Management Console together.
   - You'll answer five questions as we navigate; we discuss and reveal each answer.
@@ -663,7 +663,7 @@
     Question to pose: "For Ledgerline, which of these three drivers is likely the biggest, and which
     could surprise YAT on the bill?" (compute for an always-on app; egress data transfer as the
     surprise).
-    UoC/AT1 tie: KE 4 / KE 3 (cost models & scalability) → AT1 Appendix 2 Q5 and §7 cost-benefit.
+    UoC/AT1 tie: KE 4 / KE 3 (cost models & scalability) → AT1 Appendix 2 Q5 and §6 cost-benefit.
 - [BESPOKE] How do you pay for AWS?
   - Pay for what you use.
   - Pay less when you reserve.
@@ -723,7 +723,7 @@
     your assumptions.
     Question to pose: "Before you can price Ledgerline in the calculator, what do you need to know about
     how it runs?" (which services, instance size, hours, storage, data transfer).
-    UoC/AT1 tie: KE 4 → directly enables AT1 §7 + Appendix 1 (Cost-Benefit Analysis) — the tool they'll
+    UoC/AT1 tie: KE 4 → directly enables AT1 §6 + Appendix 1 (Cost-Benefit Analysis) — the tool they'll
     actually use.
 - [BESPOKE] Reading an estimate
   - An estimate is broken into three figures:
@@ -743,7 +743,7 @@
     misleads the business case.
     Question to pose: "If YAT's board asks 'what will this cost us?', which of the three figures do you
     lead with, and which do you NOT hide?" (lead with 12-month/annual; don't hide upfront).
-    UoC/AT1 tie: KE 4 → AT1 cost-benefit — interpreting the estimate correctly is what makes the §7
+    UoC/AT1 tie: KE 4 → AT1 cost-benefit — interpreting the estimate correctly is what makes the §6
     argument credible.
 - [TABLE] Match the pricing model to the workload
   kicker: cost follows the shape of demand
@@ -778,7 +778,7 @@
     against a purely-cost argument in AT1.
     Question to pose: "Which soft benefit would matter most to YAT specifically, and how would you
     evidence something you can't put a dollar on?"
-    UoC/AT1 tie: KE 4 → AT1 §7 cost-benefit AND §3 strategic alignment — the benefits case, not just
+    UoC/AT1 tie: KE 4 → AT1 §6 cost-benefit AND §2 strategic alignment — the benefits case, not just
     the price tag.
 - [TAKEAWAYS] Section 5 · Cost models
   - Three cost drivers: compute · storage · data transfer.

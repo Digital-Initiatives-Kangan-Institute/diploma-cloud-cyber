@@ -20,14 +20,14 @@
     • Read the three moves (the bolded line): prioritise → recommend → plan it → then ask for the
     decision. Each move is one of today's three sections.
     • Stress the payoff: after this Topic the WRITTEN practice business case is complete (Topics 2→3→4
-    build §3–§5, §6–§8, §9–§11). Only the pitch (Topic 5) remains.
+    build §2–§4, §5–§7, §8–§10). Only the pitch (Topic 5) remains.
     • Anchor the client: still the YAT Accounting System (Ledgerline) — same practice case all term.
     Misconception to pre-empt: "the recommendation is just my opinion." No — a board approves a call
     that rests on the evidence they already built, not a hunch.
     Question to pose: "You've weighed the options in Topic 3 — what does a client actually pay a
     consultant to do next?" (make the call and plan it, not just present analysis).
     UoC/AT1 tie: this Topic develops ICTICT517 §3 (PC 2.3/3.1–3.3, PE 4/6, KE 1) — the AT1 Business
-    Case §9–§11 sections.
+    Case §8–§10 sections.
 
 ### C1 — Recommendation
 - Teaches: [ICTICT517 PC 2.3] · [ICTICT517 PE 4]
@@ -50,7 +50,7 @@
     choose." No — presenting options is Topic 3; the board is paying for your recommendation.
     Question to pose: "What's the difference between a report that says 'here are three options' and
     one that says 'do this'?" (the second is advice — and worth more).
-    UoC/AT1 tie: opens PC 2.3 / PE 4 (prioritise + recommend) → AT1 §9 Recommendation.
+    UoC/AT1 tie: opens PC 2.3 / PE 4 (prioritise + recommend) → AT1 §8 Recommendation.
 - [BESPOKE] Prioritise first
   - Before recommending, rank the proposed changes (from your gap analysis): what matters most, what's urgent, what can wait.
   - A simple lens: impact (against the objectives) versus effort / urgency.
@@ -69,7 +69,7 @@
     can be worth doing first even if it's harder; impact leads, effort is the second axis.
     Question to pose: "If YAT can only fund half of the proposed changes this year, which do you do
     first — and on what basis?" (impact against the objectives, then urgency).
-    UoC/AT1 tie: PC 2.3 (prioritise proposed changes to assist scheduling) + PE 4 → AT1 §9.
+    UoC/AT1 tie: PC 2.3 (prioritise proposed changes to assist scheduling) + PE 4 → AT1 §8.
 - [BESPOKE] Make the call
   - State the recommended option plainly — no hedging.
   - Justify it straight from the evidence:
@@ -83,14 +83,14 @@
     hedging" tone yourself as you talk.
     • State the recommended option plainly — one option, no weasel words ("we could possibly consider").
     • Justify it straight from the evidence they already have: the CBA result (cost over the horizon),
-    the risk / impact comparison, and alignment with the strategic objectives (§3).
+    the risk / impact comparison, and alignment with the strategic objectives (§2).
     • The line that earns trust (accent-bold): NAME the trade-off you're accepting — a recommendation
     with no downside reads as naive and the board won't believe it.
     Misconception to pre-empt: "justifying means re-arguing the whole CBA." No — POINT at the evidence
     section; the recommendation cites, it doesn't repeat.
     Question to pose: "You recommend moving Ledgerline to the cloud — what's the honest trade-off
     you're asking the board to accept?" (e.g. ongoing opex vs owned capex, migration risk).
-    UoC/AT1 tie: PC 2.3 / PE 4 → AT1 §9 — the recommended option with evidence-linked justification.
+    UoC/AT1 tie: PC 2.3 / PE 4 → AT1 §8 — the recommended option with evidence-linked justification.
 - [BESPOKE] What a strong recommendation looks like
   - Decisive — one clear recommended option.
   - Evidence-linked — every reason traces to your CBA / risk / strategy work.
@@ -110,7 +110,7 @@
     evidence beat a long list of assertions; padding weakens it.
     Question to pose: "Which of these four is the one students most often miss?" (honest — naming the
     trade-off; get them to commit to including one).
-    UoC/AT1 tie: this is the quality bar for AT1 §9; a recommendation hitting all four is what the
+    UoC/AT1 tie: this is the quality bar for AT1 §8; a recommendation hitting all four is what the
     marking grid rewards.
 - [EX] Write the Recommendation
   - In your working copy of the Business Case, add the Recommendation section for the Accounting System (Ledgerline).
@@ -124,7 +124,7 @@
   timer: ~20 min, then we discuss
   image: none
   notes:
-    Facilitation — first build task of the Topic. They add §9 to the SAME practice business case they
+    Facilitation — first build task of the Topic. They add §8 to the SAME practice business case they
     started in Topic 2. Circulate; this is where analyst-to-advisor becomes real.
     Tell students: "In your working copy of the Business Case, add the Recommendation section for the
     YAT Accounting System (Ledgerline). Recommend, don't re-argue — point at the evidence you already
@@ -139,9 +139,9 @@
     Timing: ~20 min then discuss. Where they get stuck: they re-argue the whole CBA instead of citing
     it, or they hedge with two options — push them to pick ONE and point back at their evidence.
     Share-back prompt: take two recommendations and ask the room which trade-off is more honest.
-    No-leakage note: this is PRACTICE on Ledgerline; AT1 assesses the same §9 skill on the LMS —
+    No-leakage note: this is PRACTICE on Ledgerline; AT1 assesses the same §8 skill on the LMS —
     comparable, not identical. Keep them on the practice case.
-    UoC/AT1 tie: PC 2.3 / PE 4 → AT1 Part A §9.
+    UoC/AT1 tie: PC 2.3 / PE 4 → AT1 Part A §8.
 - [TAKEAWAYS] Section 1 · Recommendation
   - Prioritise the changes, then recommend — impact vs effort/urgency.
   - One clear option; justify it straight from the evidence; name the trade-off.
@@ -170,7 +170,7 @@
     resourcing.
     Question to pose: "The board says yes to moving Ledgerline — what do they now need from you before
     anyone lifts a finger?" (how it happens and when — the plan).
-    UoC/AT1 tie: opens PC 3.1 / 3.2, PE 6, KE 1 → AT1 §10 Action Plan.
+    UoC/AT1 tie: opens PC 3.1 / 3.2, PE 6, KE 1 → AT1 §9 Action Plan.
 - [BESPOKE] The parts of an action plan
   - Prioritised changes — what gets done, in priority order
   - Implementation schedule — phases / sequence / timeframe
@@ -180,7 +180,7 @@
   kicker: five parts (becomes the Action Plan section)
   image: none
   notes:
-    The structural spine of Section 2 — the five parts that BECOME the AT1 §10 Action Plan section.
+    The structural spine of Section 2 — the five parts that BECOME the AT1 §9 Action Plan section.
     Walk each briefly; the following slides go deeper on the hard three.
     • 1. Prioritised changes — what gets done, in priority order (carries straight from Section 1).
     • 2. Implementation schedule — phases / sequence / timeframe.
@@ -192,7 +192,7 @@
     standards, methods or governance is a wish-list; all five parts are needed.
     Question to pose: "Which of these five do students most often forget?" (standards/targets/metrics,
     and change-management alignment — the two that make it accountable and real).
-    UoC/AT1 tie: KE 1 (key sections of an action plan) + PC 3.1 / 3.2, PE 6 → AT1 §10.1–§10.5.
+    UoC/AT1 tie: KE 1 (key sections of an action plan) + PC 3.1 / 3.2, PE 6 → AT1 §9.1–§9.5.
 - [BESPOKE] Sequencing & the schedule
   - Order the work by priority and dependency (you can't migrate data before the target exists).
   - Group into phases with a realistic timeframe.
@@ -210,7 +210,7 @@
     — a day-by-day task list buries the decision; phases and milestones communicate.
     Question to pose: "What in a Ledgerline migration simply CAN'T happen until something else is done
     first?" (build the target before cutover; test before go-live) — that's a dependency.
-    UoC/AT1 tie: PC 3.1 (prioritised schedule consistent with policy/procedures) → AT1 §10.
+    UoC/AT1 tie: PC 3.1 (prioritised schedule consistent with policy/procedures) → AT1 §9.
 - [BESPOKE] Standards, targets & success metrics
   - Hold the work to the industry standards (Well-Architected, ISO 27017, Essential Eight, ITIL).
   - Set measurable targets: availability, recovery, cutover with no data loss, budget adherence.
@@ -229,7 +229,7 @@
     a target is "99.9% availability" or "cutover with zero data loss", something you can check against.
     Question to pose: "How would YAT KNOW the Ledgerline migration succeeded — name one number you'd
     commit to?" (availability %, recovery time, zero-data-loss cutover, on-budget).
-    UoC/AT1 tie: PC 3.2 (standards, targets, implementation methods) → AT1 §10.
+    UoC/AT1 tie: PC 3.2 (standards, targets, implementation methods) → AT1 §9.
 - [BESPOKE] Align to the change-management procedure
   - Real change runs through governance.
   - Map the high-risk steps (e.g. cutover) to the change-management procedure:
@@ -248,7 +248,7 @@
     high-risk steps it's exactly what a board expects to see; skipping it reads as naive.
     Question to pose: "Cutover to the new Ledgerline is high-risk — what governance does it pass
     through before it happens?" (change request → risk assessment → approval → scheduled window).
-    UoC/AT1 tie: PC 3.1 (consistency with organisational policy and procedures) → AT1 §10.
+    UoC/AT1 tie: PC 3.1 (consistency with organisational policy and procedures) → AT1 §9.
 - [EX] Build the Action Plan
   - In your working copy of the Business Case, add the Action Plan for the Accounting System.
   - Include all five parts:
@@ -260,7 +260,7 @@
   timer: ~30 min, then we compare
   image: none
   notes:
-    Facilitation — the biggest build task of the Topic. They add §10 to their practice BC with all
+    Facilitation — the biggest build task of the Topic. They add §9 to their practice BC with all
     five parts. Circulate and watch the altitude (board-level, not task-level).
     Tell students: "In your working copy of the Business Case, add the Action Plan for the YAT
     Accounting System. Board-level — phases, milestones and metrics, not a day-by-day task list."
@@ -276,9 +276,9 @@
     them back up to phases/milestones), or they forget targets and change-management — the two parts
     most often missed. Have the five-part list on the board the whole time.
     Share-back prompt: compare two schedules — which one handles dependencies and the critical path?
-    No-leakage note: PRACTICE on Ledgerline; AT1 assesses the same §10 plan on the LMS — comparable,
+    No-leakage note: PRACTICE on Ledgerline; AT1 assesses the same §9 plan on the LMS — comparable,
     not identical.
-    UoC/AT1 tie: PC 3.1 / 3.2, PE 6, KE 1 → AT1 Part A §10.
+    UoC/AT1 tie: PC 3.1 / 3.2, PE 6, KE 1 → AT1 Part A §9.
 - [TAKEAWAYS] Section 2 · Action plan
   - The plan turns the recommendation into executable phases.
   - Five parts: prioritised changes · schedule · standards/targets/metrics · methods · change-mgmt alignment.
@@ -304,7 +304,7 @@
     budget). Spell it out separately.
     Question to pose: "You've recommended and planned — what's the one sentence that gets the board to
     actually decide today?" (a specific, answerable ask).
-    UoC/AT1 tie: opens PC 3.3 (provide action plan for feedback/approval — the written ask) → AT1 §11.
+    UoC/AT1 tie: opens PC 3.3 (provide action plan for feedback/approval — the written ask) → AT1 §10.
 - [BESPOKE] What to ask for
   - Approve the recommended option.
   - Approve the action plan as the roadmap.
@@ -315,7 +315,7 @@
   image: none
   notes:
     Teach the CONTENT of the ask — be specific enough that the board can answer with one word. This is
-    the slide that makes §11 concrete.
+    the slide that makes §10 concrete.
     • Approve the recommended option.
     • Approve the action plan as the roadmap.
     • Authorise the budget envelope — the actual figure from their CBA (not "some funding").
@@ -327,7 +327,7 @@
     management. Don't over-ask.
     Question to pose: "Name the three things you're asking YAT's board to approve." (the option, the
     plan, the budget figure).
-    UoC/AT1 tie: PC 3.3 → AT1 §11 Next Steps and Decision Requested.
+    UoC/AT1 tie: PC 3.3 → AT1 §10 Next Steps and Decision Requested.
 - [EX] Write Next Steps & the Decision Requested
   - In your working copy of the Business Case, add the Next Steps and Decision Requested section for the Accounting System — completing the written business case.
   - Remember to:
@@ -350,15 +350,15 @@
     3. Note how the high-risk steps route through the change-management procedure.
     Must produce: a ~½-page Next Steps & Decision Requested section — a specific, answerable ask
     (option + plan + budget figure) with next steps and governance routing. With this, the written
-    practice BC is COMPLETE (§3–§11).
+    practice BC is COMPLETE (§2–§10).
     Timing: ~15 min then discuss. Where they get stuck: vague asks ("approve some budget") — push them
     to name the actual CBA figure; or they ask the board to approve the cutover itself — remind them
     high-risk gates route through change management, not this ask.
     Share-back prompt: "Read me your ask in one sentence — could the board answer it with a single
     'approved'?"
-    No-leakage note: PRACTICE on Ledgerline; AT1 assesses the same §11 on the LMS — comparable, not
+    No-leakage note: PRACTICE on Ledgerline; AT1 assesses the same §10 on the LMS — comparable, not
     identical. Mark the milestone: their practice case is now written end to end.
-    UoC/AT1 tie: PC 3.3 → AT1 Part A §11 (Topic 5 then DELIVERS the pitch — PC 3.3's live approval).
+    UoC/AT1 tie: PC 3.3 → AT1 Part A §10 (Topic 5 then DELIVERS the pitch — PC 3.3's live approval).
 - [TAKEAWAYS] Section 3 · The decision requested
   - End with a specific, answerable ask: approve option + plan + budget.
   - Defer high-risk gates to their change-management approval.

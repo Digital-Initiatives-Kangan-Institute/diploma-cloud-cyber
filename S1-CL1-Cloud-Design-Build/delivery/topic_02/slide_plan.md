@@ -21,13 +21,13 @@
     you plot a route.
     • Third bullet (bolded): the three moves — align to strategy → describe the current state → expose
     the gaps. Say them in that order; each depends on the one before.
-    • Fourth bullet: these three become the OPENING SECTIONS of the business case (AT1 §3–§5). What
+    • Fourth bullet: these three become the OPENING SECTIONS of the business case (AT1 §2–§4). What
     they build today is directly the front half of the AT1 deliverable.
     Misconception to pre-empt: "we're picking a cloud solution today." No — diagnosis comes before
     prescription; solutions are Topic 3. Manage the student who jumps straight to "move it to AWS".
     Question to pose: "Before you can recommend a fix, what three things must you establish about the
     client?" — draws out strategy / current state / gap.
-    UoC/AT1 tie: this Topic develops PC 1.1–1.3 and PE 1–3; the output is AT1 Part A §3–§5.
+    UoC/AT1 tie: this Topic develops PC 1.1–1.3 and PE 1–3; the output is AT1 Part A §2–§4.
 - [BESPOKE] A case for change is evidence, not opinion
   - It answers three questions, in order:
     - Where does the organisation want to go?   — strategy
@@ -47,7 +47,7 @@
     argues the problem exists; the solution could even be "renew on-prem". Keep it solution-neutral.
     Question to pose: "If a doctor prescribed before diagnosing, what would go wrong — and how is a rushed
     cloud recommendation the same mistake?"
-    UoC/AT1 tie: PE 1–3 in sequence; this three-part spine maps one-to-one onto AT1 §3 / §4 / §5.
+    UoC/AT1 tie: PE 1–3 in sequence; this three-part spine maps one-to-one onto AT1 §2 / §3 / §4.
 
 ### C1 — Strategic alignment
 - Teaches: [ICTICT517 PC 1.1] · [ICTICT517 PE 1] · [ICTICT517 KE 4]
@@ -71,7 +71,7 @@
     connecting THIS initiative to a specific organisational objective, with a citation.
     Question to pose: "YAT's board has limited money — why would 'the servers are old' persuade them less
     than 'this serves your national-growth goal'?" (funders back strategy, not maintenance).
-    UoC/AT1 tie: PC 1.1 / PE 1 → AT1 §3 Strategic Alignment Analysis (criterion A1).
+    UoC/AT1 tie: PC 1.1 / PE 1 → AT1 §2 Strategic Alignment Analysis (criterion A1).
 - [BESPOKE] Read a strategic plan in three layers
   - Business objectives — where the whole organisation is going
     - e.g. grow students 15%/yr, expand nationally
@@ -93,7 +93,7 @@
     selecting the material few and tracing them up is the analytical skill being marked.
     Question to pose: "Migrating Ledgerline — which ICT goal does it serve, and which business objective
     sits above that goal?" (traces the chain live).
-    UoC/AT1 tie: PC 1.1 / PE 1 → AT1 §3; the "trace up, material only" habit is exactly what A1 rewards.
+    UoC/AT1 tie: PC 1.1 / PE 1 → AT1 §2; the "trace up, material only" habit is exactly what A1 rewards.
 - [BESPOKE] Add the outside view
   - A plan doesn't exist in a vacuum — compare it to where the industry is heading.
   - Trends that matter: cloud adoption · managed services · OPEX over CAPEX · resilience.
@@ -114,7 +114,7 @@
     where the client is behind AND where a trend might not fit them; honesty is the mark of analysis.
     Question to pose: "The sector is moving to managed cloud services — where does that ALIGN with YAT's
     plan, and is there anywhere it might DIVERGE for a small RTO?"
-    UoC/AT1 tie: KE 4 (current/emerging trends and directions) → AT1 §3; the outside view is what lifts
+    UoC/AT1 tie: KE 4 (current/emerging trends and directions) → AT1 §2; the outside view is what lifts
     A1 from description to analysis.
 - [BESPOKE] What good looks like
   - Every claim cited to the plan (e.g. “ICT Strategic Plan — ICT Goals”).
@@ -123,17 +123,17 @@
   - Alignment and divergence both named — balanced, not cheerleading.
   image: none
   notes:
-    The quality checklist for Section 1 — read it as the marker's-eye view of a strong §3, right before
+    The quality checklist for Section 1 — read it as the marker's-eye view of a strong §2, right before
     they attempt it. Keep it short; it's a rubric, not new content.
     • Every claim CITED to the plan (e.g. "ICT Strategic Plan — ICT Goals") — no unsourced assertions.
     • MATERIAL items only — not the whole plan recited.
     • TRACES the initiative up to a real organisational goal (the three-layer move).
     • ALIGNMENT AND DIVERGENCE both named (magenta line) — balanced, not cheerleading.
-    Misconception to pre-empt: "more is better." No — a padded §3 that recites the plan scores worse than
+    Misconception to pre-empt: "more is better." No — a padded §2 that recites the plan scores worse than
     a tight one that cites four material objectives and traces them.
-    Question to pose: "If I marked your §3, what's the single fastest way to lose marks?" (uncited claims /
+    Question to pose: "If I marked your §2, what's the single fastest way to lose marks?" (uncited claims /
     reciting everything / no divergence named).
-    UoC/AT1 tie: this is the A1 acceptance standard for AT1 §3 — hand them the bar before the activity.
+    UoC/AT1 tie: this is the A1 acceptance standard for AT1 §2 — hand them the bar before the activity.
 - [EX] Write a Strategic Alignment section
   - In your working copy of the Business Case, write the Strategic Alignment section for moving the Accounting System (Ledgerline).
   - Remember to:
@@ -146,8 +146,8 @@
   timer: ~20 min, then we discuss
   image: none
   notes:
-    Facilitation — the Section 1 practice; students draft §3 of the PRACTICE business case (Ledgerline).
-    This mirrors AT1 §3 against a different system.
+    Facilitation — the Section 1 practice; students draft §2 of the PRACTICE business case (Ledgerline).
+    This mirrors AT1 §2 against a different system.
     Tell students: "In your working copy of the Business Case, write the Strategic Alignment section for
     moving YAT's Accounting System (Ledgerline) to the cloud. Argue it — don't just describe."
     Steps (put on the board):
@@ -190,7 +190,7 @@
     synthesis; the skill is choosing and re-stating the material few in plain language.
     Question to pose: "If the board can already read the IT docs, what's YOUR value in the current-state
     section?" (you distil and interpret — you make it decision-relevant).
-    UoC/AT1 tie: PC 1.2 / PE 2 → AT1 §4 Current State (criterion A2); "own words, material only" is A2.
+    UoC/AT1 tie: PC 1.2 / PE 2 → AT1 §3 Current State (criterion A2); "own words, material only" is A2.
 - [BESPOKE] The relevance filter
   - KEEP (if it bears on the decision):
     - platform & stack · age / condition / capacity · availability today · dependencies & integrations · constraints · pain points
@@ -211,7 +211,7 @@
     DECISION; a fact can be true and important yet irrelevant to renew-vs-migrate, so it goes.
     Question to pose: "The Ledgerline server is 6 years old and there are 12 office printers — which fact
     do you keep, and why?" (age bears on renew-vs-migrate; printers don't).
-    UoC/AT1 tie: PC 1.2 / PE 2 → AT1 §4; the filter is how A2 stays material rather than a data dump.
+    UoC/AT1 tie: PC 1.2 / PE 2 → AT1 §3; the filter is how A2 stays material rather than a data dump.
 - [BESPOKE] How to distil
   - Read the source docs — environment overview, server/app specs, consultation notes.
   - For each fact ask: “does this affect the renew-vs-migrate decision?” If no, cut it.
@@ -231,7 +231,7 @@
     documents; the output is shorter and organised by theme, not a paraphrase of every line.
     Question to pose: "You've got five source docs — what's the first question you ask of every fact in
     them?" ("does it affect the decision?").
-    UoC/AT1 tie: PC 1.2 / PE 2 → AT1 §4; this procedure is exactly how a strong A2 gets written.
+    UoC/AT1 tie: PC 1.2 / PE 2 → AT1 §3; this procedure is exactly how a strong A2 gets written.
 - [EX] Add the Current State section
   - In your working copy of the Business Case, add the Current State section for the Accounting System (Ledgerline).
   - Remember to:
@@ -242,8 +242,8 @@
   timer: ~20 min, then we discuss
   image: none
   notes:
-    Facilitation — the Section 2 practice; students draft §4 of the practice business case (Ledgerline),
-    mirroring AT1 §4 on a different system.
+    Facilitation — the Section 2 practice; students draft §3 of the practice business case (Ledgerline),
+    mirroring AT1 §3 on a different system.
     Tell students: "In your working copy of the Business Case, add the Current State section for the
     Accounting System (Ledgerline). Synthesise — in your own words, material facts only."
     Steps (put on the board):
@@ -278,7 +278,7 @@
     Open Section 3 — teach gap analysis as the BRIDGE that makes the problem concrete and hands the next
     stage its worklist.
     • First bullet: it bridges where we want to be (strategy + requirements) and where we are (your
-    current state) — it literally joins §3 to §4.
+    current state) — it literally joins §2 to §3.
     • Second/third bullets: it makes the problem CONCRETE and MEASURABLE, and it hands the next stage a
     list of changes to evaluate (the seed of Topic 3's options).
     • The green line: "No gap → no case." If you can't show a gap, there's no justified change — say it.
@@ -286,8 +286,8 @@
     change" is a CANDIDATE to evaluate later, not a decision; gap analysis proves the problem, Topic 3
     weighs the fix.
     Question to pose: "Where do the 'desired' and 'current' columns each come from?" (desired ← strategy
-    + requirements; current ← your §4 synthesis — it's traceable both ways).
-    UoC/AT1 tie: PC 1.3 / PE 3 → AT1 §5 Gap Analysis (criterion A3); it's the hinge into the options work.
+    + requirements; current ← your §3 synthesis — it's traceable both ways).
+    UoC/AT1 tie: PC 1.3 / PE 3 → AT1 §4 Gap Analysis (criterion A3); it's the hinge into the options work.
 - [TABLE] The gap table
   kicker: one row per objective
   | Objective | Current | Desired | Gap | Opportunity | Proposed change |
@@ -319,8 +319,8 @@
   timer: ~25 min, then we discuss
   image: none
   notes:
-    Facilitation — the Section 3 practice; students build §5 of the practice business case (Ledgerline)
-    as a structured gap table, mirroring AT1 §5.
+    Facilitation — the Section 3 practice; students build §4 of the practice business case (Ledgerline)
+    as a structured gap table, mirroring AT1 §4.
     Tell students: "In your working copy of the Business Case, add the Gap Analysis for the Accounting
     System (Ledgerline) — a table of at least 3 rows, every column filled and traceable."
     Steps (put on the board):
@@ -329,12 +329,12 @@
     RTO <=1 business day); keep financial data onshore + 7-year retention; size for month-end / EOFY
     peaks without year-round over-provisioning.
     2. Fill every column: objective → current → desired → gap → opportunity → proposed change.
-    3. Check each row traces BACK to a real objective (from §3) and your current-state facts (from §4).
+    3. Check each row traces BACK to a real objective (from §2) and your current-state facts (from §3).
     Must produce: a >=3-row gap table, all six columns filled, each row traceable both ways.
     Timing: ~25 min then discuss. Where they get stuck: they jump to "move to AWS" in every "proposed
     change" cell — remind them proposed change is a CANDIDATE seed, not a chosen solution; and they leave
     "opportunity" blank — it's the bridge from gap to proposed change.
-    Share-back prompt: take one row and trace it end-to-end — objective from the plan, current from §4.
+    Share-back prompt: take one row and trace it end-to-end — objective from the plan, current from §3.
     No-leakage note: Ledgerline is PRACTICE; AT1 assesses the gap-analysis skill on the LMS — comparable,
     not identical.
 - [TAKEAWAYS] Section 3 · Gap analysis

@@ -38,11 +38,11 @@ UoC **taught / developed** in this Topic:
 
 | AT1 element | Criterion | How Topic 2 aligns |
 |---|---|---|
-| **§3 — Strategic Alignment Analysis** | A1 | Direct — C1 is exactly this section: plan objectives + external industry context + alignment/divergence, with citations. |
-| **§4 — Current State of YAT's ICT** | A2 | Direct — C2 is the synthesised current-state summary (own words, not verbatim). |
-| **§5 — Gap Analysis** | A3 | Direct — C3 is the gap table comparing strategic objectives to current state. |
+| **§2 — Strategic Alignment Analysis** | A1 | Direct — C1 is exactly this section: plan objectives + external industry context + alignment/divergence, with citations. |
+| **§3 — Current State of YAT's ICT** | A2 | Direct — C2 is the synthesised current-state summary (own words, not verbatim). |
+| **§4 — Gap Analysis** | A3 | Direct — C3 is the gap table comparing strategic objectives to current state. |
 
-**Practice-activity alignment:** the exercise has students write the **§3–§5 sections** of the practice business case (YAT Accounting System / Ledgerline) — strategic alignment, current-state synthesis, and a 3-row gap table — mirroring AT1 Part A §3–§5 against a different system.
+**Practice-activity alignment:** the exercise has students write the **§2–§4 sections** of the practice business case (YAT Accounting System / Ledgerline) — strategic alignment, current-state synthesis, and a 3-row gap table — mirroring AT1 Part A §2–§4 against a different system.
 
 ---
 
@@ -58,5 +58,5 @@ UoC **taught / developed** in this Topic:
 
 - [ ] Every UoC item in §1 is taught in `teaching.md`.
 - [ ] Each of C1–C3 has teaching content.
-- [ ] The exercise has students produce §3–§5 of the practice BC (Accounting System scenario).
+- [ ] The exercise has students produce §2–§4 of the practice BC (Accounting System scenario).
 - [ ] AT1 alignment (§2) is explicit enough that a student leaving this Topic could draft the related AT1 sections.

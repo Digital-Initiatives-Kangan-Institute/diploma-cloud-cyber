@@ -44,9 +44,9 @@ What in the real AT1 (Business Case) this Topic prepares students for:
 | AT1 element | Criterion | How Topic 1 aligns |
 |---|---|---|
 | **Appendix 2 — Knowledge Evidence, selection-style Q1–Q5** | A11 | Direct 1:1 — the Topic teaches exactly what these questions test: **Q1** IaaS/PaaS/SaaS (C2), **Q2** deployment model (C1), **Q3** industry standards (C4), **Q4** industry-standard products (C3), **Q5** cost models & scalability (C5). |
-| **§7 + Appendix 1 — Cost-Benefit Analysis** | A5 | Cost-model knowledge (C5) underpins researching/justifying AWS pricing; service knowledge (C3/C4) underpins choosing which services get priced. |
-| **§6 — Options Considered & Evaluation** | A4 | Service-type and service-catalogue knowledge (C2/C3) underpins defining the workload and articulating the cloud option. |
-| **§3 — Strategic Alignment Analysis** | A3 | Industry-standards / technology-trend awareness (C4) feeds the external industry context. |
+| **§6 + Appendix 1 — Cost-Benefit Analysis** | A5 | Cost-model knowledge (C5) underpins researching/justifying AWS pricing; service knowledge (C3/C4) underpins choosing which services get priced. |
+| **§5 — Options Considered & Evaluation** | A4 | Service-type and service-catalogue knowledge (C2/C3) underpins defining the workload and articulating the cloud option. |
+| **§2 — Strategic Alignment Analysis** | A3 | Industry-standards / technology-trend awareness (C4) feeds the external industry context. |
 
 **Practice-activity alignment:** the Topic's exercise mirrors **Appendix 2 Q1–Q5** in *contextual* form — classify a sample solution's components by service model, name the likely AWS service, and identify the cost model — set against the **practice scenario (YAT Accounting System / Ledgerline)**, not the LMS.
 

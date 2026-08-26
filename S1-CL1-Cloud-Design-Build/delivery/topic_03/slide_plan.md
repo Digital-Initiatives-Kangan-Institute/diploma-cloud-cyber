@@ -27,7 +27,7 @@
     is not the same as choosing one; keep them from jumping to "move to cloud" before the evidence is in.
     Question to pose: "You've proved Ledgerline's on-prem setup is a problem — why isn't that enough to
     get a board to write a cheque?" (they fund an evidenced answer, not a problem).
-    UoC/AT1 tie: this Topic develops PC 2.1/2.2 and feeds AT1 §6–§8 (Options, CBA, Risk).
+    UoC/AT1 tie: this Topic develops PC 2.1/2.2 and feeds AT1 §5–§7 (Options, CBA, Risk).
 
 ### C1 — Options & evaluation
 - Teaches: [ICTICT517 PC 2.1] · [ICTICT517 PC 2.2] · [ICTICT517 PE 5] · [ICTICT517 KE 2] · [ICTICT517 KE 3]
@@ -49,7 +49,7 @@
     compared alternative there's no evidence the chosen path is better, only that it's advocated.
     Question to pose: "If a consultant handed you one option and said 'do this', what would you, as the
     client, immediately want to know?" (what else was considered, and why not that).
-    UoC/AT1 tie: KE 3 (methods of evaluating competing/complementary systems); this is AT1 §6's premise.
+    UoC/AT1 tie: KE 3 (methods of evaluating competing/complementary systems); this is AT1 §5's premise.
 - [BESPOKE] Define the workload first
   - Before comparing options, state what any option must satisfy — from your gap analysis + the migration requirements:
     - capacity & peaks · availability target · recovery (RPO/RTO)
@@ -71,7 +71,7 @@
     requirement is one an option can silently fail; the written list is what keeps the comparison honest.
     Question to pose: "What must ANY Ledgerline solution do, regardless of whether it's on-prem or cloud?"
     (surfaces the shared yardstick before options enter).
-    UoC/AT1 tie: KE 2 (methods of evaluation/planning) → AT1 §6.1 (workload definition).
+    UoC/AT1 tie: KE 2 (methods of evaluation/planning) → AT1 §5.1 (workload definition).
 - [BESPOKE] Identify the realistic options
   - Keep the option set honest and small:
     - Option A — renew / stay on-prem (the status-quo baseline)
@@ -91,7 +91,7 @@
     analysis; two well-chosen, genuinely-considered options beat five token ones.
     Question to pose: "Why must 'keep Ledgerline on-prem' be one of the options, even in a report that's
     probably heading toward cloud?" (a comparison needs a baseline; it keeps the case credible).
-    UoC/AT1 tie: KE 3 → AT1 §6.2 (options considered).
+    UoC/AT1 tie: KE 3 → AT1 §5.2 (options considered).
 - [BESPOKE] Choosing an evaluation method
   - Evaluate each option on two stated lenses:
     - Impact against the strategic objectives — does it move the org toward its goals?
@@ -111,7 +111,7 @@
     it's a stated, consistent basis for judgement; the value is transparency, not automation.
     Question to pose: "Two options both look good — what two questions let you rank them without
     mentioning money yet?" (how much does each move the objectives; how hard is each to do).
-    UoC/AT1 tie: PC 2.1 (evaluate impact vs strategic objectives) + PC 2.2/PE 5 (evaluate difficulty) → §6.3.
+    UoC/AT1 tie: PC 2.1 (evaluate impact vs strategic objectives) + PC 2.2/PE 5 (evaluate difficulty) → §5.3.
 - [BESPOKE] Impact & difficulty — a first read
   - A simple matrix communicates it: each option × {impact, difficulty}.
   - High impact + low difficulty = strong candidate.
@@ -130,7 +130,7 @@
     the cost and risk work can confirm or overturn it; a cheap-looking option can still lose on risk.
     Question to pose: "Where does 'migrate Ledgerline to cloud' land on impact vs difficulty for YAT —
     and does landing in 'high difficulty' kill it?" (no — it means plan for it).
-    UoC/AT1 tie: PC 2.1 + PC 2.2 together → AT1 §6.4 (the impact/difficulty assessment).
+    UoC/AT1 tie: PC 2.1 + PC 2.2 together → AT1 §5.4 (the impact/difficulty assessment).
 - [EX] Define the options & evaluate
   - In your working copy of the Business Case, add the Options Considered and Evaluation section for the Accounting System (Ledgerline).
   - Remember to:
@@ -142,7 +142,7 @@
   timer: ~20 min, then we discuss
   image: none
   notes:
-    Facilitation — the Section 1 practice; students build AT1 §6 in miniature on the practice case.
+    Facilitation — the Section 1 practice; students build AT1 §5 in miniature on the practice case.
     Tell students: "In your working copy of the Business Case, add the Options Considered and Evaluation
     section for the Accounting System (Ledgerline). Evaluate the options — do NOT decide yet."
     Steps (put on the board):
@@ -154,9 +154,9 @@
     Timing: ~20 min then discuss. Where they get stuck: they leap to a recommendation — pull them back to
     EVALUATE; and they forget the workload definition — remind them options are judged against it.
     Share-back prompt: take two groups' difficulty scores for Option B and ask why they differ.
-    No-leakage note: this is practice on Ledgerline; AT1 assesses the same §6 skill on the LMS —
+    No-leakage note: this is practice on Ledgerline; AT1 assesses the same §5 skill on the LMS —
     comparable, not identical. Keep them anchored to the practice case.
-    UoC/AT1 tie: PC 2.1/2.2, PE 5, KE 2/3 → AT1 §6.
+    UoC/AT1 tie: PC 2.1/2.2, PE 5, KE 2/3 → AT1 §5.
 - [TAKEAWAYS] Section 1 · Options & evaluation
   - Compare realistic options on a level field — always include the status-quo.
   - Define the workload/requirements first; options are judged against it.
@@ -184,27 +184,27 @@
     can reverse a monthly-only read; the 5-year total is the honest comparison.
     Question to pose: "Why compare Ledgerline's options over 5 years instead of just this month's bill?"
     (capex, reserved commitments and lifecycle only show up over time).
-    UoC/AT1 tie: FS Numeracy (interprets/uses numerical info) + applied KE 4 → AT1 §7 + Appendix 1.
+    UoC/AT1 tie: FS Numeracy (interprets/uses numerical info) + applied KE 4 → AT1 §6 + Appendix 1.
 - [BESPOKE] What a good CBA contains
-  - Assumptions → per-option 5-year costs → benefits (incl. avoided downtime) → comparison → sensitivity.
+  - Assumptions → per-option 5-year costs → benefits (incl. avoided downtime) → comparison.
   - Compare like-for-like over the same horizon.
   - State every assumption — an unstated assumption is a hole in the case.
   - Detailed line items go in Appendix 1; the section shows the summary.
-  kicker: becomes §7 + Appendix 1
+  kicker: becomes §6 + Appendix 1
   image: none
   notes:
-    Teach the anatomy of the CBA so their AT1 §7 has the right parts. Lean on the structure.
+    Teach the anatomy of the CBA so their AT1 §6 has the right parts. Lean on the structure.
     • Walk the chain: assumptions → per-option 5-year costs → benefits (including avoided downtime) →
-    comparison summary → sensitivity check. Compare like-for-like over the same horizon.
+    comparison summary. Compare like-for-like over the same horizon.
     • The accent line: state EVERY assumption — an unstated assumption is a hole in the case. Hours,
     instance size, region, licence terms, growth — name them or the numbers can't be trusted.
-    • Where things live: detailed line items go in Appendix 1; the §7 section shows only the summary. Keep
+    • Where things live: detailed line items go in Appendix 1; the §6 section shows only the summary. Keep
     the body readable; put the arithmetic in the appendix.
     Misconception to pre-empt: that a CBA is just a table of prices. No — it's assumptions + costs +
-    benefits + a stress-test; the assumptions and the sensitivity are what make it credible, not the table.
+    benefits; the stated assumptions are what make it credible, not the table.
     Question to pose: "If I challenged one number in your Ledgerline CBA, what would let you defend it?"
     (a stated assumption or a cited source behind every figure).
-    UoC/AT1 tie: FS Numeracy → AT1 §7 (summary) + Appendix 1 (line items).
+    UoC/AT1 tie: FS Numeracy → AT1 §6 (summary) + Appendix 1 (line items).
 - [BESPOKE] Costing the on-prem option (Option A)
   - Option A = renew / keep on-prem. Cost it from the operational-costing facts:
     - capex (server refresh) + opex (power, maintenance, licences, admin time), over 5 years
@@ -222,7 +222,7 @@
     power, maintenance, licences, admin and eventual refresh; ignoring those rigs the CBA toward on-prem.
     Question to pose: "What on-prem costs would YAT keep paying even though the server is already bought?"
     (power, maintenance, licences, admin time, refresh).
-    UoC/AT1 tie: FS Numeracy → AT1 §7 (Option A costing).
+    UoC/AT1 tie: FS Numeracy → AT1 §6 (Option A costing).
 - [BESPOKE] AWS Pricing Calculator
   - Use it to:
     - estimate monthly costs and find ways to reduce them
@@ -244,7 +244,7 @@
     document them.
     Question to pose: "Before you can price Ledgerline's cloud option, what do you need to decide first?"
     (which services, instance size, hours, storage, data transfer — the assumptions).
-    UoC/AT1 tie: FS Numeracy + applied KE 4 → directly enables AT1 §7 Option B + Appendix 1.
+    UoC/AT1 tie: FS Numeracy + applied KE 4 → directly enables AT1 §6 Option B + Appendix 1.
 - [EX] Build a cost estimate
   - In groups, use the AWS Pricing Calculator + the supplied specifications to build a cost estimate for the cloud option.
   - Remember to:
@@ -270,59 +270,58 @@
     Share-back prompt: compare two groups' monthly figures and ask which assumption drove the difference.
     No-leakage note: practice sizing on Ledgerline's specs; AT1 has them size the assessed system's cloud
     option the same way — comparable, not identical.
-    UoC/AT1 tie: FS Numeracy → AT1 §7 (Option B sizing) + Appendix 1.
-- [BESPOKE] Assembling the CBA — compare & test it
+    UoC/AT1 tie: FS Numeracy → AT1 §6 (Option B sizing) + Appendix 1.
+- [BESPOKE] Assembling the CBA — comparing the options
   - 5-year comparison summary: Option A vs Option B, like-for-like.
   - Avoided-downtime benefit — value the reliability gain, don't just assert it.
-  - Sensitivity: which one or two assumptions would flip the answer?
-  - A CBA with no sensitivity check reads as overconfident.
+  - State the assumptions the comparison rests on — an unstated assumption is an unexamined one.
   kicker: the part the calculator doesn't do
   image: none
   notes:
-    Teach the part the calculator can't do — the comparison and the stress-test. This is where a CBA earns
+    Teach the part the calculator can't do — the comparison itself. This is where a CBA earns
     its credibility.
     • Walk it: a 5-year comparison summary of Option A vs Option B, like-for-like; an avoided-downtime
-    BENEFIT (value the reliability gain, don't just assert it); and a sensitivity check.
-    • The accent line: a CBA with NO sensitivity check reads as overconfident. Name the one or two
-    assumptions that, if wrong, would flip the answer — that's intellectual honesty, and it's markable.
+    BENEFIT (value the reliability gain, don't just assert it).
+    • The accent line: state the assumptions the comparison rests on, and where each figure came from —
+    that's what makes the numbers checkable rather than asserted.
     • Make avoided-downtime concrete: if on-prem Ledgerline goes down X hours/year and cloud cuts that,
     put a defensible dollar value on the hours saved — a benefit, not just a cost line.
     Misconception to pre-empt: "the calculator gives me the CBA." No — it sizes ONE option; you assemble
-    the comparison, add benefits, and test sensitivity yourself. The judgement is the human part.
-    Question to pose: "Which single assumption in your Ledgerline CBA, if wrong, would change which option
-    wins?" (surfaces the sensitivity variable).
-    UoC/AT1 tie: FS Numeracy + PC 2.1 (impact) → AT1 §7.4–§7.6 (comparison, benefit, sensitivity).
+    the comparison and add the benefits yourself. The judgement is the human part.
+    Question to pose: "Which assumption in your Ledgerline CBA are you least sure of, and where did that
+    figure come from?" (surfaces sourcing, which the assessment now asks for).
+    UoC/AT1 tie: FS Numeracy + PC 2.1 (impact) → AT1 §6.4–§6.5 (benefit, comparison).
 - [EX] Build the 5-year CBA
-  - In your working copy of the Business Case, add the Cost-Benefit Analysis (§7) + Appendix 1 for the Accounting System.
+  - In your working copy of the Business Case, add the Cost-Benefit Analysis (§6) + Appendix 1 for the Accounting System.
   - Remember to:
     - Cost Option A (renew on-prem) from the operational-costing doc.
     - Size Option B using your Pricing Calculator estimate.
-    - State assumptions; build the 5-year comparison; add avoided-downtime + a sensitivity note.
+    - State assumptions and their sources; build the 5-year comparison; add avoided-downtime.
   - ~1 page + Appendix 1 line items.
   - ⚠  Like-for-like, same horizon; every figure traceable to an assumption or source.
   timer: ~30 min, then we compare
   image: none
   notes:
-    Facilitation — the Section 2 capstone practice; students assemble the full §7 + Appendix 1.
-    Tell students: "In your working copy of the Business Case, add the Cost-Benefit Analysis (§7) and
+    Facilitation — the Section 2 capstone practice; students assemble the full §6 + Appendix 1.
+    Tell students: "In your working copy of the Business Case, add the Cost-Benefit Analysis (§6) and
     Appendix 1 for the Accounting System. Like-for-like, same 5-year horizon, every figure traceable."
     Steps (put on the board):
     1. Cost Option A (renew on-prem) from the operational-costing doc.
     2. Size Option B using your Pricing Calculator estimate from the last activity.
-    3. State assumptions; build the 5-year comparison; add avoided-downtime benefit + a sensitivity note.
-    Must produce: ~1 page §7 summary + Appendix 1 line items — a like-for-like 5-year comparison with
-    stated assumptions, an avoided-downtime benefit, and a sensitivity check.
+    3. State assumptions and their sources; build the 5-year comparison; add avoided-downtime benefit.
+    Must produce: ~1 page §6 summary + Appendix 1 line items — a like-for-like 5-year comparison with
+    stated assumptions with sources, and an avoided-downtime benefit.
     Timing: ~30 min then compare. Where they get stuck: mismatched horizons (force both to 5 years) and
     untraceable figures — every number ties back to an assumption or a source.
-    Share-back prompt: take one group's result and ask the room whether the sensitivity note is honest.
-    No-leakage note: practice CBA on Ledgerline; AT1 assesses the same §7 build on the LMS — comparable,
+    Share-back prompt: take one group's result and ask the room whether the assumptions are defensible.
+    No-leakage note: practice CBA on Ledgerline; AT1 assesses the same §6 build on the LMS — comparable,
     not identical.
-    UoC/AT1 tie: FS Numeracy, applied KE 4 → AT1 §7 + Appendix 1.
+    UoC/AT1 tie: FS Numeracy, applied KE 4 → AT1 §6 + Appendix 1.
 - [TAKEAWAYS] Section 2 · Cost-Benefit Analysis
   - A CBA compares options in money over a fixed horizon — total cost + benefit, not a monthly price.
   - State every assumption; detail goes in Appendix 1.
   - Size the cloud option with the Pricing Calculator; assemble the comparison yourself.
-  - Always include avoided-downtime benefit and a sensitivity check.
+  - Always include the avoided-downtime benefit, and state where each assumption came from.
   image: none
 
 ### C3 — Risk & impact
@@ -345,7 +344,7 @@
     option can carry unacceptable risk or lose on intangibles. The number is half the story.
     Question to pose: "Two Ledgerline options cost the same over 5 years — what would still make you
     prefer one over the other?" (skills, lock-in, continuity, disruption — the intangibles).
-    UoC/AT1 tie: PC 2.1 (impact against strategic objectives) → AT1 §8.
+    UoC/AT1 tie: PC 2.1 (impact against strategic objectives) → AT1 §7.
 - [BESPOKE] Intangibles comparison
   - Name the qualitative factors, per option:
     - staff skills / learning curve · vendor lock-in · agility & scalability
@@ -365,7 +364,7 @@
     often decisive; you can't put a clean dollar on them but you can compare them explicitly and reason.
     Question to pose: "Which intangible would weigh heaviest for YAT specifically — and why?" (draws out
     client-specific reasoning over textbook lists).
-    UoC/AT1 tie: PC 2.1 → AT1 §8.1 (intangibles comparison).
+    UoC/AT1 tie: PC 2.1 → AT1 §7.1 (intangibles comparison).
 - [BESPOKE] The risk register
   - For the direction you're heading, list the real risks:
     - Risk → Likelihood → Impact → Mitigation
@@ -384,9 +383,9 @@
     risks makes the case STRONGER; unnamed risks are the ones that sink projects.
     Question to pose: "Name one concrete risk of moving Ledgerline to cloud — and what you'd actually do
     to reduce it." (forces a real risk→mitigation pair).
-    UoC/AT1 tie: PC 2.1 (impact/risk) → AT1 §8.2 (risk register).
+    UoC/AT1 tie: PC 2.1 (impact/risk) → AT1 §7.2 (risk register).
 - [EX] Add the Risk & Impact assessment
-  - In your working copy of the Business Case, add the Risk and Impact Assessment (§8) for the Accounting System.
+  - In your working copy of the Business Case, add the Risk and Impact Assessment (§7) for the Accounting System.
   - Remember to:
     - Compare the intangibles of Option A vs Option B.
     - Build a risk register (risk → likelihood → impact → mitigation) for the cloud direction.
@@ -395,8 +394,8 @@
   timer: ~20 min, then we discuss
   image: none
   notes:
-    Facilitation — the Section 3 practice; students complete AT1 §8 on the practice case.
-    Tell students: "In your working copy of the Business Case, add the Risk and Impact Assessment (§8) for
+    Facilitation — the Section 3 practice; students complete AT1 §7 on the practice case.
+    Tell students: "In your working copy of the Business Case, add the Risk and Impact Assessment (§7) for
     the Accounting System. Specific risks, real mitigations — not generic 'things might go wrong'."
     Steps (put on the board):
     1. Compare the intangibles of Option A (renew on-prem) vs Option B (migrate to cloud).
@@ -407,9 +406,9 @@
     for a named risk with a likelihood, an impact and a concrete mitigation.
     Share-back prompt: take one group's biggest risk and ask the room whether the mitigation actually
     reduces it.
-    No-leakage note: practice §8 on Ledgerline; AT1 assesses the same skill on the LMS — comparable, not
+    No-leakage note: practice §7 on Ledgerline; AT1 assesses the same skill on the LMS — comparable, not
     identical.
-    UoC/AT1 tie: PC 2.1 → AT1 §8; completes the §6–§8 evidence base built across this Topic.
+    UoC/AT1 tie: PC 2.1 → AT1 §7; completes the §5–§7 evidence base built across this Topic.
 - [TAKEAWAYS] Section 3 · Risk & impact
   - Cost isn't everything — compare the intangibles too.
   - A risk register: risk → likelihood → impact → mitigation, specific to this change.

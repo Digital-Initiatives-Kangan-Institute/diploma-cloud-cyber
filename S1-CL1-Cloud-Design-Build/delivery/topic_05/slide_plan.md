@@ -25,7 +25,7 @@
     delivery and Q&A; a strong writer who can't present loses those criteria.
     Question to pose: "Your business case is written and correct. What could still go wrong in the
     boardroom?" — surfaces that communication is a separate, assessed skill.
-    UoC/AT1 tie: the whole Topic prepares AT1 Part B (board presentation, criteria B1–B9); today
+    UoC/AT1 tie: the whole Topic prepares AT1 Part B (board presentation, criteria B1–B8); today
     rehearses on Ledgerline what AT1 assesses on the LMS.
 
 ### C1 — Prepare & rehearse
@@ -34,7 +34,7 @@
 - [BESPOKE] The pitch is a distillation, not a read-through
   - A board deck isn't your business case with slide borders — the board already read the document.
   - The deck carries the spine — the ask, the money, the risk, the plan; you fill the rest verbally.
-  - 8–10 slides, one section each, with speaker notes — on the YAT Board Presentation Deck template.
+  - 8–10 slides, one section each — on the YAT Board Presentation Deck template.
   image: none
   notes:
     Open Section 1 — the core mindset for the prepare phase. Give it weight; students default to
@@ -43,7 +43,7 @@
     borders. Reading it back to them wastes the room's time.
     • The deck carries the SPINE only — the ask, the money, the risk, the plan; you fill the detail
     verbally. The slides prompt you; they aren't the script.
-    • The format target (bolded): 8–10 slides, one section each, with speaker notes, on the YAT Board
+    • The format target (bolded): 8–10 slides, one section each, on the YAT Board
     Presentation Deck template — the exact shape AT1 Part B requires.
     Misconception to pre-empt: "more slides / more text = more thorough." The opposite — a dense deck
     signals you can't distil. The skill is choosing what earns a slide.
@@ -116,7 +116,7 @@
     UoC/AT1 tie: prepares every Part-B delivery criterion (B1–B4, B7); rehearsal is the practice that
     turns a written case into a deliverable AT1 presentation.
 - [EX] Build & rehearse your board deck
-  - Build an 8–10 slide board deck for your practice Business Case (Accounting System / Ledgerline) on the YAT Board Presentation Deck template, with speaker notes.
+  - Build an 8–10 slide board deck for your practice Business Case (Accounting System / Ledgerline) on the YAT Board Presentation Deck template.
   - Then rehearse it:
     - run it aloud and time it (target 10–15 min)
     - in your notes, write the three questions you'd least like to be asked — and your answers
@@ -128,15 +128,15 @@
     Facilitation — the Section 1 practice: students build and rehearse the pitch for their PRACTICE
     business case. This is the biggest task of the Topic; protect the time for it.
     Tell students: "Take the business case you completed across Topics 2–4 on the Accounting System
-    and turn it into a board deck. Eight to ten slides on the YAT Board Presentation Deck template,
-    with speaker notes. Then rehearse it — out loud, to time. A deck you haven't said aloud isn't
+    and turn it into a board deck. Eight to ten slides on the YAT Board Presentation Deck template.
+    Then rehearse it — out loud, to time. A deck you haven't said aloud isn't
     ready."
     Steps (put on the board):
     1. Build the 8–10 slide deck — one section per slide, following the board arc; headline + a few
     points; the recommendation and plan get the airtime.
     2. Rehearse: run it aloud and TIME it (target 10–15 min); cut if you run long.
     3. In your notes, write the three questions you'd LEAST like to be asked — and your answers.
-    Must produce: an 8–10 slide board deck with speaker notes, rehearsed and timed, plus three
+    Must produce: an 8–10 slide board deck, rehearsed and timed, plus three
     anticipated questions with prepared answers.
     Timing: ~30 min build + rehearse, then we present. Where they get stuck: they rebuild the whole
     document onto slides (too dense) — push them back to the spine/keep-cut rule; and they skip saying
@@ -201,7 +201,7 @@
   - Jargon loses the room.
   image: none
   notes:
-    Teach the plain-English skill — the coverage spec calls this out explicitly (B7/B9). The audience
+    Teach the plain-English skill — the coverage spec calls this out explicitly (B7/B8). The audience
     is NON-technical; jargon loses them.
     • The rule: plain English, and translate each technical term as you use it — "RDS: a managed
     database the vendor runs for us." Don't assume they know the acronyms.
@@ -215,7 +215,7 @@
     Question to pose: "Say 'we'll deploy across two Availability Zones' the way you'd say it to Sam
     Walker, who isn't technical." (e.g. "we'll run it in two separate data centres so one failing
     doesn't take Ledgerline down").
-    UoC/AT1 tie: 517 FS Oral Communication → B7 and 502 FS Oral communication → B9 — plain English and
+    UoC/AT1 tie: 517 FS Oral Communication → B7 and 502 FS Oral communication → B8 — plain English and
     translating technical terms for the intended audience.
 - [EX] Deliver your pitch
   - Present your board deck to a mock board (peers + trainer as Sam Walker / Pat Lin), 10–15 minutes.
@@ -270,7 +270,7 @@
     Question to pose: "The board asks 'why PaaS for the database and not IaaS?' — is that a hostile
     question or an assessment?" (an assessment — they're checking you understand your own design
     choice).
-    UoC/AT1 tie: 502 FS Oral communication → B9 (articulate complex concepts under questioning); Q&A
+    UoC/AT1 tie: 502 FS Oral communication → B8 (articulate complex concepts under questioning); Q&A
     is where the probed knowledge from Topics 1–4 is defended, not re-taught.
 - [BESPOKE] Listen, then answer
   - Let the question land; clarify if unsure — “Do you mean cost or risk?”
@@ -292,7 +292,7 @@
     Question to pose: "The board asks something ambiguous — what do you do before answering?" (clarify
     what they're really asking, so you answer the right question).
     UoC/AT1 tie: 517 FS Oral Communication → B8 (elicit information with effective listening/questioning)
-    and 502 FS → B9; the listen-clarify-answer-check loop is exactly what B8/B9 assess.
+    and 502 FS → B8; the listen-clarify-answer-check loop is exactly what B8 assess.
 - [BESPOKE] Be ready for these
   - Cost assumptions — what if pricing changes?
   - Risk — the single biggest reason to say no?
@@ -317,11 +317,11 @@
     not having reviewed your own reasoning.
     Question to pose: "Pick one of these and answer it for Ledgerline right now — from what you already
     analysed." (proves the answer is already in their work).
-    UoC/AT1 tie: defends the probed knowledge (517 PC 1.1–3.2, 401 KE 1/3, 502 PC 1.1/1.2) → B8/B9;
+    UoC/AT1 tie: defends the probed knowledge (517 PC 1.1–3.2, 401 KE 1/3, 502 PC 1.1/1.2) → B8;
     this is the applied-from-earlier content the coverage spec flags as defended, not re-taught.
 - [BESPOKE] Seek feedback & get sign-off
   - Explicitly seek and respond to the board's feedback — confirm you've understood it.
-  - Capture the feedback in the Feedback Record.
+  - Capture the feedback in the Feedback section (§11) of your Business Case.
   - Obtain the board's sign-off on the action plan.
   - The decision is the point of the whole exercise — ask for it.
   image: none
@@ -329,7 +329,7 @@
     Teach the close of the event — the part students forget under pressure. Seeking feedback and
     obtaining sign-off are distinct assessed acts (B5/B6), and the sign-off is the whole point.
     • Walk the closing moves: explicitly SEEK and RESPOND to the board's feedback (confirm you've
-    understood it — reflect it back); CAPTURE it in the Feedback Record; OBTAIN the board's sign-off
+    understood it — reflect it back); CAPTURE it in the Business Case's Feedback section (§11); OBTAIN the board's sign-off
     on the action plan.
     • The message (accent bold): the decision is the point of the whole exercise — ASK for it. A
     presentation that ends without securing sign-off hasn't finished the job.
@@ -356,7 +356,7 @@
     across the dimensions we listed."
     Steps:
     1. Presenter: clarify → answer from your evidence → seek/respond to feedback → capture it in the
-    Feedback Record → obtain the sign-off.
+    Business Case's Feedback section (§11) → obtain the sign-off.
     2. Board: probe across cost, risk, prioritisation, strategic fit, service models/standards.
     Must produce: a handled Q&A with feedback captured and an explicit sign-off asked for and recorded.
     Timing: ~5 min each, then debrief. Where they get stuck: presenters answer then forget to ask for
