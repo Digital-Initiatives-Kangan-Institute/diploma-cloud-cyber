@@ -102,18 +102,10 @@ def build(path):
     add_body_paragraph(doc, "The principal risks of the cloud option — staff upskilling, cost control, and a safe "
               "cutover — are manageable through continued MTS support, AWS cost guardrails, and phased "
               "migration outside assessment windows. We recommend Option B and ask the board to approve "
-              "the migration, the phased action plan in §10, and the Year-1 budget envelope.")
+              "the migration, the phased action plan in §9, and the Year-1 budget envelope.")
 
-    h1("2. Engagement Context")
-    add_uoc_evidence_tag(doc, "[ICTICT517 AC 4]")
-    add_body_paragraph(doc, "This Business Case is prepared by MP Tech Solutions (MTS) for the YAT Board, via the YAT "
-              "ICT Manager (Sam Walker), under the MTS–YAT Master Services Agreement, and reviewed by the "
-              "MTS Senior Consultant (Pat Lin) before submission. MTS has been engaged to analyse YAT's "
-              "LMS operating-model options and recommend a way forward. It asks the board to decide "
-              "whether to renew the LMS on-premises or migrate it to AWS, and to approve the associated "
-              "action plan and Year-1 budget.")
 
-    h1("3. Strategic Alignment Analysis")
+    h1("2. Strategic Alignment Analysis")
     add_uoc_evidence_tag(doc, "[ICTICT517 PC 1.1] · [ICTICT517 PE 1]")
     add_body_paragraph(doc, "YAT's ICT Strategic Plan sets goals to ensure reliable ICT services, respond quickly to "
               "change, reduce dependency on in-house server infrastructure, and adopt sustainable "
@@ -137,7 +129,7 @@ def build(path):
               "for the broader strategy, and delivering it well sets the pattern for moving YAT's other "
               "suitable on-site systems to the cloud.")
 
-    h1("4. Current State of YAT's ICT")
+    h1("3. Current State of YAT's ICT")
     add_uoc_evidence_tag(doc, "[ICTICT517 PC 1.2] · [ICTICT517 PE 2]")
     add_body_paragraph(doc, "YAT's network is resilient at the infrastructure layer (no single point of failure, "
               "dual-NIC servers, two AD-controlled security zones), but the LMS itself is not. DOODLE runs "
@@ -152,43 +144,43 @@ def build(path):
               "recovery objectives far from target, and fixed capacity that cannot absorb the ~3× "
               "assessment-window peaks or 15% annual growth without over-provisioning.")
 
-    h1("5. Gap Analysis")
+    h1("4. Gap Analysis")
     add_uoc_evidence_tag(doc, "[ICTICT517 PC 1.3] · [ICTICT517 PE 3]")
     add_data_table(doc,
-           ["Strategic objective", "Current state", "Desired future state", "Gap",
+           ["Strategic objective", "Current state", "Gap",
             "Improvement opportunity", "Proposed change"],
            [["99.9% availability for critical systems",
-             "99.2% on a single server", "99.9% (Multi-AZ resilient)",
+             "99.2% on a single server",
              "~0.7 pp (~61 hr/yr); single server cannot deliver", "Highly available architecture",
              "Migrate to AWS across two Availability Zones"],
             ["Reduce dependency on in-house infrastructure",
-             "Owns/runs end-of-life server + room", "No in-house server to own or run",
+             "Owns/runs end-of-life server + room",
              "Full reliance on self-run hardware", "Managed cloud operating model",
              "Migrate LMS to AWS (managed services)"],
-            ["Recover quickly (RTO ≤ 4h / RPO ≤ 1h)",
-             "RTO ~7–11h, RPO ~24h (nightly tape)", "RTO ≤ 4h, RPO ≤ 1h",
+            ["Recover quickly (RTO \u2264 4h / RPO \u2264 1h)",
+             "RTO ~7\u201311h, RPO ~24h (nightly tape)",
              "Hours-to-a-day short on both", "Automated backups + failover",
              "RDS Multi-AZ + AWS Backup"],
             ["Scale for growth and assessment peaks",
-             "Fixed server, no elasticity", "Auto-scale to ~3× peaks; absorb 15%/yr",
+             "Fixed server, no elasticity",
              "No elasticity; over-provision or degrade", "Elastic compute",
              "EC2 Auto Scaling; scale in off-peak"]],
-           widths=[2.9, 2.6, 2.6, 2.6, 2.5, 2.6])
+           widths=[3.2, 3.0, 3.0, 3.0, 3.0])
     add_body_paragraph(doc, "The gaps cluster around resilience, recovery, capacity, and ownership. An on-premises "
               "refresh (Option A) addresses end-of-life hardware but leaves the single point of failure, "
               "the recovery shortfall, and the fixed capacity largely intact. A cloud operating model "
               "(Option B) addresses all four. This is the central finding the options analysis tests.")
 
-    h1("6. Options Considered and Evaluation")
+    h1("5. Options Considered and Evaluation")
     add_uoc_evidence_tag(doc, "[ICTICT517 PC 2.1] · [ICTICT517 PC 2.2] · [ICTICT517 KE 3] · [ICTCLD401 PC 1.8] · [ICTCLD502 PC 1.2]")
-    h2("6.1 Workload definition")
+    h2("5.1 Workload definition")
     add_body_paragraph(doc, "The LMS serves ~860 users (≈800 students + 60 staff), with 200–300 typical concurrent "
               "users, 500–700 at peak (~3× for the ~10–14-day assessment window each term), and very low "
               "overnight/term-break load. Data is ~178 GB, growing ~25 GB/year. It must preserve the "
               "Windows Server 2016 / DOODLE / MySQL stack with full OS control, keep its AD, Office 365, "
               "Accounting and ASQA integrations, hold all data in Australia, and meet 99.9% availability, "
               "RTO ≤ 4h and RPO ≤ 1h.")
-    h2("6.2 Options considered")
+    h2("5.2 Options considered")
     add_bullet_list(doc, [
         "Option A — In-house renewal: replace the end-of-life server and ancillary hardware; retain the "
         "single-site on-premises operating model.",
@@ -198,13 +190,13 @@ def build(path):
         "benefits (no in-house server, managed resilience) are a subset of Option B's, while AWS adds the "
         "elasticity and recovery posture the requirements demand.",
     ])
-    h2("6.3 Evaluation method")
-    add_body_paragraph(doc, "Each option is evaluated with a five-year cost-benefit analysis (§7), a quantified "
-              "avoided-downtime benefit (§7.4), an intangibles comparison (§8.1), and a risk register "
-              "(§8.2). This combination is appropriate because the decision turns on both cost and "
+    h2("5.3 Evaluation method")
+    add_body_paragraph(doc, "Each option is evaluated with a five-year cost-benefit analysis (§6), a quantified "
+              "avoided-downtime benefit (§6.4), an intangibles comparison (§7.1), and a risk register "
+              "(§7.2). This combination is appropriate because the decision turns on both cost and "
               "non-cost factors — resilience, capacity, and strategic alignment — that a cost comparison "
               "alone would not capture.")
-    h2("6.4 Initial impact and difficulty assessment")
+    h2("5.4 Initial impact and difficulty assessment")
     add_data_table(doc, ["", "Option A — In-house", "Option B — Cloud (AWS)"],
            [["Strategic impact", "Refreshes hardware but leaves the 99.9% target out of reach",
              "Directly delivers the strategy's lead initiative and availability target"],
@@ -216,41 +208,41 @@ def build(path):
              "Higher Year-1 outlay; cloud upskilling; vendor dependency"]],
            widths=[4.0, 6.25, 6.25])
 
-    h1("7. Cost-Benefit Analysis")
+    h1("6. Cost-Benefit Analysis")
     add_uoc_evidence_tag(doc, "[ICTICT517 PC 2.1] · [ICTICT517 KE 3] · [ICTICT517 FS Numeracy] · [ICTCLD401 KE 4] · [ICTCLD502 KE 3] · [ICTCLD401 KE 1]")
     add_body_paragraph(doc, "A five-year CBA comparing the two options (AUD ex GST). Detailed line items are in "
-              "Appendix 1; AWS figures are indicative, sized per §6.1 and backed by a Pricing Calculator "
+              "Appendix 1; AWS figures are indicative, sized per §5.1 and backed by a Pricing Calculator "
               "export. A 3% annual inflation factor is applied to recurring costs from Year 2.")
-    h2("7.1 Assumptions")
-    add_data_table(doc, ["Assumption", "Value", "Used as-is?"],
-           [["LMS user population", "800 students + 60 staff", "Yes"],
-            ["Annual student growth", "+15% per year", "Yes"],
-            ["Current / target availability", "99.2% / 99.9%", "Yes"],
-            ["ICT FTE fully-loaded cost", "$115,000 / year (≈$63.19/hr)", "Yes"],
-            ["Cost of downtime (teaching hours)", "$750 / hour", "Yes"],
-            ["Inflation applied to recurring", "3% per year from Year 2", "Adjusted — see note"],
-            ["AWS region", "ap-southeast-2 (Sydney)", "Yes (data residency)"]],
-           widths=[6.5, 5.5, 4.5])
+    h2("6.1 Assumptions")
+    add_data_table(doc, ["Assumption", "Value", "Source"],
+           [["LMS user population", "800 students + 60 staff", "YAT LMS application specification"],
+            ["Annual student growth", "+15% per year", "YAT ICT Strategic Plan"],
+            ["Current / target availability", "99.2% / 99.9%", "LMS server status; ICT Strategic Plan"],
+            ["ICT FTE fully-loaded cost", "$115,000 / year (\u2248$63.19/hr)", "YAT LMS operational costing"],
+            ["Cost of downtime (teaching hours)", "$750 / hour", "ICT Manager consultation notes"],
+            ["Inflation applied to recurring", "3% per year from Year 2", "Own assumption \u2014 RBA target midpoint"],
+            ["AWS region", "ap-southeast-2 (Sydney)", "AWS Pricing Calculator (data residency)"]],
+           widths=[5.5, 4.5, 6.5])
     yr = ["", "Year 1", "Year 2", "Year 3", "Year 4", "Year 5", "5-year"]
-    h2("7.2 Option A — In-house renewal (5-year summary)")
+    h2("6.2 Option A — In-house renewal (5-year summary)")
     add_data_table(doc, yr,
            [["One-off capital", "$51,000", "—", "—", "—", "—", "$51,000"],
             ["Recurring", "$74,650", "$76,890", "$79,196", "$81,572", "$84,019", "$396,327"],
             ["Annual total", "$125,650", "$76,890", "$79,196", "$81,572", "$84,019", "$447,327"]])
-    h2("7.3 Option B — Cloud migration to AWS (5-year summary)")
+    h2("6.3 Option B — Cloud migration to AWS (5-year summary)")
     add_data_table(doc, yr,
            [["One-off project", "$108,500", "—", "—", "—", "—", "$108,500"],
             ["AWS direct", "$27,250", "$28,068", "$28,910", "$29,777", "$30,670", "$144,675"],
             ["Staff + external", "(in project)", "$45,000", "$46,350", "$47,741", "$49,173", "$188,264"],
             ["Annual total", "$135,750", "$73,068", "$75,260", "$77,518", "$79,843", "$441,439"]])
-    h2("7.4 Avoided-downtime benefit (Option B)")
+    h2("6.4 Avoided-downtime benefit (Option B)")
     add_data_table(doc, ["", "Calculation", "Value"],
            [["Avoided unavailability / year", "(0.008 − 0.001) × 8,760 hr", "61.3 hr"],
             ["Proportion during teaching hours", "assumption", "30%"],
             ["Avoided downtime cost / year", "61.3 × 30% × $750", "$13,800"],
             ["5-year avoided-downtime benefit", "× 5", "$69,000"]],
            widths=[6.0, 6.5, 4.0])
-    h2("7.5 Comparison summary")
+    h2("6.5 Comparison summary")
     add_data_table(doc, ["", "Option A", "Option B", "Delta (B − A)"],
            [["One-off (Year 1)", "$51,000", "$108,500", "+$57,500"],
             ["Recurring (5-year)", "$396,327", "$332,939", "−$63,388"],
@@ -261,17 +253,10 @@ def build(path):
     add_body_paragraph(doc, "On direct cost the options are within ~1.3% over five years. Option B carries a higher "
               "Year-1 outlay but lower recurring cost, and once the avoided-downtime benefit is included "
               "it is ~$74,900 ahead on net position — before the unpriced strategic and capacity benefits.")
-    h2("7.6 Sensitivity analysis")
-    add_body_paragraph(doc, "Sensitivity 1 — teaching-hours downtime proportion 30% → 50%: the avoided-downtime "
-              "benefit rises from ~$69,000 to ~$115,000 over five years, widening Option B's net "
-              "advantage. The recommendation is reinforced.")
-    add_body_paragraph(doc, "Sensitivity 2 — MTS migration labour $60,000 → $80,000: Option B's five-year direct cost "
-              "rises to ~$461,400, slightly above Option A; but after the avoided-downtime benefit its net "
-              "position (~$392,400) remains well below Option A's $447,327. The recommendation holds.")
 
-    h1("8. Risk and Impact Assessment")
+    h1("7. Risk and Impact Assessment")
     add_uoc_evidence_tag(doc, "[ICTICT517 PC 2.1] · [ICTICT517 PC 2.2] · [ICTICT517 PE 5]")
-    h2("8.1 Intangibles comparison")
+    h2("7.1 Intangibles comparison")
     add_data_table(doc, ["Factor", "Option A — In-house", "Option B — Cloud (AWS)"],
            [["99.9% availability target", "Not credibly achievable on a single server",
              "Achievable via Multi-AZ deployment"],
@@ -284,7 +269,7 @@ def build(path):
             ["Sustainability", "Runs own server + room", "Shared, efficient cloud infrastructure"],
             ["DR (whole-campus loss)", "Slow tape restore offsite", "Cross-Region backup copy"]],
            widths=[4.5, 5.75, 6.0])
-    h2("8.2 Risk register (recommended option — cloud)")
+    h2("7.2 Risk register (recommended option — cloud)")
     add_data_table(doc, ["Risk", "Likelihood", "Impact", "Mitigation"],
            [["Cloud cost overrun / bill shock", "Medium", "Medium",
              "Budgets + CloudWatch alarms; tagging; Savings Plans for baseline"],
@@ -298,19 +283,19 @@ def build(path):
              "Standard Windows/MySQL stack; infrastructure-as-code; documented exit plan"]],
            widths=[5.0, 2.3, 2.0, 6.9])
 
-    h1("9. Recommendation")
+    h1("8. Recommendation")
     add_uoc_evidence_tag(doc, "[ICTICT517 PC 2.3] · [ICTICT517 PE 4] · contributes to [ICTICT517 PC 3.1]")
     add_body_paragraph(doc, "Recommended option: Option B — Cloud migration to AWS. Over five years the two options "
               "are effectively cost-neutral on direct spend, but only the cloud option meets the 99.9% "
               "availability target and the RTO ≤ 4h / RPO ≤ 1h recovery objectives, scales for 15% growth "
               "and the assessment-window peaks, and materially improves disaster recovery. The "
               "avoided-downtime benefit puts it ahead on net cost as well. The main risks — upskilling, "
-              "cost control, and a safe cutover — are manageable and addressed in §8.2 and §10. This "
+              "cost control, and a safe cutover — are manageable and addressed in §7.2 and §9. This "
               "recommendation drives the prioritisation and action plan below.")
 
-    h1("10. Action Plan")
+    h1("9. Action Plan")
     add_uoc_evidence_tag(doc, "[ICTICT517 PC 3.1] · [ICTICT517 PC 3.2] · [ICTICT517 PE 6] · [ICTICT517 KE 1]")
-    h2("10.1 Prioritised changes")
+    h2("9.1 Prioritised changes")
     add_data_table(doc, ["#", "Change", "Priority rationale"],
            [["1", "Stand up the AWS foundation (network, IAM, guardrails)",
              "Everything else depends on a secure, governed landing zone"],
@@ -321,7 +306,7 @@ def build(path):
             ["4", "Cut over and decommission the on-premises server",
              "Final, highest-risk step; only after parallel-run acceptance"]],
            widths=[1.2, 7.3, 7.5])
-    h2("10.2 Implementation schedule")
+    h2("9.2 Implementation schedule")
     add_data_table(doc, ["Phase", "Activities", "Start", "Duration", "Dependencies", "Owner"],
            [["1", "AWS foundation + design review", "Wk 1", "2 wks", "—", "MTS"],
             ["2", "HA infrastructure build", "Wk 3", "3 wks", "Phase 1", "MTS"],
@@ -330,29 +315,42 @@ def build(path):
            widths=[1.5, 5.2, 2.0, 2.0, 3.0, 2.6])
     add_body_paragraph(doc, "Scheduling avoids month-end and the two-week assessment windows; the cutover runs in an "
               "approved maintenance window with a tested rollback.")
-    h2("10.3 Standards, targets, and success metrics")
+    h2("9.3 Standards, targets, and success metrics")
     add_data_table(doc, ["Aspect", "Standard / target", "How measured"],
            [["Availability", "99.9%", "CloudWatch uptime over rolling 12 months"],
             ["Recovery", "RPO ≤ 1h / RTO ≤ 4h", "DR test results; backup frequency"],
             ["Data residency", "Australia (ap-southeast-2)", "AWS Config region check"],
             ["Cost envelope (Year 1)", "≈ $135,750", "Actuals vs budget in Cost Explorer"]],
            widths=[4.5, 5.5, 5.5])
-    h2("10.4 Implementation methods")
+    h2("9.4 Implementation methods")
     add_body_paragraph(doc, "Each phase applies an AWS Well-Architected review at its design milestone, infrastructure-"
               "as-code (CloudFormation) for repeatable builds, and YAT's Change Management Procedure for "
               "all production changes.")
-    h2("10.5 Alignment with the change management procedure")
+    h2("9.5 Alignment with the change management procedure")
     add_body_paragraph(doc, "Phases 2–4 raise change requests; the Phase 4 cutover is a high-risk change requiring "
               "Change Advisory Board endorsement and ICT-Manager approval, with the budget and option "
               "decision approved by the board via this Business Case.")
 
-    h1("11. Next Steps and Decision Requested")
+    h1("10. Next Steps and Decision Requested")
     add_uoc_evidence_tag(doc, "[ICTICT517 PC 3.3]")
     add_body_paragraph(doc, "We ask the board today to: (1) approve Option B — cloud migration to AWS — as the "
-              "recommended approach; (2) approve the phased action plan in §10 as the implementation "
+              "recommended approach; (2) approve the phased action plan in §9 as the implementation "
               "roadmap; and (3) authorise the Year-1 budget envelope (≈$135,750). The high-risk cutover "
               "change request is deferred to the appropriate phase gate, per the change management "
               "procedure.")
+
+    h1("11. Feedback")
+    add_uoc_evidence_tag(doc, "[ICTICT517 PC 2.4]")
+    add_data_table(doc, ["Feedback received", "From", "Your response", "Resulting action"],
+           [["Year-1 capital outlay is close to the on-premises option — make the payback point clearer.",
+             "Sam Walker (YAT ICT Manager)",
+             "Agreed. The Year-1 positions are comparable; the saving accrues from Year 2.",
+             "Added the payback point to the Executive Summary."],
+            ["Confirm the migration will not run across an assessment period.",
+             "Board member",
+             "Confirmed — Phase 4 cutover is scheduled outside teaching weeks.",
+             "Noted the constraint against Phase 4 in the schedule (§9.2)."]],
+           widths=[5.0, 3.0, 4.0, 4.0])
 
     h1("Sign-off")
     add_uoc_evidence_tag(doc, "[ICTICT517 PC 3.3]")
@@ -451,15 +449,15 @@ def build(path):
            widths=[6.5, 9.0])
     h2("A2.2 Demonstration-style questions")
     add_data_table(doc, ["Question", "Response"],
-           [["How does §10 demonstrate the key sections of an action plan? [ICTICT517 KE 1]",
-             "§10.1 prioritised changes; §10.2 schedule with durations/dependencies/owners; §10.3 "
-             "standards, targets and success metrics; §10.4 methods; §10.5 change-management alignment."],
+           [["How does §9 demonstrate the key sections of an action plan? [ICTICT517 KE 1]",
+             "§9.1 prioritised changes; §9.2 schedule with durations/dependencies/owners; §9.3 "
+             "standards, targets and success metrics; §9.4 methods; §9.5 change-management alignment."],
             ["Evaluation and planning methods applied [ICTICT517 KE 2]",
-             "Five-year CBA (§7), avoided-downtime quantification (§7.4), sensitivity analysis (§7.6), "
-             "intangibles comparison (§8.1), and a risk register (§8.2)."],
+             "Five-year CBA (§6), avoided-downtime quantification (§6.4), sensitivity analysis (§6.6), "
+             "intangibles comparison (§7.1), and a risk register (§7.2)."],
             ["How competing products were evaluated [ICTICT517 KE 3]",
-             "Option A vs Option B compared on cost (§7), strategic impact and difficulty (§6.4), "
-             "intangibles (§8.1) and risk (§8.2)."],
+             "Option A vs Option B compared on cost (§6), strategic impact and difficulty (§5.4), "
+             "intangibles (§7.1) and risk (§7.2)."],
             ["Emerging trends that informed the recommendation [ICTICT517 KE 4]",
              "Sector shift to managed cloud and OPEX-over-CAPEX, and elastic capacity as a baseline "
              "expectation — material to choosing a cloud operating model over a hardware refresh."]],
@@ -471,5 +469,5 @@ def build(path):
 
 
 if __name__ == "__main__":
-    out = sys.argv[1] if len(sys.argv) > 1 else "scenario/exemplars/internal-document-exemplar-business-case.docx"
+    out = sys.argv[1] if len(sys.argv) > 1 else "S1-CL1-Cloud-Design-Build/assessments/AT1/AT1-exemplar-business-case.docx"
     build(out)

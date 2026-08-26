@@ -4,7 +4,7 @@
 A branded, fillable board-presentation deck mirroring the Business Case document:
 title → agenda → context → current state → gap → options → recommendation →
 cost → benefits → risks → plan → decision → close. Each content slide carries
-greyed guidance the presenter replaces. Branding via pptx_brand (brand-pack §4/§5.3).
+greyed guidance the presenter replaces. Branding via pptx_brand (brand-pack §3/§4.3).
 
 Usage:  python scripts/build_bc_deck_template.py [output.pptx]
 Default: ../diploma-cloud-cyber-website-s1/public/templates/YAT-Business-Case-Deck-Template.pptx

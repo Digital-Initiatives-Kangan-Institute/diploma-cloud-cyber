@@ -30,12 +30,12 @@ TEMPLATE = str(Path(__file__).resolve().parents[2] / "kangan-templates" / "Proje
 
 OVERVIEW = [
     ('You are being assessed on the production and presentation of a Business Case for the YAT LMS Cloud Migration. The assessment is split into two parts (Parts A and B — see Task(s) to be assessed below):', 'p'),
-    ('Part A (written): the Business Case document, including its three appendices (CBA detail, Knowledge Evidence responses, supporting research)', 'b'),
+    ('Part A (written): the Business Case document, including its two appendices (CBA detail, Knowledge Evidence responses)', 'b'),
     ('Part B (observed): the Business Case presentation delivered to the role-played YAT board, with sign-off captured from the role-played YAT ICT Manager', 'b'),
-    ('This is an open-book assessment. You may use the YAT intranet, the AWS Pricing Calculator, AWS Academy lab environments, course reference materials, and external research (which must be cited) throughout. Where the Business Case requires synthesis (e.g. the current-state summary in §4), you must produce content in your own words — verbatim reproduction of intranet material is not satisfactory.', 'p'),
+    ('This is an open-book assessment. You may use the YAT intranet, the AWS Pricing Calculator, AWS Academy lab environments, course reference materials, and external research (which must be cited) throughout. Where the Business Case requires synthesis (e.g. the current-state summary in §3), you must produce content in your own words — verbatim reproduction of intranet material is not satisfactory.', 'p'),
     ('Reasonable adjustment for this assessment may include extending the time allowed, varying the location or format of the presentation event (e.g. in-person vs video conference), allowing you to present to a recorded audience for asynchronous assessment where appropriate, or providing one-on-one verbal explanation of board questions where needed.', 'p'),
     ('Teacher/assessor support level: the teacher/assessor may clarify task requirements and the scenario but must not guide you to specific recommendations or correct answers. During the presentation, the teacher/assessor (in the role of the YAT ICT Manager) may ask substantive questions but must not coach you through your responses.', 'p'),
-    ('Submission: Part A (Business Case) is submitted via the LMS as a .docx with all three appendices populated. Part B (presentation deck) is submitted via the LMS as a .pptx. The §12 Feedback section and the signed Sign-off block are completed within Part A.', 'p'),
+    ('Submission: Part A (Business Case) is submitted via the LMS as a .docx with both appendices populated. Part B (presentation deck) is submitted via the LMS as a .pptx. The §11 Feedback section and the signed Sign-off block are completed within Part A.', 'p'),
     ('The assessment will not proceed if for any reason it is not safe to do so. The assessor must advise you of the reason for suspending the assessment, and what safety action should be taken and of revised arrangements for the assessment when it is safe to do so.', 'p'),
     ('There is a zero tolerance for plagiarism, cheating and collusion. You will be expected to make a declaration that all work is your own prior to submission. Refer to the Training and Assessment Policy for further information.', 'p'),
 ]
@@ -46,7 +46,7 @@ TASKS = [
     ('Part A — Business Case', 'h'),
     ("Produce a written Business Case for the YAT LMS Cloud Migration using YAT's standard Business Case template.", 'p'),
     ('Part B — Presentation to the YAT board', 'h'),
-    ('Prepare a slide deck and present your Business Case to the YAT board to seek approval of the action plan in Business Case §10.', 'p'),
+    ('Prepare a slide deck and present your Business Case to the YAT board to seek approval of the action plan in Business Case §9.', 'p'),
 ]
 
 RESOURCES = [
@@ -60,12 +60,12 @@ RESOURCES = [
 
 CRITERIA = [
     ('To receive a Satisfactory outcome for this assessment you must:', 'p'),
-    ('Achieve Satisfactory on every criterion in the Part A Marking Guide (Business Case — covers Business Case sections §1–§12, Sign-off, and Appendices 1–3)', 'b'),
+    ('Achieve Satisfactory on every criterion in the Part A Marking Guide (Business Case — covers Business Case sections §1–§11, Sign-off, and Appendices 1–2)', 'b'),
     ('Achieve Satisfactory on every criterion in the Part B Marking Guide (Presentation — covers the observed presentation event including Q&A, feedback capture, and sign-off)', 'b'),
     ('Submit all required artefacts:', 'h'),
-    ('Completed Business Case (.docx) with all three appendices populated', 'b'),
-    ('Presentation deck (.pptx) with populated speaker notes', 'b'),
-    ('Completed §12 Feedback section within the Business Case', 'b'),
+    ('Completed Business Case (.docx) with both appendices populated', 'b'),
+    ('Presentation deck (.pptx)', 'b'),
+    ('Completed §11 Feedback section within the Business Case', 'b'),
     ('Signed Sign-off block from the role-played YAT ICT Manager (within the Business Case)', 'b'),
 ]
 
@@ -74,26 +74,25 @@ RESULTS = [
 ]
 
 SUBMIT = [
-    ('Part A is submitted to the LMS as the populated Business Case (.docx) with all three appendices completed.', 'p'),
-    ('Part B is submitted to the LMS as the presentation deck (.pptx or equivalent) with populated speaker notes. The §12 Feedback section and the signed Sign-off block are completed within the Business Case.', 'p'),
+    ('Part A is submitted to the LMS as the populated Business Case (.docx) with both appendices completed.', 'p'),
+    ('Part B is submitted to the LMS as the presentation deck (.pptx or equivalent). The §11 Feedback section and the signed Sign-off block are completed within the Business Case.', 'p'),
 ]
 
 MARKING_A = [
-    ["A1 - Strategic Alignment Analysis — you analysed YAT's ICT Strategic Plan against the industry environment and organisational objectives, with citations "],
+    ["A1 - Strategic Alignment Analysis — you analysed YAT's ICT Strategic Plan against the industry environment and organisational objectives "],
     ["A2 -Current State of YAT's ICT — you produced a synthesised summary of YAT's current ICT systems and practices in your own words (not verbatim from the intranet) "],
     ["A3 - Gap Analysis — you compared YAT's strategic plan objectives against the current state and identifies gaps, improvement opportunities, and proposed changes"],
     ['A4 - Options Considered and Evaluation — you defined the LMS workload, considers both options (in-house renewal vs cloud migration to AWS), names and justifies the evaluation method, and produces an initial impact + difficulty assessment for both options'],
-    ['A5 - Appendix 1 Cost-Benefit Analysis — you completed the 5-year CBA covering both options with line-item detail in Appendix 1; assumptions stated; year-by-year projections; comparison summary; avoided-downtime benefit; Year-1 cash-flow comparison; sensitivity analysis. AWS Pricing Calculator export attached in Appendix 3. Numbers reconcile between Appendix 1 detail, summary, and Executive Summary '],
+    ['A5 - Appendix 1 Cost-Benefit Analysis — you completed the 5-year CBA covering both options with line-item detail in Appendix 1; assumptions stated; year-by-year projections; comparison summary; avoided-downtime benefit. AWS Pricing Calculator export attached in Appendix 3. Numbers reconcile between Appendix 1 detail, summary, and Executive Summary '],
     ['A6 - Risk and Impact Assessment — you populated intangibles comparison for both options (honest about trade-offs of the recommended option) and produces a risk register for the recommended option '],
     ['A7 - Recommendation — you state a clear recommendation with rationale connecting back to the CBA findings, intangibles, and risk register'],
-    ["A8 - Action Plan — you developed a phased action plan with prioritised changes, implementation schedule with dependencies, standards / targets / success metrics, implementation methods, alignment with YAT's change-management procedure, and an action-plan risk register"],
+    ["A8 - Action Plan — you developed a phased action plan with prioritised changes, implementation schedule with dependencies, standards / targets / success metrics, implementation methods, and alignment with YAT's change-management procedure"],
     ['A9 - Next Steps and Decision Requested — you explicitly named what the board is being asked to approve today and what is deferred to later sign-off gates'],
     ['A10 - Executive Summary — one-page summary covering the recommendation, 5-year cost position, top 2–3 risks of the recommended option, and the asked-for decision. Numbers reconcile with A5'],
     ['A11 - Appendix 2 Knowledge Evidence — you answered all 9 KE questions (5 selection-style + 4 demonstration-style) with reference to specific sections of your own Business Case (not generic textbook answers)'],
-    ['A12 - Appendix 3 Supporting Research — AWS Pricing Calculator export attached; external research sources cited with URLs and access dates'],
-    ['A13 - §12 Feedback — completed during/after the Part B presentation event; one row per item of board feedback received, with your response and the resulting action'],
-    ['A14 - Sign-off block — signed by the role-played YAT ICT Manager at the end of the Part B presentation event'],
-    ['A15 - Document quality — Business Case uses plain English, appropriate vocabulary, terminology, diagrams, numerical information, formatting and structure relevant to a professional consulting deliverable for an RTO client'],
+    ['A12 - §11 Feedback — completed during/after the Part B presentation event; one row per item of board feedback received, with your response and the resulting action'],
+    ['A13 - Sign-off block — signed by the role-played YAT ICT Manager at the end of the Part B presentation event'],
+    ['A14 - Document quality — Business Case uses plain English, appropriate vocabulary, terminology, diagrams, numerical information, formatting and structure relevant to a professional consulting deliverable for an RTO client'],
 ]
 
 MARKING_B = [
@@ -104,8 +103,7 @@ MARKING_B = [
     ['B5 – You seek feedback during Q&A and respond substantively to feedback received'],
     ['B6 – You confirm, seek, and respond to feedback with the role-played superior'],
     ['B7 – You use plain English and translate technical terminology when necessary, communicating with the role-played superior to articulate ideas, requirements, and plans '],
-    ['B8 - You elicit information using effective listening and questioning techniques during the Q&A'],
-    ['B9 – You use listening and questioning techniques to articulate complex concepts and requirements using industry language for the intended audience'],
+    ['B8 – You use listening and questioning techniques to articulate complex concepts and requirements using industry language for the intended audience'],
 ]
 
 
