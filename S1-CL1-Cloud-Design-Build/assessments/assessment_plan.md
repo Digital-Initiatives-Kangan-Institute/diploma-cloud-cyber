@@ -59,8 +59,8 @@ build environment. The testable scenario needs are the `SR-*` in §3 + the regis
 | AT | Working title | Mode | Format | Unit focus |
 |----|---|---|---|---|
 | **AT1** | Strategic alignment and migration plan | Individual | Written case-study + report + observation + contextual reflective questions | **ICTICT517** |
-| **AT2** | Cloud foundation build | Individual | Portfolio (Deployment Report) + direct observation + contextual reflective questions | **ICTCLD401** |
-| **AT3** | High-availability design, implementation & project closure | Individual | **A** HA Design · **B** HA Deployment Report (implementation, simulation evidence, feedback + sign-off) + contextual reflective questions | **ICTCLD502** + cross-unit closure |
+| **AT2** | Cloud foundation build | Individual | Guided build workbook — build tasks with evidence captured in place, connectivity + scaling tests, and contextual knowledge questions | **ICTCLD401** |
+| **AT3** | High-availability design, implementation & project closure | Individual | Guided design-and-build workbook — **A** led design questions · **B** a run sheet that builds the student's own Part A answers, with simulation evidence and closure captured in place, and contextual knowledge questions | **ICTCLD502** + cross-unit closure |
 
 The YAT case study carries through all three; KE is embedded contextually in each AT (no standalone
 questioning task). **Why three not five:** folding the closure work into AT3 (its natural terminal phase) and
@@ -75,22 +75,73 @@ to QA reviewers.
 - **Scenario requirements:** SR-CL1-02 · SR-CL1-03 · SR-CL1-04 · SR-CL1-06
 
 ### AT2 — Cloud foundation build
-- **Mode / Format / Unit focus:** Individual; build the YAT cloud foundation (IAM, VPC/subnets, EC2 + web
-  app, RDS, multi-layer app with target group / load balancer / launch template / autoscaling), documented
-  as a Deployment Report; contextual reflective questions; ICTCLD401.
-- **UoC coverage:** [ICTCLD401 PC 1.1–1.7, 2.1–2.6, 3.1, 3.2, 4.3] · [ICTCLD401 PE 1–3] · [ICTCLD401 KE 5–10] · [ICTCLD401 FS Learning] · [ICTCLD401 FS Planning and organising] · [ICTCLD401 FS Reading] · [ICTCLD401 FS Self-management skills] · [ICTCLD401 FS Writing] · [ICTCLD502 PC 1.3, 4.1–4.3]
+- **Mode / Format / Unit focus:** Individual; build the YAT cloud foundation (IAM, VPC/subnets, EC2 +
+  launch template, target group / load balancer / autoscaling, RDS, S3, security groups, baseline
+  monitoring) to the supplied design, then test it; ICTCLD401.
+- **Form of the instrument — a guided build workbook, not a report.** Nearly every item AT2 carries is
+  a *create / configure / deploy / test* verb, so the instrument is a sequence of build tasks rather
+  than a written deliverable. Each task states the job and the settings it must be built to, and
+  carries the evidence slot for it. The prose an earlier draft asked for — a build narrative
+  describing what had just been built and screenshotted — evidenced nothing the screenshot did not.
+  - **Settings are given; navigation is not.** The student is handed an approved design and builds to
+    it, as an implementer would. What is withheld is how to find things in the console, and anything
+    the unit asks them to decide.
+  - **Evidence sits with the task that produces it**, never in an appendix of collected captures.
+  - **Two decision points, both inline.** Only `[ICTCLD401 PC 1.1]` (*discuss and compare*) and
+    `[ICTCLD401 PC 1.3]` (*select best*) carry decision verbs. They are exercised at the two tasks
+    where the choice is actually made — the application-tier instance type, and the database instance
+    class and storage size — each asking for the options considered, the choice, and why. Every other
+    task is implement-to-spec.
+  - **Tests are instrumented**: what the test demonstrates, the steps to run it, and the capture it
+    produces. Every test must be runnable from the console with what the design tells the student to
+    build — no VPN, no jump host, and nothing to install locally.
+  - **Knowledge questions are the only sustained writing**, and carry `[ICTCLD401 FS Writing]`.
+- **Sections:** build tasks (with the two inline decisions) → tests → handover and filing → knowledge
+  questions.
+- **UoC coverage:** [ICTCLD401 PC 1.1–1.7, 2.1–2.6, 3.1, 3.2, 4.3] · [ICTCLD401 PE 1–3] · [ICTCLD401 KE 5–10] · [ICTCLD401 FS Reading] · [ICTCLD401 FS Writing] · [ICTCLD502 PC 1.3, 4.1–4.3]
 - **Scenario requirements:** SR-CL1-01 · SR-CL1-04 · SR-CL1-05 · SR-CL1-07
 
 ### AT3 — High-availability design, implementation & project closure
-- **Mode / Format / Unit focus:** Individual; two written deliverables submitted together, with no
-  presentation or observation event. **Part A — HA Design:** the HA-equivalent architecture superseding the
-  AT2 baseline (SPOFs, recovery objectives, multi-AZ database, cross-AZ compute and load balancing,
-  monitoring, implementation sequencing, simulation plan). **Part B — HA Deployment Report:** the
-  implementation during a simulated maintenance window, the failure and resize simulation outcomes,
-  availability measured across the window, any post-simulation adjustments, and engagement closure — the
-  feedback record and the final sign-off block completed within the report, filed per YAT's records
-  procedures. Contextual reflective questions; ICTCLD502 + cross-unit closure.
-- **UoC coverage:** [ICTCLD502 PC 1.1, 2.1–2.5, 3.1–3.5, 4.1–4.6, 5.1–5.3] · [ICTCLD502 PE 1–5] · [ICTCLD502 KE 4–9] · [ICTCLD502 FS Problem solving] · [ICTCLD502 FS Reading] · [ICTCLD502 FS Self-management] · [ICTCLD401 PC 4.1, 4.3] · [ICTCLD401 FS Learning] · [ICTCLD401 FS Planning and organising] · [ICTCLD401 FS Reading] · [ICTCLD401 FS Self-management skills] · [ICTCLD401 FS Writing]
+- **Mode / Format / Unit focus:** Individual; one guided workbook in two parts, submitted as a single
+  document, with no presentation or observation event. **Part A — design:** the workbook opens with the
+  current architecture supplied to the student (description, diagram, key-facts table), then leads them
+  question by question to design its HA equivalent — availability-zone placement, cross-AZ compute,
+  Multi-AZ database, cross-AZ load balancing, HA-tuned monitoring, the single points of failure each
+  change removes, the recovery objectives the design achieves, the order the changes will be applied in,
+  and the simulations that will verify them. **Part B — implementation:** a run sheet. Task 1 deploys the
+  supplied baseline lab-pack to reach the starting state Part A describes; each task after it builds one
+  part of the student's own design, carrying forward the settings they decided in the numbered Part A
+  questions. Then the failure and resize simulations, availability measured across the maintenance
+  window, any post-simulation adjustments, and engagement closure — the student hands the completed work
+  to the YAT ICT Manager (played by the assessor), records the feedback and the final sign-off in place,
+  and files the documentation per YAT's records procedures. Contextual reflective questions; ICTCLD502 +
+  cross-unit closure.
+- **Form of the instrument — a guided workbook, not two reports.** ICTCLD502 asks the student to design
+  an HA architecture *and* implement it, inside one assessment. Left as two open written deliverables,
+  the design work is where students stall, and a student whose design is unsound then has nothing sound
+  to build. The workbook removes the stall without removing the thinking: it supplies the structure of
+  the design task — the order of the questions — and nothing else.
+  - **Questions are given; answers are not.** This is the inverse of AT2, and the distinction is the
+    basis of AT3's evidence. AT2 hands the student an approved design and withholds console navigation.
+    AT3 hands the student a sequence of questions and withholds every finding and every design decision —
+    which zone, what capacity, which threshold, and above all which components are single points of
+    failure. A step may say *"work through each tier below and record whether its failure would take the
+    LMS down"*; it may not say *"the database is a single point of failure — fix it"*. Two performance
+    criteria (`[ICTCLD502 PC 2.2]`, `[ICTCLD502 PC 3.2]`) turn on the student doing the identifying.
+  - **Part B builds Part A.** Each implementation task names the Part A question whose answer it uses,
+    and the student copies that answer into the task before building to it. This is what keeps
+    `[ICTCLD502 PE 1]` and `[ICTCLD502 PE 2]` intact: both require the same candidate to design **and**
+    implement the same infrastructure, so the design and the build cannot be separate artefacts produced
+    by separate hands. It also makes the chain auditable — one thread runs from a Part A answer, through
+    the Part B task, to the capture it produces.
+  - **The starting state is deployed, not assumed.** Part B task 1 deploys the baseline lab-pack, putting
+    every student at the architecture Part A describes regardless of what they personally built in AT2.
+  - **Evidence sits with the task that produces it**, never in an appendix of collected captures.
+  - **Knowledge questions are the only sustained writing**, and carry `[ICTCLD401 FS Writing]`.
+- **Sections:** supplied current architecture → Part A design questions → Part B run sheet (lab-pack
+  deploy → build tasks → simulations → availability measurement → adjustments) → closure and filing →
+  reflections → knowledge questions.
+- **UoC coverage:** [ICTCLD502 PC 1.1, 2.1–2.5, 3.1–3.5, 4.1–4.6, 5.1–5.3] · [ICTCLD502 PE 1–5] · [ICTCLD502 KE 4–9] · [ICTCLD502 FS Problem solving] · [ICTCLD502 FS Reading] · [ICTCLD502 FS Self-management] · [ICTCLD401 PC 4.3] · [ICTCLD401 FS Learning] · [ICTCLD401 FS Planning and organising] · [ICTCLD401 FS Reading] · [ICTCLD401 FS Self-management skills] · [ICTCLD401 FS Writing]
 - **Scenario requirements:** SR-CL1-01 · SR-CL1-03 · SR-CL1-04 · SR-CL1-05 · SR-CL1-07 · SR-CL1-08
 
 ---
@@ -117,12 +168,14 @@ the AT3 starting state.
 RTO/RPO, HA cloud design + feedback + sign-off, HA implementation + failure simulation + resize, multi-AZ
 database), rebranded Llamazonia → YAT-LMS; Activity 1's boss-interview requirements → YAT's documented ICT
 goals; Activity 2's diagram → YAT's on-prem environment; Activity 4/5 harden + convert the AT2 environment.
-Closure reuses the 502 AT2 feedback/sign-off pattern, carried inside the HA Deployment Report as its
-feedback record and final sign-off block, filed per YAT's records procedures.
+The five activities supply the substance; the workbook supplies the order — each activity becomes a run of
+numbered questions or tasks rather than a section of a written deliverable. Closure reuses the 502 AT2
+feedback/sign-off pattern, carried inside the workbook's closure section as its feedback record and final
+sign-off, filed per YAT's records procedures.
 
 **Author basis:** brownfield — the three units have standalone source assessments (audited; the YAT case
 study is the heaviest reuse asset). New authoring is the contextual-question sets, the inter-AT bridges,
-and the AT3 HA Design deliverable.
+and AT3's design questions and run sheet.
 
 ---
 
@@ -131,7 +184,7 @@ and the AT3 HA Design deliverable.
 The per-AT **UoC coverage** in §3 is the authoritative item→AT mapping; this is the rollup proof that
 nothing is unassessed (across `consolidated_uoc.md`, 126 items: 106 PC/FS/PE/KE + 20 AC).
 
-- **PC** (52) — 401 in AT2 (`1.1–3.2, 4.3`) + AT1/AT3 (`1.8, 4.1, 4.2`); 502 split AT1 (`1.2, 5.2`) / AT2
+- **PC** (52) — 401 in AT2 (`1.1–3.2, 4.3`) + AT1 (`1.8, 4.1, 4.2`) + AT3 (`4.3`); 502 split AT1 (`1.2, 5.2`) / AT2
   (`1.3, 4.1–4.3`) / AT3 (`1.1, 2.1–5.3`); 517 in AT1 (`1.1–3.3`).
 - **PE** (14) — 401 AT2 (`1–3`); 502 AT3 (`1–5`); 517 AT1 (`1–6`, the sub-bullets of the single PE).
 - **KE** (24) — 401 AT1 (`1–4, 11`) + AT2 (`5–10`); 502 AT1 (`1–3`) + AT3 (`4–9`); 517 AT1 (`1–4`).
@@ -155,7 +208,7 @@ Condition each environmental requirement discharges.
 | **SR-CL1-02** | The YAT College case study — strategic plan, ICT goals, current ICT environment description, on-prem network diagram, stakeholder hierarchy | AT1, AT2, AT3 | [ICTICT517 AC 1] · [ICTICT517 AC 2] · [ICTICT517 AC 3] · [ICTICT517 AC 5] |
 | **SR-CL1-03** | A superior/stakeholder (the MTS consultant / YAT ICT manager) to role-play the AT1 presentation + the AT3 closure sign-off | AT1, AT3 | [ICTICT517 AC 4] |
 | **SR-CL1-04** | Requirements + data sources to determine user/business requirements (incl. user-access + business protocols) | AT1, AT2, AT3 | [ICTCLD401 AC 4] · [ICTCLD502 AC 3] · [ICTCLD502 AC 5] · [ICTCLD502 AC 8] |
-| **SR-CL1-05** | A deployable app-tier web endpoint — a placeholder page served by the app tier (provisioned by the AT3 baseline lab-pack) — sufficient to demonstrate the ALB, health checks and HA failover. The LMS application itself is **out of scope** (YAT in-house; not student-deployed in AT2/AT3) | AT2, AT3 | — |
+| **SR-CL1-05** | A deployable app-tier web endpoint — a placeholder page served by the app tier — sufficient to demonstrate the ALB, health checks and HA failover. In **AT2** the student stands it up as part of the build, from the web-server install the supplied design specifies in the launch template; without it the target group has nothing healthy to report and neither ALB test can pass. In **AT3** it arrives pre-built in the baseline lab-pack. The LMS application itself is **out of scope** (YAT in-house; not student-deployed in AT2/AT3) | AT2, AT3 | — |
 | **SR-CL1-06** | The supplied CBA and Draft-Plan templates (ICTICT517) | AT1 | — |
 | **SR-CL1-07** | The artefact thread — the AT1 action plan is the AT2 brief; the AT2-built environment is the AT3 starting state | AT2, AT3 | — |
 | **SR-CL1-08** | YAT's documented change-management procedure as the formal closure process (change request, risk assessment, ICT-manager sign-off) | AT3 | — |
@@ -164,13 +217,17 @@ Condition each environmental requirement discharges.
 
 ## 7. Worklist
 
-None outstanding — all three ATs are authored, generated and approved.
+- **AT3 — re-author as the guided workbook described in §3.** The instrument, its criteria and its
+  benchmark are all anchored to the two-report shape and re-anchor to numbered questions and tasks. The
+  baseline lab-pack is reviewed as part of this, since Part B task 1 deploys it.
 
 ---
 
 ## 8. Open questions / TBDs
 
-None outstanding.
+- `[TBD — needs discussion: the baseline lab-pack's specification.]` Whether AT3's starting state stays
+  exactly what AT2 builds, or is re-specified to suit the run sheet. It needs a pass either way — it
+  currently creates an `AlarmAlb5xx` alarm the supplied design no longer specifies.
 
 ---
 
