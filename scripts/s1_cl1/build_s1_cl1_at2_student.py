@@ -46,8 +46,8 @@ TASKS = [
     ("Following the YAT board's approval of the action plan in your AT1 Business Case engagement, you took a period of planned annual leave. During that time MTS Senior Architecture worked with YAT IT to translate the approved direction into a detailed technical design — the YAT LMS Cloud Architecture — Baseline Design — which has been approved by Pat Lin and Sam Walker and is now your build specification.", 'p'),
     ('You have returned to MTS to lead the foundation-build phase of the engagement. Your task has two parts that combine into a single deliverable:', 'p'),
     ('Implement the supplied AWS architecture for the YAT LMS migration foundation build, in the AWS Academy lab environment authorised for this engagement.', 'b'),
-    ('Produce a Deployment Report documenting your build, using the YAT-provided Deployment Report template. The report includes Configuration Decision justifications (where the supplied design left choices to you), testing outcomes, an operational handover for YAT IT, written responses to six Knowledge Evidence questions about your own build, and four appendices of evidence (build screenshots, configuration exports, test results, reflections).', 'b'),
-    ("The Deployment Report is your single submitted deliverable. All build evidence (screenshots, configuration exports, test results) is captured in the report's appendices — there is no separate portfolio submission.", 'p'),
+    ('Produce a Deployment Report documenting your build, using the YAT-provided Deployment Report template. The report includes Configuration Decision justifications (where the supplied design left choices to you), testing outcomes, an operational handover for YAT IT, written responses to six Knowledge Evidence questions about your own build, and three appendices of evidence (build screenshots, test results, reflections).', 'b'),
+    ("The Deployment Report is your single submitted deliverable. All build evidence (screenshots, test results) is captured in the report's appendices — there is no separate portfolio submission.", 'p'),
     ('This phase is the foundation build only. The architecture is intentionally non-HA at this stage — HA hardening is the next phase (AT3) and is out of scope here.', 'p'),
 ]
 
@@ -70,7 +70,7 @@ RESOURCES = [
 CRITERIA = [
     ('To receive a Satisfactory result for AT2 you must:', 'p'),
     ('Achieve Satisfactory on every criterion in the Assessment Criteria table (below)', 'b'),
-    ('Submit a completed Deployment Report (.docx) with every section and every appendix populated, using the YAT-provided Deployment Report template', 'b'),
+    ('Submit a completed Deployment Report (.docx) with every section you are asked to write and every appendix populated, using the YAT-provided Deployment Report template', 'b'),
 ]
 
 RESULTS = [
@@ -78,21 +78,19 @@ RESULTS = [
 ]
 
 SUBMIT = [
-    ('Submit the completed Deployment Report (.docx) to the LMS by the due date. The report includes all four appendices populated; no separate files are submitted.', 'p'),
+    ('Submit the completed Deployment Report (.docx) to the LMS by the due date. The report includes all three appendices populated; no separate files are submitted.', 'p'),
 ]
 
 # Single-part marking criteria (A1-A13; second person; no UoC traceability line).
 MARKING = [
-    'A1 - §1 Executive Summary — you produced a concise (≤ 1 page) summary of what was delivered, with explicit acknowledgement that HA hardening is deferred to AT3, and numbers/components reconcile with the body of the report',
-    'A2 - §4.1 + §4.2 + §4.7 Build narrative — Foundation tier (IAM, network, security) — you described the IAM model, network topology, and security-group model, with cross-references to Appendix A screenshots and Appendix B configuration exports',
+    'A2 - §4.1 + §4.2 + §4.7 Build narrative — Foundation tier (IAM, network, security) — you described the IAM model, network topology, and security-group model, and identified the shared security responsibility outcome of your build, with cross-references to the Appendix A screenshots',
     'A3 - §4.3 + §4.4 + §4.5 + §4.6 Build narrative — Workload tier (compute, load balancing, database, storage) — you described the EC2 + ALB + ASG, the RDS managed database, and the EBS + S3 storage',
-    'A4 - §4.8 Build narrative — Operability (autoscaling configuration, baseline monitoring) — you described the ASG scaling policy and the baseline CloudWatch alarms; you identified the shared security responsibility outcome of your build',
+    'A4 - §4.8 Build narrative — Operability (autoscaling configuration, baseline monitoring) — you described the ASG scaling policy and the baseline CloudWatch alarms',
     'A5 - §5 Configuration Decisions — you justified all 8 decision points (C1–C8 from the supplied design §14) with rationale tied to the YAT LMS workload',
     'A6 - §6 Testing and Validation — you ran the four required test categories (connectivity, autoscaling, database connectivity, end-to-end smoke); results are documented with cross-reference to Appendix C evidence',
     "A7 - §7 Operational Handover — you documented access information for YAT IT, named known limitations carried into AT3, and confirmed filing of the report per YAT's documented records procedures",
     'A8 - §8 Knowledge Evidence Responses — you answered all 6 KE questions with specific reference to your own build, not generic textbook answers',
     "A9 - Appendix A Build Evidence — all 17 named screenshots (A1–A17) are present, the AWS region indicator is visible, and the named items are visible per the template's requirements",
-    'A10 - Appendix B Configuration Exports — all 7 named exports (B1–B7) are present, exported from the actual deployed environment',
     'A11 - Appendix C Test Evidence — test outcomes are documented with supporting evidence; outcomes are consistent with §6',
     'A12 - Appendix D Reflections — two honest reflective responses are present, both specific to your own build experience',
     'A13 - Document quality — the Deployment Report uses plain English, appropriate technical vocabulary, structure, formatting, and depth relevant to a professional consulting deliverable for an RTO client',

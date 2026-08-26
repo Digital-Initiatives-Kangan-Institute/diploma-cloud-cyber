@@ -7,9 +7,11 @@ exactly and only the sections that deployment requires. Split from the generic s
 
 What a foundation build does not have, and so is not in here: a maintenance window (§3.1),
 cross-Region backup (§4.9), failure/resize simulation, availability measurement and the findings
-and adjustments that follow from them (§6.5-§6.9), and a stakeholder feedback record (§7.5).
-Nothing carries an "Applicability / mark Not applicable" note — every section in this template is
-a section the report needs.
+and adjustments that follow from them (§6.5-§6.9), a stakeholder feedback record, a sign-off
+block, and an appendix of configuration exports. The feedback record and sign-off go because no AT2
+marking criterion looks at them; the exports go because the Appendix A screenshots already evidence
+the same performance item. Nothing carries an "Applicability / mark Not applicable" note — every
+section in this template is a section the report needs.
 
 [TBD - needs discussion: the Appendix A / B / C evidence lists. The AT2 marking criteria name
 counts (17 screenshots, 7 exports, 6 test-evidence items) that no artefact enumerates and that no
@@ -37,6 +39,81 @@ from docx import Document  # noqa: E402
 from docx.enum.section import WD_SECTION  # noqa: E402
 from docx.enum.table import WD_TABLE_ALIGNMENT  # noqa: E402
 from docx.shared import Pt, Cm, RGBColor  # noqa: E402
+
+# Course-side note styling — the same violet convention the Business Case template uses for
+# anything addressed to the student rather than to the reader of the finished report.
+NOTE = "6A3EA1"
+NOTE_PT = 9.0
+
+SUPPLIED_NOTE = ("Supplied — this section is already written for you. It is part of your report: "
+                 "leave the text below as it is. Delete this note before you submit.")
+
+# §2 and §3 are the same for every consultant on this engagement — the engagement, the
+# stakeholders, the predecessor work and the scope all come from the approved design. They are
+# supplied rather than written, so nothing here is student work.
+ENGAGEMENT_CONTEXT = [
+    "This deployment is the foundation-build phase of the YAT College Learning Management System "
+    "(LMS) migration to AWS, carried out by MTS under the engagement agreed following the LMS "
+    "Replacement Business Case. The board approved the action plan set out in that business case, "
+    "and this phase implements the first stage of it.",
+    "MTS Senior Architecture and YAT IT subsequently produced the YAT LMS Cloud Architecture — "
+    "Baseline Design, approved by Pat Lin (MTS Senior Consultant) and Sam Walker (YAT IT Manager). "
+    "That design is the specification this deployment implements; where it leaves a decision to the "
+    "implementer, the decision and its rationale are recorded in §5.",
+    "On completion the infrastructure is handed to YAT in-house IT, who are responsible for "
+    "installing the LMS application, migrating the database, and running the cutover. Hardening the "
+    "environment for high availability is a separate, later phase.",
+]
+
+SCOPE_IN = [
+    "Identity and access management — groups, users, MFA enforcement and instance roles",
+    "Network topology — the VPC, its subnets, gateways and route tables",
+    "Compute — the launch template, EC2 instances and the Auto Scaling group",
+    "Load balancing — the application load balancer, its target group and listener",
+    "Database — the managed relational database instance",
+    "Storage — the EBS volumes and S3 buckets, with encryption and public-access settings",
+    "Security — the tiered security-group model and encryption in transit and at rest",
+    "Monitoring — the baseline alarm set",
+]
+
+SCOPE_DEFERRED = [
+    "Multi-availability-zone database deployment",
+    "Resilience across availability zones",
+    "Failure and resize simulation, and the availability measurement that goes with it",
+    "Cross-Region backup and replication",
+    "Disaster-recovery runbooks",
+    "The high-availability-tuned monitoring set",
+]
+
+SCOPE_EXCLUDED = [
+    "LMS application installation on the infrastructure built here",
+    "Migration of the existing database content",
+    "Cutover from the legacy environment, and the change management around it",
+    "Ongoing application support after handover",
+]
+
+
+def add_supplied_note(doc):
+    """The violet course-side marker that heads a supplied (pre-written) section."""
+    p = doc.add_paragraph()
+    p.paragraph_format.space_after = Pt(6)
+    r = p.add_run(SUPPLIED_NOTE)
+    r.italic = True
+    r.font.size = Pt(NOTE_PT)
+    r.font.color.rgb = RGBColor.from_string(NOTE)
+
+
+def add_supplied_body(doc, text):
+    """A paragraph of supplied report content — normal body styling, not guidance styling."""
+    p = doc.add_paragraph()
+    p.add_run(text).font.size = Pt(10.5)
+    return p
+
+
+def add_supplied_bullets(doc, items):
+    for item in items:
+        p = doc.add_paragraph(style="List Bullet")
+        p.add_run(item).font.size = Pt(10.5)
 
 
 def build(path):
@@ -87,10 +164,12 @@ def build(path):
     doc.add_section(WD_SECTION.NEW_PAGE); build_header_footer(doc.sections[-1])
     doc.add_paragraph("How to use this template", style="Heading 1")
     add_convention_box(doc, [
-        ("Complete every section.", "Every section in this template is one the report needs — "
-         "there is nothing here to skip."),
+        ("Complete every section that asks you for a response.", "Every section in this template "
+         "is one the report needs — there is nothing here to skip."),
+        ("Two sections are supplied.", "§2 and §3 are already written for you and are part of your "
+         "report. Leave them as they are, and delete the violet note above each before you submit."),
         ("Cross-reference your evidence.", "The build narrative and testing sections reference the "
-         "screenshots and configuration exports captured in the appendices."),
+         "screenshots and test evidence captured in the appendices."),
     ])
     doc.add_paragraph("Contents", style="Heading 1")
     add_field(doc.add_paragraph(), 'TOC \\o "1-3" \\h \\z \\u',
@@ -101,28 +180,23 @@ def build(path):
     h1 = lambda t: doc.add_paragraph(t, style="Heading 1")
     h3 = lambda t: doc.add_paragraph(t, style="Heading 3")
 
-    h1("1. Executive Summary")
-    add_guidance_text(doc, "Write this last. A ≤ 1-page summary the reader sees first: what was deployed; the "
-                     "region/AZ footprint; the 2–3 highlights; and any limitations or items deferred to a "
-                     "later phase. ~250–400 words.")
-    add_response_placeholder(doc)
-
     h1("2. Engagement Context")
-    add_guidance_text(doc, "Brief context for the reader (≤ ½ page): the strategic/prior work this deployment "
-                     "builds on (the approved business case and the design being implemented), your role, "
-                     "and the scope hand-off to any later phase.")
-    add_response_placeholder(doc)
+    add_supplied_note(doc)
+    for para in ENGAGEMENT_CONTEXT:
+        add_supplied_body(doc, para)
 
     h1("3. Scope of Deployment")
-    add_guidance_text(doc, "What is included in this deployment and what is deferred (≤ ½ page). Restate from the "
-                     "approved design in your own words: the in-scope components, and what is out of scope / "
-                     "deferred to a later phase.")
-    add_response_placeholder(doc)
+    add_supplied_note(doc)
+    add_supplied_body(doc, "In scope of this deployment:")
+    add_supplied_bullets(doc, SCOPE_IN)
+    add_supplied_body(doc, "Deferred to the follow-on high-availability phase:")
+    add_supplied_bullets(doc, SCOPE_DEFERRED)
+    add_supplied_body(doc, "Outside the MTS engagement entirely — YAT in-house IT's responsibility:")
+    add_supplied_bullets(doc, SCOPE_EXCLUDED)
 
     h1("4. Build Narrative")
     add_guidance_text(doc, "A layer-by-layer account of what was built. For each layer, write a short narrative of "
-                     "what you stood up, and cross-reference the Appendix A screenshots and Appendix B "
-                     "configuration exports.")
+                     "what you stood up, and cross-reference the Appendix A screenshots.")
     for n, title, hint in [
         ("4.1", "Identity and access management (IAM)", "account access, groups/users/roles, MFA, instance profiles"),
         ("4.2", "Network topology", "VPC, subnets, gateways, route tables"),
@@ -134,7 +208,7 @@ def build(path):
         ("4.8", "Monitoring", "the baseline CloudWatch alarms and thresholds"),
     ]:
         h3(f"{n} {title}")
-        add_guidance_text(doc, f"Cover: {hint}. Cross-reference the relevant Appendix A screenshots and Appendix B exports.")
+        add_guidance_text(doc, f"Cover: {hint}. Cross-reference the relevant Appendix A screenshots.")
         add_response_placeholder(doc)
 
     h1("5. Configuration Decisions")
@@ -190,16 +264,8 @@ def build(path):
     h3("7.4 Documentation filing")
     add_template_table(doc, ["Item", "Filed in", "Reference"],
              [["This Deployment Report", "[ YAT ICT shared documentation ]", "[ ref ]"],
-              ["Configuration exports (Appendix B)", "[ … ]", "[ ref ]"],
               ["Test evidence (Appendix C)", "[ … ]", "[ ref ]"]],
              widths=[6.5, 5.0, 4.0])
-    h3("7.5 Sign-off")
-    add_template_table(doc, ["Role", "Name", "Date", "Signature"],
-             [["Prepared by", "[ … ]", "", ""],
-              ["Reviewed by", "[ … ]", "", ""],
-              ["Approved by (acceptance authority)", "[ … ]", "", ""]],
-             widths=[5.5, 4.5, 2.5, 3.0])
-
     h1("8. Knowledge Evidence Responses")
     for text, placeholder in KE_AT2:
         add_guidance_text(doc, text)
@@ -219,11 +285,6 @@ def build(path):
               ["A6", "CloudWatch alarms / dashboard", "[ the baseline alarms ]"],
               ["…", "[ add as your deployment requires ]", "[ … ]"]],
              widths=[1.0, 5.5, 9.0])
-    h1("Appendix B — Configuration exports")
-    add_guidance_text(doc, "Export each configuration (AWS CLI or console) and attach as a code block or file. "
-                     "Examples: IAM policies; security-group rules; VPC/subnet/route tables; launch template "
-                     "+ ASG; ALB + target groups; RDS instance; S3 bucket policy/encryption; CloudWatch alarms.")
-    add_response_placeholder(doc, "[ Configuration exports ]")
     h1("Appendix C — Test evidence")
     add_guidance_text(doc, "Attach the evidence supporting the results in §6 — screenshots, terminal/log excerpts "
                      "and metric graphs.")
