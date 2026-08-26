@@ -4,8 +4,11 @@
 ONE generic, in-world Deployment Report template — the superset that serves any
 deployment, from a greenfield foundation build to a full HA hardening. Built from the
 HA report outline (the larger of the two), with AT2's foundation-only sections folded
-back in, and assessment-only scaffolding (KE Q&A, reflections, student ID, UoC tags)
-stripped — the same generic-template principle applied to the Business Case.
+back in — the same generic-template principle applied to the Business Case.
+
+The base variant additionally carries the assessment-scoped sections: §8 Knowledge
+Evidence Responses and Appendix D Reflections, in one AT2-scoped and one AT3-scoped copy
+each, the student deleting the three that are not theirs.
 
 Two scoped variants from ONE definition, selected by the `serverless` flag:
   * serverless=False — the base template (EC2/RDS infrastructure build/HA hardening). This
@@ -36,6 +39,9 @@ from docx import Document  # noqa: E402
 from docx.enum.section import WD_SECTION  # noqa: E402
 from docx.enum.table import WD_TABLE_ALIGNMENT  # noqa: E402
 from docx.shared import Pt, Cm, RGBColor  # noqa: E402
+
+#: Colour of the "delete this section" note on the assessment-scoped sections.
+NOTE_RED = "EE0000"
 
 
 def build(path, serverless=False):
@@ -174,6 +180,11 @@ def build(path, serverless=False):
               ["Approved by (acceptance authority)", "[ … ]", "", ""]],
              widths=[5.5, 4.5, 2.5, 3.0])
 
+    # ---- §8 Knowledge Evidence — assessment-scoped, base template only ----
+    if not serverless:
+        _ke_responses(doc, h1, "AT2", KE_AT2)
+        _ke_responses(doc, h1, "AT3", KE_AT3)
+
     # ---- APPENDICES ----
     doc.add_section(WD_SECTION.NEW_PAGE); build_header_footer(doc.sections[-1])
     if serverless:
@@ -220,6 +231,11 @@ def build(path, serverless=False):
                          "metric graphs, and (for HA work) failure/resize simulation captures and the computed "
                          "availability over the window.")
         add_response_placeholder(doc, "[ Test and simulation evidence ]")
+
+    # ---- Appendix D Reflections — assessment-scoped, base template only ----
+    if not serverless:
+        _reflections(doc, h1, h3, "AT2", *REFLECT_AT2)
+        _reflections(doc, h1, h3, "AT3", *REFLECT_AT3)
 
     h1("Document control")
     add_template_table(doc, ["Field", "Value"],
@@ -407,6 +423,98 @@ def _serverless_body(doc, h1, h3):
              [["[ … ]", "[ … ]", "[ … ]"],
               ["[ … ]", "[ … ]", "[ … ]"]],
              widths=[5.2, 5.4, 5.4])
+
+
+# ===================== Assessment-scoped sections (base template only) =====================
+# §8 Knowledge Evidence and Appendix D Reflections exist in one AT2-scoped and one AT3-scoped
+# copy each; the student deletes the three that are not theirs.
+
+KE_AT2 = [
+    ("Q1. Identify the compute, networking and scaling services you deployed (e.g. EC2, ALB, Auto "
+     "Scaling Group), and for each explain the feature it provides and how that choice supports the "
+     "YAT LMS specifically (its load pattern, availability needs).", "[ Write your response here ]"),
+    ("Q2. In your build: (a) why did you use a managed service (RDS) rather than self-hosting the "
+     "database? (b) why did you use EBS and S3 together — what does each store and why? (c) why did "
+     "you scale horizontally (ASG) rather than vertically, and what trade-off did that involve?", None),
+    ("Q3. Using your own environment, name two responsibilities that remain YAT's and one that "
+     "shifted to AWS under the shared-responsibility model, and say why each falls where it does.", None),
+    ("Q4. Pick one IAM group you created, describe the permissions you gave it and the job function "
+     "it serves, and explain why its permissions differ from another group in your build.", None),
+    ("Q5. Pick one security group you configured, state its rules, explain why you restricted traffic "
+     "that way, and describe the risk to YAT if that restriction were removed.", None),
+    ("Q6. Identify two points in your deployment where DNS resolution happens (e.g. users reaching "
+     "the LMS via the ALB; EC2 reaching the RDS endpoint), and explain what would fail for YAT if "
+     "each were misconfigured", None),
+]
+
+KE_AT3 = [
+    ("Q1. Choose at least three HA concepts relevant to your design (fault tolerance, SPOFs, RPO/RTO, "
+     "SLAs, MTTF/MTTR/MTBF, vertical vs horizontal scaling). For each: define it in your own words, "
+     "name where it appears in your work, and say how it shaped an implementation choice.", None),
+    ("Q2. From your HA testing: (a) a technique you used to avoid creating a single point of failure "
+     "while testing, and (b) a debugging technique you used or would use to isolate the cause of an "
+     "unexpected result.", None),
+    ("Q3. Which tools did you use to measure the availability impact of a failure? Show how you "
+     "computed the impact for one specific simulation (with your timing data), and name one "
+     "limitation of your method.", None),
+    ("Q4. For the services in your solution (e.g. S3, RDS, ALB), explain which fault tolerance is "
+     "built in by AWS and which you had to design, being precise about where the responsibility line "
+     "falls for each.", None),
+    ("Q5. Explain how load balancing and autoscaling work together to deliver availability beyond "
+     "what either provides alone, then point to a specific failure simulation in your own work that "
+     "this combination made survivable.", None),
+    ("Q6. Name one HA-specific monitoring metric you configured. State what it measures, the "
+     "threshold you set and why, and the failure mode it would detect.", None),
+]
+
+REFLECT_AT2 = (
+    'Reflect honestly on your own build — your judgement and experience, not a summary of what you '
+    'built. Honest "here\'s what I\'d change" earns more credit than "everything went perfectly."',
+    [("R1 — Lessons applicable beyond this build.",
+      "Describe one lesson from this deployment that you would carry into future cloud work. Say how "
+      "you arrived at it — what happened during your build that taught it to you — and why it would "
+      "apply beyond this project."),
+     ("R2 — Decisions in hindsight.",
+      "Looking back over the choices you made, name one decision you'd make the same way again (and "
+      "why it proved right), and one decision you would revise (what you'd do differently and why).")],
+)
+
+REFLECT_AT3 = (
+    "Reflect honestly on your own HA work — your judgement and experience, not a summary of what you built.",
+    [("R1 — Decisions in hindsight",
+      "Name one decision in your HA work you'd make the same way again (and why it proved right), and "
+      "one you would revise (what you'd do differently and why) — both specific to your own HA design "
+      "and implementation."),
+     ("R2 — Problem solving under time pressure.",
+      "Describe a moment during your time-boxed maintenance window where something didn't go as "
+      'expected and you had to decide how to respond — what the problem was, how you diagnosed it, '
+      'and the call you made. (If nothing went wrong, say so honestly and analyse the most likely '
+      '"gotcha" you were watching for and how you\'d have handled it.)')],
+)
+
+
+def _delete_note(doc, at):
+    """The red 'this section is not yours' note under an assessment-scoped heading."""
+    r = doc.add_paragraph().add_run(f"(for assessments other than S1 CL1 {at} delete this section)")
+    r.font.size = Pt(9.5); r.font.color.rgb = RGBColor.from_string(NOTE_RED)
+
+
+def _ke_responses(doc, h1, at, questions):
+    h1(f"8. Knowledge Evidence Responses (S1 CL1 {at} only)")
+    _delete_note(doc, at)
+    for text, placeholder in questions:
+        add_guidance_text(doc, text)
+        add_response_placeholder(doc, placeholder or "[ Write your response here]")
+
+
+def _reflections(doc, h1, h3, at, intro, items):
+    h1(f"Appendix D — Reflections (S1 CL1 {at} only)")
+    _delete_note(doc, at)
+    add_guidance_text(doc, intro)
+    for heading, prompt in items:
+        h3(heading)
+        add_guidance_text(doc, prompt)
+        add_response_placeholder(doc, "[ Write your response here]")
 
 
 if __name__ == "__main__":
