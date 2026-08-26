@@ -249,14 +249,13 @@ def build(path):
         "Operates under the AWS Shared Responsibility Model — AWS secures the cloud; YAT/MTS secure the OS, application, IAM, data and access in the cloud.",
     ])
     h3("4.10 Monitoring (baseline)")
-    add_body_paragraph(doc, "Standard CloudWatch metrics for EC2, RDS, ALB and Auto Scaling. Baseline alarms (HA-tuned "
-                 "alarms come in the follow-on HA design):")
+    add_body_paragraph(doc, "Standard CloudWatch metrics for EC2, RDS, ALB and Auto Scaling. Two baseline alarms — one "
+                 "for the application tier, one for the database tier — establish availability monitoring "
+                 "for the platform. The Auto Scaling policy tracks CPU and creates its own alarms, so no "
+                 "separate CPU alarm is required. HA-tuned alarms come in the follow-on HA design:")
     add_data_table(doc, ["Alarm", "Threshold"],
-              [["EC2 CPU high", "≥ 80% over 10 min"],
-               ["RDS CPU high", "≥ 80% over 10 min"],
-               ["RDS free storage low", "< 15%"],
-               ["ALB 5XX", "> 10 / min"],
-               ["RDS connections high", "> 80% of max_connections"]],
+              [["ALB target health status", "Any unhealthy target"],
+               ["RDS free storage low", "< 15%"]],
               widths=[8.0, 8.0])
     add_bullet_list(doc, ["Logging: VPC flow logs and RDS logs → CloudWatch Logs (90-day retention); ALB access logs → S3; EC2 OS logs via the CloudWatch Agent."])
     h3("4.11 Naming and tagging conventions")
@@ -286,17 +285,19 @@ def build(path):
             "single points of failure, deliberately deferred to the follow-on HA design.")
     h3("4.16 Configuration decisions left to the implementer")
     add_body_paragraph(doc, "The design is opinionated where it matters and silent where the implementer must show "
-                 "judgement. Each decision below is to be made and evidenced in the Deployment Report.")
+                 "judgement. Two sizing decisions are left open. For each, consider at least two "
+                 "candidates, choose one, and record the choice and the reason in the Deployment Report.")
     add_data_table(doc, ["#", "Decision", "Why left open"],
-              [["C1", "EC2 instance type (general-purpose family)", "Size against the LMS workload"],
-               ["C2", "RDS instance class (general-purpose family)", "Size against the workload"],
-               ["C3", "EBS data volume + RDS storage size", "Compute from data footprint + growth"],
-               ["C4", "ASG scaling threshold", "Rationalise against the expected CPU profile"],
-               ["C5", "MTS-Consultants permission boundary", "Adapt to the lab access scope"],
-               ["C6", "Bastion / jump-host design for RDP", "Left to the implementer"],
-               ["C7", "MySQL engine version", "Confirm against the DOODLE compatibility matrix"],
-               ["C8", "DNS strategy + ACM certificate domain", "Confirm the LMS hostname with YAT ICT"]],
+              [["C1", "Application-tier instance type (general-purpose family)",
+                "Size against the LMS concurrent-user load"],
+               ["C2", "Database instance class and storage size (general-purpose family)",
+                "Size against the database workload and its data footprint"]],
               widths=[1.0, 7.0, 8.0])
+    add_body_paragraph(doc, "Everything else is specified by this design: the Auto Scaling policy tracks CPU with a "
+                 "70% scale-out target; the MTS-Consultants permission boundary is limited to the "
+                 "engagement's tagged resources; administrative access to instances is by Session "
+                 "Manager, with no bastion host; the database engine is MySQL 8.0; and the LMS hostname "
+                 "and its certificate are issued by YAT ICT.")
 
     h1("5. Implementation Sequencing")
     na(doc, "this is a greenfield build in a new account, not a change to a running system; build order is "

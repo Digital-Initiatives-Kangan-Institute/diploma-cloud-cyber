@@ -442,9 +442,9 @@ KE_AT2 = [
      "it serves, and explain why its permissions differ from another group in your build.", None),
     ("Q5. Pick one security group you configured, state its rules, explain why you restricted traffic "
      "that way, and describe the risk to YAT if that restriction were removed.", None),
-    ("Q6. Identify two points in your deployment where DNS resolution happens (e.g. users reaching "
-     "the LMS via the ALB; EC2 reaching the RDS endpoint), and explain what would fail for YAT if "
-     "each were misconfigured", None),
+    ("Q6. When a YAT staff member types the LMS address into their browser, DNS resolution has to "
+     "happen before anything else can. Explain what DNS does at that moment in your deployment, and "
+     "what would fail for YAT if it were misconfigured.", None),
 ]
 
 KE_AT3 = [

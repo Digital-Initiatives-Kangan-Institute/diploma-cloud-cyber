@@ -46,7 +46,7 @@ TASKS = [
     ("Following the YAT board's approval of the action plan in your AT1 Business Case engagement, you took a period of planned annual leave. During that time MTS Senior Architecture worked with YAT IT to translate the approved direction into a detailed technical design — the YAT LMS Cloud Architecture — Baseline Design — which has been approved by Pat Lin and Sam Walker and is now your build specification.", 'p'),
     ('You have returned to MTS to lead the foundation-build phase of the engagement. Your task has two parts that combine into a single deliverable:', 'p'),
     ('Implement the supplied AWS architecture for the YAT LMS migration foundation build, in the AWS Academy lab environment authorised for this engagement.', 'b'),
-    ('Produce a Deployment Report documenting your build, using the YAT-provided Deployment Report template. The report includes Configuration Decision justifications (where the supplied design left choices to you), testing outcomes, an operational handover for YAT IT, written responses to six Knowledge Evidence questions about your own build, and three appendices of evidence (build screenshots, test results, reflections).', 'b'),
+    ('Produce a Deployment Report documenting your build, using the YAT-provided Deployment Report template. The report includes Configuration Decision justifications (where the supplied design left choices to you), testing outcomes, an operational handover for YAT IT, written responses to six Knowledge Evidence questions about your own build, and one appendix of evidence (build screenshots).', 'b'),
     ("The Deployment Report is your single submitted deliverable. All build evidence (screenshots, test results) is captured in the report's appendices — there is no separate portfolio submission.", 'p'),
     ('This phase is the foundation build only. The architecture is intentionally non-HA at this stage — HA hardening is the next phase (AT3) and is out of scope here.', 'p'),
 ]
@@ -78,7 +78,7 @@ RESULTS = [
 ]
 
 SUBMIT = [
-    ('Submit the completed Deployment Report (.docx) to the LMS by the due date. The report includes all three appendices populated; no separate files are submitted.', 'p'),
+    ('Submit the completed Deployment Report (.docx) to the LMS by the due date. The report includes the evidence appendix populated; no separate files are submitted.', 'p'),
 ]
 
 # Single-part marking criteria (A1-A13; second person; no UoC traceability line).
@@ -86,13 +86,11 @@ MARKING = [
     'A2 - §4.1 + §4.2 + §4.7 Build narrative — Foundation tier (IAM, network, security) — you described the IAM model, network topology, and security-group model, and identified the shared security responsibility outcome of your build, with cross-references to the Appendix A screenshots',
     'A3 - §4.3 + §4.4 + §4.5 + §4.6 Build narrative — Workload tier (compute, load balancing, database, storage) — you described the EC2 + ALB + ASG, the RDS managed database, and the EBS + S3 storage',
     'A4 - §4.8 Build narrative — Operability (autoscaling configuration, baseline monitoring) — you described the ASG scaling policy and the baseline CloudWatch alarms',
-    'A5 - §5 Configuration Decisions — you justified all 8 decision points (C1–C8 from the supplied design §14) with rationale tied to the YAT LMS workload',
-    'A6 - §6 Testing and Validation — you ran the four required test categories (connectivity, autoscaling, database connectivity, end-to-end smoke); results are documented with cross-reference to Appendix C evidence',
+    'A5 - §5 Configuration Decisions — for each of the two decisions the supplied design leaves open, you named at least two options you considered, stated the choice you made, and justified it against the YAT LMS workload',
+    'A6 - §6 Testing and Validation — you ran all five tests (connect to the application server; reach the internet; reach the database; reach the load balancer; automatic scaling), pasted the required screenshot into each test box, and noted anything that failed and how you fixed it',
     "A7 - §7 Operational Handover — you documented access information for YAT IT, named known limitations carried into AT3, and confirmed filing of the report per YAT's documented records procedures",
     'A8 - §8 Knowledge Evidence Responses — you answered all 6 KE questions with specific reference to your own build, not generic textbook answers',
     "A9 - Appendix A Build Evidence — all 17 named screenshots (A1–A17) are present, the AWS region indicator is visible, and the named items are visible per the template's requirements",
-    'A11 - Appendix C Test Evidence — test outcomes are documented with supporting evidence; outcomes are consistent with §6',
-    'A12 - Appendix D Reflections — two honest reflective responses are present, both specific to your own build experience',
     'A13 - Document quality — the Deployment Report uses plain English, appropriate technical vocabulary, structure, formatting, and depth relevant to a professional consulting deliverable for an RTO client',
 ]
 
@@ -100,8 +98,8 @@ MARKING = [
 # Part 2/Tips blocks are single-sourced from the assessor module (identical text).
 PART1_STUDENT = [
     ('Part 1 — Build the supplied design', 'Heading 2'),
-    ("Using AWS Academy, implement the architecture exactly as specified in the supplied design. The design is opinionated where it matters — region, network topology, IAM model, service categories, security controls, tagging — and intentionally silent where you must demonstrate professional judgement (specific instance types, sizing, scaling thresholds, etc.). The supplied design's §14 Configuration decisions left to the implementer enumerates the eight decisions you must make and justify (C1 through C8).", 'Assessor text'),
-    ('For each of those configuration decisions, make a deliberate, justified choice based on the YAT LMS workload as described in the LMS Application Specification on the YAT intranet. You will document the choice and rationale in §5 of your Deployment Report.', 'Assessor text'),
+    ("Using AWS Academy, implement the architecture exactly as specified in the supplied design. The design is opinionated where it matters — region, network topology, IAM model, service categories, security controls, tagging — and intentionally silent where you must demonstrate professional judgement (specific instance types, sizing, scaling thresholds, etc.). The supplied design's §4.16 Configuration decisions left to the implementer names the two decisions you must make and justify.", 'Assessor text'),
+    ('For each of those two decisions, consider at least two candidates, choose one, and justify the choice against the YAT LMS workload as described in the LMS Application Specification on the YAT intranet. You will document the choice and rationale in §5 of your Deployment Report.', 'Assessor text'),
     ('Important constraints on the build:', 'Assessor text'),
     ('The deployment is single-AZ and non-HA by design. HA hardening is the next phase (AT3). Do not pre-empt that work — Multi-AZ database, cross-AZ subnets, cross-Region backup copies, failure simulation, DR runbook are all out of scope for this phase.', 'bullet'),
     ('All security, encryption, tagging, and naming conventions in the supplied design are mandatory. These are non-negotiable.', 'bullet'),

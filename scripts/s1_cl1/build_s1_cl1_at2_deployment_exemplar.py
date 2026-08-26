@@ -166,73 +166,51 @@ def build(path):
     add_described_evidence(doc, "SCREENSHOT", "should show the three security groups with inbound rules expanded, demonstrating "
                           "the tier-to-tier restriction.")
     h3("4.8 Monitoring (baseline)")
-    add_body_paragraph(doc, "Baseline CloudWatch alarms cover EC2 CPU, the ASG, RDS CPU / connections / free storage, "
-                 "and ALB 5xx and unhealthy-host counts, notifying an SNS topic. HA-tuned monitoring is added "
-                 "in the next phase.")
+    add_body_paragraph(doc, "Two baseline CloudWatch alarms establish availability monitoring: ALB target health "
+                 "status (any unhealthy target) for the application tier, and RDS free storage below 15% for "
+                 "the database tier. Both notify an SNS topic. The Auto Scaling policy tracks CPU and manages "
+                 "its own alarms. HA-tuned monitoring is added in the next phase.")
     add_described_evidence(doc, "SCREENSHOT", "should show the CloudWatch Alarms list with the baseline alarms configured.")
     h3("4.9 Cross-Region backup / replication")
     add_not_applicable(doc, "cross-Region resilience is deferred to the HA hardening phase (AT3).")
 
     h1("5. Configuration Decisions")
-    add_uoc_evidence_tag(doc, "[ICTCLD401 PC 1.3] (justified service selection)")
-    add_data_table(doc, ["#", "Decision", "Choice", "Rationale"],
-              [["C1", "EC2 instance type", "m6i.large (2 vCPU, 8 GB)",
-                "Comfortably serves 200–300 typical concurrent users; the ASG absorbs assessment-window peaks."],
-               ["C2", "RDS instance class", "db.m6i.large",
-                "Sufficient for the ~68 GB MySQL workload and connection load, with headroom for growth."],
-               ["C3", "Storage sizing", "RDS 150 GB; EBS data 100 GB",
-                "DB ~68 GB + ~25 GB/yr growth ≈ 3 years' headroom; bulk attachments go to S3, not the DB."],
-               ["C4", "ASG scaling threshold", "Scale out at 65% CPU",
-                "Below the point where response time degrades for this workload."],
-               ["C5", "MTS-Consultants permission boundary", "Limited to us-east-1 + LMS-tagged resources",
-                "Least privilege; no IAM or billing actions."],
-               ["C6", "Admin access to instances", "SSM Session Manager (no bastion)",
-                "Removes a public RDP jump host to harden and audit; access is logged."],
-               ["C7", "MySQL engine version", "MySQL 8.0.35",
-                "DOODLE-supported and a current RDS-supported minor version."],
-               ["C8", "DNS + certificate", "Route 53 alias → ALB; ACM public cert",
-                "lms.yat.edu.au resolves to the ALB; HTTPS terminated with a managed certificate."]],
-              widths=[1.0, 4.2, 4.0, 6.3])
+    add_uoc_evidence_tag(doc, "[ICTCLD401 PC 1.1] (options compared) · [ICTCLD401 PC 1.3] (best option selected)")
+    add_data_table(doc, ["#", "Decision", "Options considered", "Choice", "Why this one"],
+              [["C1", "Application-tier instance type", "t3.medium (2 vCPU, 4 GB) or m6i.large (2 vCPU, 8 GB)",
+                "m6i.large",
+                "t3.medium is burstable and cheaper, but the LMS runs sustained load through the working day and would exhaust CPU credits. m6i.large gives steady performance for the 200-300 typical concurrent users; the Auto Scaling group absorbs assessment-window peaks."],
+               ["C2", "Database instance class and storage size", "db.t3.medium or db.m6i.large; 100 GB or 150 GB",
+                "db.m6i.large, 150 GB",
+                "Same burstable objection as C1 — the database carries steady read load. 150 GB covers the current ~68 GB with roughly three years of growth at ~25 GB/yr; bulk attachments go to S3, not the database."]],
+              widths=[0.9, 3.3, 4.0, 2.6, 4.7])
 
-    h1("6. Testing, Simulation and Validation")
-    add_uoc_evidence_tag(doc, "[ICTCLD401 PC 2.6, 3.2]")
-    h3("6.1 Connectivity tests")
-    add_data_table(doc, ["Test", "Outcome", "Notes"],
-              [["ALB → EC2 health check", "Pass", "Target healthy"],
-               ["EC2 → RDS connection (private)", "Pass", "Connected over private-data subnet"],
-               ["EC2 → internet via NAT", "Pass", "Windows Update reachable"],
-               ["RDS not publicly reachable (negative)", "Pass", "Connection from outside the VPC timed out"]],
-              widths=[7.0, 3.0, 5.5])
-    add_described_evidence(doc, "TEST EVIDENCE", "should show a terminal capture of the EC2 → RDS mysql connection succeeding, "
-                            "and an external connection attempt to RDS timing out.")
-    h3("6.2 Autoscaling test")
-    add_body_paragraph(doc, "Generating load against the ALB pushed average CPU above 65%; the ASG launched a second "
-                 "instance, which became healthy in the target group within ~4 minutes. When load dropped, "
-                 "the ASG scaled back to one instance.")
-    add_described_evidence(doc, "SCREENSHOT", "should show the ASG activity history with the scale-out event, plus a CloudWatch "
-                          "CPU graph showing the spike and the new instance entering service.")
-    h3("6.3 Database connectivity and basic operations")
-    add_body_paragraph(doc, "From the EC2 instance, a mysql client connected over the private network; SELECT VERSION() "
-                 "confirmed 8.0.35; the connection used TLS.")
-    add_described_evidence(doc, "TEST EVIDENCE", "should show the SELECT VERSION() output and the TLS-enabled connection.")
-    h3("6.4 Infrastructure end-to-end smoke test")
-    add_body_paragraph(doc, "A placeholder page served from the instances returned HTTP 200 via the ALB's DNS name, "
-                 "confirming the request path (internet → ALB → EC2) works and the instance can reach RDS over "
-                 "the private network. The DOODLE application itself is installed by YAT IT.")
-    add_described_evidence(doc, "TEST EVIDENCE", "should show a browser (or curl -I) reaching the placeholder page via the ALB "
-                            "DNS name with HTTP 200/302.")
-    h3("6.5 Failure simulation")
-    add_not_applicable(doc, "no Multi-AZ resilience exists yet to fail over to; failure simulation is performed in the HA "
-            "hardening phase (AT3).")
-    h3("6.6 Resize simulation")
-    add_not_applicable(doc, "deferred to the HA hardening phase (AT3).")
-    h3("6.7 Availability measurement")
-    add_not_applicable(doc, "formal availability measurement against the 99.9% target is part of the HA phase; this baseline "
-            "build was verified functionally.")
-    h3("6.8 Simulation findings vs the design")
-    add_not_applicable(doc, "deferred to the HA hardening phase (AT3).")
-    h3("6.9 Adjustments made per simulation outcomes")
-    add_not_applicable(doc, "deferred to the HA hardening phase (AT3).")
+    h1("6. Testing and Validation")
+    add_uoc_evidence_tag(doc, "[ICTCLD401 PC 2.6, 3.2] · [ICTCLD401 PE 3] · [ICTCLD502 PC 4.2]")
+    h3("6.1 Connect to the application server")
+    add_body_paragraph(doc, "Connected to the application instance and confirmed its hostname.")
+    add_described_evidence(doc, "SCREENSHOT", "should show the terminal session on the instance, the connection "
+                            "succeeding and the hostname returned.")
+    h3("6.2 Reach the internet from the application server")
+    add_body_paragraph(doc, "curl -I https://aws.amazon.com returned HTTP/2 200, confirming outbound access through "
+                 "the NAT gateway.")
+    add_described_evidence(doc, "SCREENSHOT", "should show the command and the HTTP response header.")
+    h3("6.3 Reach the database from the application server")
+    add_body_paragraph(doc, "nc -zv against the database endpoint on port 3306 succeeded from the application tier, "
+                 "over the private subnet. The database is not reachable from outside the VPC.")
+    add_described_evidence(doc, "SCREENSHOT", "should show the command and its output confirming port 3306 was reachable.")
+    h3("6.4 Reach the load balancer from the application server")
+    add_body_paragraph(doc, "curl -I against the load balancer's DNS name returned an HTTP status line, confirming the "
+                 "web and application tiers can see each other. With 6.3 this demonstrates connectivity across "
+                 "all three tiers.")
+    add_described_evidence(doc, "SCREENSHOT", "should show the command and the HTTP response from the load balancer.")
+    h3("6.5 Automatic scaling")
+    add_body_paragraph(doc, "Lowering the scaling policy's target value below current utilisation caused the Auto "
+                 "Scaling group to launch a second instance without intervention; it entered service in about "
+                 "four minutes. Raising the target well above current utilisation caused the group to scale "
+                 "back to one instance. The target was then returned to the value recorded in §5.")
+    add_described_evidence(doc, "SCREENSHOT", "should show the Auto Scaling Activity tab with both the scale-out and "
+                            "the scale-in entries and their timestamps.")
 
     h1("7. Operational Handover")
     add_uoc_evidence_tag(doc, "[ICTCLD401 PC 4.3] (save documentation per organisational policies)")
@@ -255,7 +233,7 @@ def build(path):
     add_data_table(doc, ["Item", "Filed in", "Reference"],
               [["This Deployment Report (v1.0)", "YAT ICT shared documentation", "[ref]"],
                ["Configuration exports (Appendix B)", "YAT ICT shared documentation", "[ref]"],
-               ["Test evidence (Appendix C)", "YAT ICT shared documentation", "[ref]"]],
+               ["Test evidence (§6)", "YAT ICT shared documentation", "[ref]"]],
               widths=[6.5, 5.0, 4.0])
     h3("7.5 Feedback record")
     add_not_applicable(doc, "the formal feedback loop and end-of-engagement sign-off are captured at the close of the HA "
@@ -307,10 +285,12 @@ def build(path):
                  "any compromised host or external attacker, putting the student personal information and "
                  "records at risk.")
     h3("Q6 — Role of DNS in the deployment")
-    add_body_paragraph(doc, "Two points where DNS resolution happens: end users browse to lms.yat.edu.au, which Route 53 "
-                 "resolves to the ALB's address — if misconfigured, users couldn't reach the LMS at all. And "
-                 "the EC2 instances resolve the RDS endpoint name to its current IP — if that failed (or, in "
-                 "the HA phase, didn't update on failover) the application couldn't reach its database.")
+    add_body_paragraph(doc, "A browser cannot connect to a name, only to an address, so DNS does the translation first. "
+                 "When staff type lms.yat.edu.au, YAT's DNS resolves it to the load balancer's DNS name, and "
+                 "AWS resolves that to one of the load balancer's current addresses. Those addresses change, "
+                 "which is precisely why the hostname points at the load balancer rather than at an instance. "
+                 "If it were misconfigured, staff would get the wrong address or none at all and could not "
+                 "reach the LMS — even though every server behind it is running normally.")
 
     # ---- APPENDICES ----
     doc.add_section(WD_SECTION.NEW_PAGE); build_header_footer(doc.sections[-1])
@@ -327,45 +307,6 @@ def build(path):
         ("SCREENSHOT A8", "CloudWatch Alarms — the baseline alarm set."),
     ]:
         add_described_evidence(doc, kind, d)
-    h1("Appendix B — Configuration exports")
-    add_body_paragraph(doc, "Each export is described; in a live submission these are CLI/console JSON dumps attached as files or code blocks.")
-    for kind, d in [
-        ("CONFIG EXPORT B1", "IAM group permission policies (one per group)."),
-        ("CONFIG EXPORT B2", "Security-group rules for sg-alb / sg-app / sg-db (describe-security-groups)."),
-        ("CONFIG EXPORT B3", "VPC, subnet and route-table configuration."),
-        ("CONFIG EXPORT B4", "Launch template + ASG configuration."),
-        ("CONFIG EXPORT B5", "ALB, target group and listener configuration."),
-        ("CONFIG EXPORT B6", "RDS instance configuration (describe-db-instances)."),
-        ("CONFIG EXPORT B7", "S3 bucket policy, public-access-block and encryption configuration."),
-    ]:
-        add_described_evidence(doc, kind, d)
-    h1("Appendix C — Test and simulation evidence")
-    for kind, d in [
-        ("TEST EVIDENCE C1", "ALB target group healthy (connectivity)."),
-        ("TEST EVIDENCE C2", "EC2 → RDS mysql connection succeeding; external attempt timing out (negative test)."),
-        ("TEST EVIDENCE C3", "ASG scale-out activity history + CloudWatch CPU graph from the autoscaling test."),
-        ("TEST EVIDENCE C4", "SELECT VERSION() = 8.0.35 over a TLS connection."),
-        ("TEST EVIDENCE C5", "Placeholder page reached via the ALB DNS name (HTTP 200/302)."),
-    ]:
-        add_described_evidence(doc, kind, d)
-    add_body_paragraph(doc, "Note: HA failure/resize simulation evidence (Appendix C of the HA report) is not applicable "
-                 "to this foundation-build phase — see §6.5–6.9.")
-
-    h1("Appendix D — Reflections")
-    add_uoc_evidence_tag(doc, "[ICTCLD401 FS Learning, FS Planning and organising, FS Self-management]")
-    h3("R1 — Lessons applicable beyond this build")
-    add_body_paragraph(doc, "Tagging discipline paid off: tagging every resource with the engagement reference from the "
-                 "start made it trivial to scope the permission boundary, find resources for the evidence "
-                 "screenshots, and reason about cost. I arrived at it after an early hunt for an untagged "
-                 "security group; next time I'd enforce tagging via the launch template and an SCP from "
-                 "day one.")
-    h3("R2 — Decisions in hindsight")
-    add_body_paragraph(doc, "Choosing SSM Session Manager over a bastion host was the right call — it removed a public "
-                 "RDP entry point I would otherwise have had to harden and monitor, and it logged every "
-                 "session. If I were to do it again I'd size the EBS data volume with a little more headroom; "
-                 "100 GB is adequate now but a single resize during a quiet period would have been cheap "
-                 "insurance against the LMS's steady attachment growth.")
-
     h1("Document control")
     add_data_table(doc, ["Field", "Value"],
               [["Document version", "v1.0 — Initial submission"],

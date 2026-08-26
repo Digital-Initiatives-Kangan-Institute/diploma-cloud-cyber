@@ -8,16 +8,35 @@ exactly and only the sections that deployment requires. Split from the generic s
 What a foundation build does not have, and so is not in here: a maintenance window (§3.1),
 cross-Region backup (§4.9), failure/resize simulation, availability measurement and the findings
 and adjustments that follow from them (§6.5-§6.9), a stakeholder feedback record, a sign-off
-block, and an appendix of configuration exports. The feedback record and sign-off go because no AT2
-marking criterion looks at them; the exports go because the Appendix A screenshots already evidence
-the same performance item. Nothing carries an "Applicability / mark Not applicable" note — every
+block, an appendix of configuration exports, and an appendix of reflections. The feedback record and
+sign-off go because no AT2 marking criterion looks at them; the exports go because the Appendix A
+screenshots already evidence the same performance item; the reflections go because AT3's reflections
+appendix carries every foundation skill this one did, and the engagement ends there. Nothing carries an "Applicability / mark Not applicable" note — every
 section in this template is a section the report needs.
 
-[TBD - needs discussion: the Appendix A / B / C evidence lists. The AT2 marking criteria name
-counts (17 screenshots, 7 exports, 6 test-evidence items) that no artefact enumerates and that no
-version of this template has ever carried. The lists are to be derived from the review of what the
-assessment actually asks the student to do, once that review is complete; until then the
-appendices carry the generic examples inherited from the superset template.]
+[TBD - needs discussion: the Appendix A and C evidence lists. The AT2 marking criteria name counts
+(17 screenshots, 6 test-evidence items) that no artefact enumerates and that no version of this
+template has ever carried. The lists are to be derived from the review of what the assessment
+actually asks the student to do, once that review is complete; until then the appendices carry the
+generic examples inherited from the superset template.
+
+The rule the two lists are built on comes from the UoC wording of what each appendix evidences:
+
+  Appendix A (criterion A9)  -> [ICTCLD401 PE 1] "build ... virtual network"
+                                [ICTCLD401 PE 2] "configure compute, storage, database and
+                                                  autoscaling resources"
+                                = CONFIGURATION STATE. The settings, as set.
+
+  Appendix C (criterion A11) -> [ICTCLD401 PE 3] "conduct simple tests to confirm access"
+                                [ICTCLD502 PC 4.2] "demonstrate connectivity between resources
+                                                    at all tiers"
+                                [ICTCLD502 PC 4.3] "monitor and measure availability"
+                                = TEST OUTCOMES. What happened when it was exercised.
+
+Nothing appears in both. The exemplar currently files one screenshot twice - "ALB target group
+reporting Healthy" as A4 and again as C1 - which is the failure this rule prevents: a target group
+reporting healthy is a health-check RESULT, so it is Appendix C; Appendix A carries the ALB's
+listener / target-group / health-check configuration instead.]
 
 Usage:  python scripts/templates/build_at2_deployment_report_template.py
 """
@@ -33,11 +52,12 @@ from helpers.docx_tables import add_template_table  # noqa: E402
 from brand import ADDRESS, CREAM, GREY, TEAL  # noqa: E402
 from helpers.scenario_document import build_header_footer, configure_styles, wordmark  # noqa: E402
 
-from build_deployment_report_template import KE_AT2, REFLECT_AT2  # noqa: E402
+from build_deployment_report_template import KE_AT2  # noqa: E402
 
 from docx import Document  # noqa: E402
 from docx.enum.section import WD_SECTION  # noqa: E402
 from docx.enum.table import WD_TABLE_ALIGNMENT  # noqa: E402
+from docx.enum.text import WD_ALIGN_PARAGRAPH  # noqa: E402
 from docx.shared import Pt, Cm, RGBColor  # noqa: E402
 
 # Course-side note styling — the same violet convention the Business Case template uses for
@@ -85,6 +105,60 @@ SCOPE_DEFERRED = [
     "The high-availability-tuned monitoring set",
 ]
 
+# §6 tests. Each is (number, title, what it shows, [steps], what the screenshot must show).
+# One test per UoC item, no more: connect to the instance [401 PE 3]; reach the internet and reach
+# the database [401 PC 2.6]; reach the database and the load balancer [502 PC 4.2, all tiers];
+# scale out and back in [401 PC 3.2].
+#
+# [TBD - the connection method in 6.1 assumes the design review enables SSH access to the
+# application instance (security group, key pair, and a route in). The exact commands in 6.2-6.4
+# depend on that decision and on the instance operating system, and must be confirmed in a live
+# lab run before this template is issued.]
+TESTS = [
+    ("6.1", "Connect to the application server",
+     "you can reach the application server you built.",
+     ["In the AWS console, open EC2 and find your application instance in the instance list.",
+      "Copy its address from the details panel.",
+      "Open a terminal on your own computer and connect to the instance using the key pair and "
+      "the connection command given in the engagement's build instructions.",
+      "When the prompt appears, run: hostname"],
+     "your terminal, showing the connection succeeding and the hostname of the instance."),
+
+    ("6.2", "Reach the internet from the application server",
+     "the application server can reach the internet through the NAT gateway, so it can be patched "
+     "and can call external services.",
+     ["In the session you opened in 6.1, run: curl -I https://aws.amazon.com",
+      "Confirm the response begins with an HTTP status line."],
+     "the command and the HTTP response header it returned."),
+
+    ("6.3", "Reach the database from the application server",
+     "the application tier can reach the database tier privately, over port 3306.",
+     ["In the AWS console, open RDS and copy your database's endpoint address.",
+      "In the session from 6.1, run: nc -zv <your-database-endpoint> 3306",
+      "Confirm the result reports the connection succeeded."],
+     "the command and its output confirming the connection to port 3306 succeeded."),
+
+    ("6.4", "Reach the load balancer from the application server",
+     "the application tier and the web tier can see each other — connectivity across all three "
+     "tiers, taken with 6.3.",
+     ["In the AWS console, open EC2 → Load Balancers and copy your load balancer's DNS name.",
+      "In the session from 6.1, run: curl -I http://<your-load-balancer-dns-name>",
+      "Confirm an HTTP status line comes back."],
+     "the command and the HTTP response from the load balancer."),
+
+    ("6.5", "Automatic scaling",
+     "the Auto Scaling group adds and removes instances on its own, without you touching the "
+     "instance count.",
+     ["In the AWS console, open EC2 → Auto Scaling Groups and select your group.",
+      "On the Automatic scaling tab, edit your scaling policy and lower the target value far "
+      "enough that current usage is above it (for example, to 10).",
+      "Wait for the alarm to trigger. On the Activity tab, watch for a new instance to launch.",
+      "Once the new instance is in service, edit the policy again and raise the target value well "
+      "above current usage (for example, to 90).",
+      "Wait for the group to scale back in, then return the target to the value you set in §5."],
+     "the Activity tab, showing both the scale-out and the scale-in entries with their timestamps."),
+]
+
 SCOPE_EXCLUDED = [
     "LMS application installation on the infrastructure built here",
     "Migration of the existing database content",
@@ -114,6 +188,38 @@ def add_supplied_bullets(doc, items):
     for item in items:
         p = doc.add_paragraph(style="List Bullet")
         p.add_run(item).font.size = Pt(10.5)
+
+
+def add_screenshot_slot(doc, caption):
+    """A bordered drop-zone for a screenshot, with a caption saying what must be visible."""
+    t = doc.add_table(rows=1, cols=1)
+    cell = t.rows[0].cells[0]
+    set_cell_borders(cell)
+    shade_cell(cell, CREAM)
+    cell.width = Cm(16.6)
+    p = cell.paragraphs[0]
+    p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    r = p.add_run("[ PASTE YOUR SCREENSHOT HERE ]")
+    r.bold = True; r.font.size = Pt(10)
+    p2 = cell.add_paragraph(); p2.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    r2 = p2.add_run(caption)
+    r2.italic = True; r2.font.size = Pt(9); r2.font.color.rgb = RGBColor.from_string(GREY)
+    doc.add_paragraph()
+
+
+def add_test(doc, h3, number, title, shows, steps, capture):
+    """One instrumented test: what it shows, numbered steps to follow, and a screenshot slot."""
+    h3(f"{number} {title}")
+    add_guidance_text(doc, f"What this test shows: {shows}")
+    for i, step in enumerate(steps, 1):
+        p = doc.add_paragraph()
+        p.paragraph_format.left_indent = Cm(0.6)
+        p.paragraph_format.space_after = Pt(3)
+        lead = p.add_run(f"{i}.  ")
+        lead.bold = True; lead.font.size = Pt(10.5)
+        p.add_run(step).font.size = Pt(10.5)
+    doc.add_paragraph()
+    add_screenshot_slot(doc, capture)
 
 
 def build(path):
@@ -212,42 +318,22 @@ def build(path):
         add_response_placeholder(doc)
 
     h1("5. Configuration Decisions")
-    add_guidance_text(doc, "The approved design leaves eight decisions to the implementer (design §14). For each, "
-                     "state your choice and justify it against the YAT LMS workload described in the LMS "
-                     "Application Specification.")
-    add_template_table(doc, ["#", "Decision point", "Your decision", "Rationale"],
-             [["C1", "EC2 instance type", "[ … ]", "[ concurrent-user load + cost envelope ]"],
-              ["C2", "RDS instance class", "[ … ]", "[ database workload characteristics ]"],
-              ["C3", "EBS data volume + RDS storage sizing", "[ show the calc ]", "[ current footprint + growth ]"],
-              ["C4", "ASG scaling threshold", "[ … ]", "[ expected CPU profile at peak ]"],
-              ["C5", "Permission boundary for MTS-Consultants", "[ … ]", "[ … ]"],
-              ["C6", "Bastion / RDP design", "[ … ]", "[ security trade-off ]"],
-              ["C7", "MySQL engine version", "[ … ]", "[ application compatibility ]"],
-              ["C8", "DNS strategy + ACM certificate", "[ … ]", "[ … ]"]],
-             widths=[1.0, 6.0, 4.0, 4.5])
+    add_guidance_text(doc, "The approved design leaves two sizing decisions to the implementer (design §4.16). For "
+                     "each, name at least two options you considered, state the one you chose, and say why it "
+                     "suits the YAT LMS workload described in the LMS Application Specification.")
+    add_template_table(doc, ["#", "Decision point", "Options you considered", "Your choice", "Why this one"],
+             [["C1", "Application-tier instance type", "[ two candidates ]", "[ … ]",
+               "[ concurrent-user load from the application spec ]"],
+              ["C2", "Database instance class and storage size", "[ two candidates ]", "[ … ]",
+               "[ database workload; current data footprint and its growth ]"]],
+             widths=[0.9, 3.6, 3.6, 2.6, 4.8])
 
     h1("6. Testing and Validation")
-    add_guidance_text(doc, "Document the tests run to verify the deployment. For each test, state the test, the "
-                     "result, and reference the supporting evidence in Appendix C.")
-    h3("6.1 Connectivity tests")
-    add_template_table(doc, ["Test", "Outcome (Pass/Fail)", "Notes"],
-             [["ALB → EC2 health check", "[ ]", "[ ]"],
-              ["EC2 → RDS connection (private)", "[ ]", "[ ]"],
-              ["EC2 → internet via NAT", "[ ]", "[ ]"],
-              ["RDS not publicly reachable (negative test)", "[ ]", "[ ]"]],
-             widths=[7.0, 4.0, 4.5])
-    h3("6.2 Autoscaling test")
-    add_guidance_text(doc, "Trigger a scaling event (e.g. load against the ALB) and confirm the ASG scales out and "
-                     "back in. Cross-reference Appendix C.")
-    add_response_placeholder(doc)
-    h3("6.3 Database connectivity and basic operations")
-    add_guidance_text(doc, "Confirm the database tier is reachable from the app tier over the private network, the "
-                     "engine version meets the application requirement, and encryption-in-transit is in place.")
-    add_response_placeholder(doc)
-    h3("6.4 Infrastructure end-to-end smoke test")
-    add_guidance_text(doc, "Confirm the infrastructure is ready to serve traffic (e.g. a placeholder page via the "
-                     "ALB DNS returns HTTP 200/302 from a backend instance that can reach the database).")
-    add_response_placeholder(doc)
+    add_guidance_text(doc, "Five tests confirm the deployment works. Each one below tells you what it demonstrates "
+                     "and the exact steps to run it. Follow the steps, then paste the screenshot into the box "
+                     "provided. If a test does not pass, fix the problem, re-run it, and note what you changed.")
+    for n, title, shows, steps, capture in TESTS:
+        add_test(doc, h3, n, title, shows, steps, capture)
 
     h1("7. Operational Handover")
     add_guidance_text(doc, "Hand-over information for the team taking over the infrastructure.")
@@ -264,7 +350,7 @@ def build(path):
     h3("7.4 Documentation filing")
     add_template_table(doc, ["Item", "Filed in", "Reference"],
              [["This Deployment Report", "[ YAT ICT shared documentation ]", "[ ref ]"],
-              ["Test evidence (Appendix C)", "[ … ]", "[ ref ]"]],
+              ["Test evidence (§6)", "[ … ]", "[ ref ]"]],
              widths=[6.5, 5.0, 4.0])
     h1("8. Knowledge Evidence Responses")
     for text, placeholder in KE_AT2:
@@ -285,18 +371,6 @@ def build(path):
               ["A6", "CloudWatch alarms / dashboard", "[ the baseline alarms ]"],
               ["…", "[ add as your deployment requires ]", "[ … ]"]],
              widths=[1.0, 5.5, 9.0])
-    h1("Appendix C — Test evidence")
-    add_guidance_text(doc, "Attach the evidence supporting the results in §6 — screenshots, terminal/log excerpts "
-                     "and metric graphs.")
-    add_response_placeholder(doc, "[ Test evidence ]")
-
-    reflect_intro, reflect_items = REFLECT_AT2
-    h1("Appendix D — Reflections")
-    add_guidance_text(doc, reflect_intro)
-    for heading, prompt in reflect_items:
-        h3(heading)
-        add_guidance_text(doc, prompt)
-        add_response_placeholder(doc)
 
     h1("Document control")
     add_template_table(doc, ["Field", "Value"],
