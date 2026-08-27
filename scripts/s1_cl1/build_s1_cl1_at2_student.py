@@ -1,16 +1,26 @@
 #!/usr/bin/env python3
 """Build the S1-CL1 AT2 STUDENT instrument (.docx) by populating the Kangan template.
 
-The student-facing version of AT2. It imports the assessor module (build_s1_cl1_at2_assessor)
-to single-source the shared content — DETAILS, the CHECK box, and the identical parts of the
-'Instructions' prose (the engagement intro, Part 2 and Tips blocks) — and defines its own
-student-facing wording for the instruction table, the marking criteria (second person, no UoC
-traceability), and the Part 1 build block (which the student copy phrases with extra detail). It
-loads the official Kangan 'Project Assessment - Student.docx' template. The assessor-only material
-— the Deployment Report Benchmark and the UoC reverse-map — is NOT included.
+The student-facing half of AT2. Two sources feed it:
 
-EVERGREEN: emits NO scenario-site URL and imports no brand.WEBSITE_URL — where the authored copy
-named the intranet URL, only the URL and its immediate wrapper are dropped.
+  the Kangan wrapper   this module's own second-person wording — OVERVIEW, TASKS, RESOURCES,
+                       CRITERIA, RESULTS, SUBMIT and the A1-A9 MARKING criteria — poured into
+                       the official 'Project Assessment - Student.docx' template. DETAILS and
+                       the CHECK box are imported from build_s1_cl1_at2_assessor so the two
+                       instruments cannot disagree about what task this is.
+  the run sheet        at2_run_sheet.render_front_matter + render_run_sheet(mode="student"),
+                       the same content module the assessor copy renders. Student mode emits
+                       empty screenshot and response boxes, and no UoC tags.
+
+Assessor-only material is not included: the marking benchmark, the UoC reverse-map, the
+per-task 'Evidences:' lines, the terracotta screenshot descriptions and the teal model answers.
+validate_student_instrument.py is the gate that proves none of it leaked.
+
+Scenario-site links: the run sheet emits real intranet URLs, built from at2_run_sheet.SITE —
+the required-resources list up front, and the 'Related resources' block under the knowledge
+questions that carry one. One constant to change if the site ever moves. Note that this
+module's own RESOURCES block names the same two documents WITHOUT a URL ('on the YAT
+intranet'), so the wrapper and the run sheet currently follow different conventions.
 
 Usage:  python scripts/s1_cl1/build_s1_cl1_at2_student.py [output.docx]
 Default: S1-CL1-Cloud-Design-Build/assessments/AT2/AT2-Deployment-Student.docx

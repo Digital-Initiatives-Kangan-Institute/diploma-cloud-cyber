@@ -478,11 +478,23 @@ HANDOVER = dict(
     uoc=["ICTCLD401 PC 4.3"])
 
 # ---------------------------------------------------------------- knowledge questions
+# resources — optional: (label, url) pairs pointing at the YAT intranet page a student would
+#             reasonably consult to answer this question in YAT's terms rather than generically.
+#             Only where a page genuinely carries the material. Q3 (shared responsibility) and
+#             Q6 (DNS) have no page in this state, so they carry none rather than a token link.
 
 QUESTIONS = [
     dict(n="Q1", uoc=["ICTCLD401 KE 5"],
          q="Name the compute, networking and scaling services you deployed. For each, explain the "
            "feature it provides and how it supports the YAT LMS specifically.",
+         resources=[
+             ("LMS Application Specification — the user population, concurrent load and "
+              "service-level expectations your services have to support",
+              f"{SITE}/intranet/s1-cl1-at2/ict/lms-application-spec"),
+             ("LMS Cloud Architecture — Baseline Design — the design your build implements",
+              f"{SITE}/intranet/s1-cl1-at2/projects/lms-cloud-infrastructure/"
+              "cloud-architecture-baseline"),
+         ],
          points=["Names the three: the instance, the load balancer, the Auto Scaling group.",
                  "Instance: the compute the LMS runs on, sized against the concurrent-user load.",
                  "Load balancer: distributes traffic and removes unhealthy servers from rotation.",
@@ -495,6 +507,15 @@ QUESTIONS = [
            "the server and the storage behind the database. Explain how block storage differs from "
            "object storage, and when each is the right choice for an LMS. (c) why scale "
            "horizontally rather than vertically, and what does that trade off?",
+         resources=[
+             ("LMS Cloud Architecture — Baseline Design — why the design chose a managed database "
+              "and a scaling group rather than a single larger server",
+              f"{SITE}/intranet/s1-cl1-at2/projects/lms-cloud-infrastructure/"
+              "cloud-architecture-baseline"),
+             ("LMS Application Specification — what the LMS stores, which is what the storage "
+              "choices have to suit",
+              f"{SITE}/intranet/s1-cl1-at2/ict/lms-application-spec"),
+         ],
          points=["(a) Managed: AWS handles patching, backups and monitoring; less for YAT ICT to "
                  "operate; and multi-AZ is one setting away for the next phase.",
                  "(b) Block storage is a disk attached to one server, addressed in blocks, and it "
@@ -518,19 +539,38 @@ QUESTIONS = [
     dict(n="Q4", uoc=["ICTCLD401 KE 8"],
          q="Pick one IAM group you created. Describe the permissions you gave it, the job function "
            "it serves, and why its permissions differ from another group in your build.",
+         resources=[
+             ("User Access Policy — YAT's role-based access model, its role groups and "
+              "permissions matrix, and its rules on privileged access",
+              f"{SITE}/intranet/s1-cl1-at2/policies/user-access"),
+         ],
          points=["Names a real group from their own build.",
                  "Ties the permissions to what that job actually needs to do.",
                  "Contrasts it with another group and explains the boundary — e.g. YAT ICT operate "
                  "the platform but do not change IAM, because that is a security boundary."]),
 
     dict(n="Q5", uoc=["ICTCLD401 KE 9"],
-         q="Pick one security group you configured. State its rules, explain why you restricted "
-           "traffic that way, and describe the risk to YAT if that restriction were removed.",
-         points=["States the actual rules from their build.",
-                 "Explains the reasoning — e.g. the database accepts traffic only from the "
-                 "application tier, never from the internet.",
-                 "Names a concrete risk: student personal information exposed, credentials attacked "
-                 "directly from the internet."]),
+         q="The yat-lms-db-sg security group you created in task 7 permits MySQL traffic on port "
+           "3306 from one source only. State the rule exactly as you configured it, explain why "
+           "the database is restricted this way rather than being reachable from the internet, "
+           "and describe the risk to YAT if that restriction were removed.",
+         resources=[
+             ("LMS Application Specification § 4, Data stored — what the MySQL database "
+              "actually holds",
+              f"{SITE}/intranet/s1-cl1-at2/ict/lms-application-spec#4-data-stored"),
+         ],
+         points=["States the rule as built: inbound MySQL on 3306, source yat-lms-app-sg — the "
+                 "application tier's security group, not an address range and not the internet.",
+                 "Explains the restriction: only the application tier has any business reaching the "
+                 "database. Naming a security group as the source rather than an address range "
+                 "means the rule follows the instances, however many the Auto Scaling group "
+                 "launches and whatever addresses they get.",
+                 "Names a concrete risk grounded in what the database holds — the ~50 GB of "
+                 "student personal information in § 4 of the specification (names, dates of "
+                 "birth, USIs, enrolment and fee status, assessment results) becomes reachable "
+                 "from the internet and the database engine can be attacked directly for "
+                 "credentials. YAT carries Privacy Act and APP obligations over that data.",
+                 "A student who says only that it would be \"less secure\" has not evidenced this."]),
 
     dict(n="Q6", uoc=["ICTCLD401 KE 10"],
          q="When a YAT staff member types the LMS address into their browser, DNS resolution has to "
@@ -681,6 +721,18 @@ def _steps(doc, steps):
     doc.add_paragraph()
 
 
+def _resources(doc, items):
+    """Links to the intranet pages that carry the material a question draws on."""
+    _p(doc, "Related resources", bold=True, after=3)
+    for label, url in items:
+        p = doc.add_paragraph()
+        p.paragraph_format.left_indent = Cm(0.6)
+        p.paragraph_format.space_after = Pt(4)
+        p.add_run("•  ").font.size = Pt(BODY_PT)
+        add_hyperlink(p, label, url, size_pt=BODY_PT)
+    doc.add_paragraph()
+
+
 def render_front_matter(doc, h1):
     """Scenario, required resources and instructions — all at body size, one visual voice."""
     h1("Scenario")
@@ -770,6 +822,8 @@ def render_run_sheet(doc, h1, h2, mode="student", tasks=None, tests=None,
                 _p(doc, "Evidences: " + " \u00b7 ".join(f"[{u}]" for u in q["uoc"]),
                    size=9, italic=True, colour=UOC, after=4)
             _p(doc, q["q"], after=6)
+            if q.get("resources"):
+                _resources(doc, q["resources"])
             _response_slot(doc, None, mode, points=q["points"])
 
     # ---- handover ----
