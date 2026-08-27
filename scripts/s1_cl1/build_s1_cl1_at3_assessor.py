@@ -250,20 +250,16 @@ MARKING = [
      "the feedback received and their response to it",
      "[ICTCLD502 PC 5.2]"],
 
-    ["A16 Sign-off (task 28) — the role-played YAT ICT Manager has accepted the work and the sign-off block "
-     "is completed and signed",
-     "[ICTCLD502 PC 5.3]"],
-
-    ["A17 Filing (task 29) — student names where the completed workbook was filed and which YAT policy "
+    ["A16 Filing (task 28) — student names where the completed workbook was filed and which YAT policy "
      "required that location",
      "[ICTCLD401 PC 4.3]"],
 
-    ["A18 Knowledge questions (Q1–Q6) — student answers all six with reference to their own design and "
+    ["A17 Knowledge questions (Q1–Q6) — student answers all six with reference to their own design and "
      "their own build, not generically, in clear written English",
      "[ICTCLD502 KE 4] · [ICTCLD502 KE 5] · [ICTCLD502 KE 6] · [ICTCLD502 KE 7] · [ICTCLD502 KE 8] · "
      "[ICTCLD502 KE 9] · [ICTCLD401 FS Writing]"],
 
-    ["A19 Reflection (R1–R3) — three honest reflective responses: decisions in hindsight, working under "
+    ["A18 Reflection (R1–R3) — three honest reflective responses: decisions in hindsight, working under "
      "time pressure, and a lesson carried forward — all specific to the student's own work",
      "[ICTCLD401 FS Learning] · [ICTCLD401 FS Self-management skills] · [ICTCLD502 FS Problem solving] · "
      "[ICTCLD502 FS Self-management]"],
@@ -297,21 +293,20 @@ ASSESSOR_BODY = [
         ["[ICTCLD502 PC 4.6] Compare and document simulation findings according to documented design", "A8"],
         ["[ICTCLD502 PC 5.1] Adjust and improve availability of architecture according to simulations", "A14"],
         ["[ICTCLD502 PC 5.2] Confirm, seek and respond to feedback with required personnel", "A15"],
-        ["[ICTCLD502 PC 5.3] Obtain final sign off from required personnel", "A16"],
         ["[ICTCLD502 PE 1] Design and implement at least one fault tolerant cloud infrastructure", "A4 (design) · A9 (implement)"],
         ["[ICTCLD502 PE 2] Design and deploy automated infrastructure scaling for at least one business need", "A4 (design) · A9 (deploy)"],
         ["[ICTCLD502 PE 3] Simulate failures of at least one component and demonstrate fault tolerance", "A12"],
         ["[ICTCLD502 PE 4] Use cloud management console, software development kits or command line tools", "A9"],
         ["[ICTCLD502 PE 5] Define, monitor and record resource availability in cloud environment", "A4 (design) · A10 (measure)"],
-        ["[ICTCLD502 KE 4] HA concepts — fault tolerance, SPOFs, MTTF/MTTR/MTBF, RPO/RTO, SLAs, scalability", "A18 (Q1)"],
-        ["[ICTCLD502 KE 5] Testing and debugging techniques, including avoiding single point failures", "A18 (Q2)"],
-        ["[ICTCLD502 KE 6] Tools and techniques to measure availability impact", "A18 (Q3)"],
-        ["[ICTCLD502 KE 7] Built-in fault tolerance versus infrastructure designed for fault tolerance", "A18 (Q4)"],
-        ["[ICTCLD502 KE 8] Purpose and features of load balancing and autoscaling for availability", "A18 (Q5)"],
-        ["[ICTCLD502 KE 9] Techniques, methods and metrics used to monitor cloud resource performance", "A18 (Q6)"],
-        ["[ICTCLD502 FS Problem solving]", "A19"],
+        ["[ICTCLD502 KE 4] HA concepts — fault tolerance, SPOFs, MTTF/MTTR/MTBF, RPO/RTO, SLAs, scalability", "A17 (Q1)"],
+        ["[ICTCLD502 KE 5] Testing and debugging techniques, including avoiding single point failures", "A17 (Q2)"],
+        ["[ICTCLD502 KE 6] Tools and techniques to measure availability impact", "A17 (Q3)"],
+        ["[ICTCLD502 KE 7] Built-in fault tolerance versus infrastructure designed for fault tolerance", "A17 (Q4)"],
+        ["[ICTCLD502 KE 8] Purpose and features of load balancing and autoscaling for availability", "A17 (Q5)"],
+        ["[ICTCLD502 KE 9] Techniques, methods and metrics used to monitor cloud resource performance", "A17 (Q6)"],
+        ["[ICTCLD502 FS Problem solving]", "A18"],
         ["[ICTCLD502 FS Reading]", "A1"],
-        ["[ICTCLD502 FS Self-management]", "A19"],
+        ["[ICTCLD502 FS Self-management]", "A18"],
         ["[ICTCLD502 AC 1] Cloud vendor service provider", "C1 (pre-condition)"],
         ["[ICTCLD502 AC 2] Cloud managed database service", "C1 (pre-condition)"],
         ["[ICTCLD502 AC 3] Information and data sources required to design and implement cloud infrastructure", "C2 (pre-condition)"],
@@ -326,12 +321,12 @@ ASSESSOR_BODY = [
     ("p", "ICTCLD401 — Configure cloud services (AT3-evidenced items only)"),
     ("tbl", [
         ["UoC item", "Evidenced by criterion(ia)"],
-        ["[ICTCLD401 PC 4.3] Save and store user documentation according to organisational policies", "A17"],
-        ["[ICTCLD401 FS Learning]", "A19"],
+        ["[ICTCLD401 PC 4.3] Save and store user documentation according to organisational policies", "A16"],
+        ["[ICTCLD401 FS Learning]", "A18"],
         ["[ICTCLD401 FS Planning and organising]", "A7"],
         ["[ICTCLD401 FS Reading]", "A1"],
-        ["[ICTCLD401 FS Self-management skills]", "A19"],
-        ["[ICTCLD401 FS Writing]", "A18"],
+        ["[ICTCLD401 FS Self-management skills]", "A18"],
+        ["[ICTCLD401 FS Writing]", "A17"],
         ["[ICTCLD401 AC 1] Cloud vendor service provider", "C1 (pre-condition)"],
         ["[ICTCLD401 AC 2] Cloud managed database service", "C1 (pre-condition)"],
         ["[ICTCLD401 AC 3] Internet and web browser", "C1 (pre-condition)"],

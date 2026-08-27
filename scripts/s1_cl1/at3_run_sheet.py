@@ -373,17 +373,28 @@ DESIGN = [
                 "An alarm needs a metric, a threshold and a failure it would catch. The two that exist today catch an unhealthy target and low database storage — start from what they would miss.",
          uoc=["ICTCLD502 PC 3.1", "ICTCLD502 PE 5"],
          standard="the student designs at least one alarm that would reveal a loss of availability the "
-                  "current set would miss — per-zone healthy host count, a database failover event, or an "
+                  "current set would miss. The model shows one per zone, which is the complete "
+                  "answer; a single alarm on one zone still meets the item — per-zone healthy host count, a database failover event, or an "
                   "equivalent. Thresholds are context. Restating the two existing alarms is not designing "
                   "monitoring for high availability.",
          given=0, blank_rows=4,
          table=(["Alarm", "What it measures", "Threshold", "What it detects"],
-                [["Healthy hosts per zone", "HealthyHostCount, per availability zone", "below 1 in either zone",
-                  "one zone has stopped serving even though the LMS is still up"],
-                 ["Database failover", "RDS events / DatabaseConnections drop", "any failover event",
-                  "the standby has taken over — the LMS is running on the other zone"],
-                 ["Service availability", "ALB target health over the window", "below the 99.9% target",
-                  "the service-level target is being missed"]])),
+                [["Healthy hosts, us-east-1a", "HealthyHostCount for the target group in that zone",
+                  "below 1", "that zone has stopped serving even though the LMS is still up"],
+                 ["Healthy hosts, us-east-1b", "HealthyHostCount for the target group in that zone",
+                  "below 1", "the same for the second zone. An alarm watches one zone, so covering "
+                  "both takes one alarm each — the baseline alarm counts unhealthy hosts across the "
+                  "whole target group and cannot see a zone go dark at all"],
+                 ["Database connections lost", "DatabaseConnections, for the database instance",
+                  "below 1", "nothing is connected to the database — which is what a Multi-AZ "
+                  "failover looks like while it happens, and also what an application outage looks "
+                  "like. (A failover itself is an RDS event, not a CloudWatch metric: subscribing to "
+                  "it is done under RDS, Event subscriptions, not here.) EXPECT THIS ONE TO FIRE "
+                  "IMMEDIATELY AND STAY FIRING: the instances serve a placeholder page and never "
+                  "connect to the database, because installing the LMS application is YAT IT's job "
+                  "and out of scope here. The alarm is correct for the real system; this environment "
+                  "simply cannot exercise it. A student who builds it and notes that it alarms for "
+                  "that reason has understood more than one whose alarms all sit quietly in OK."]])),
 
     dict(n=13, title="Which single points of failure does your design remove?",
          prompt="Go back to your answer to task 3. For each single point of failure you found there, "
@@ -596,12 +607,24 @@ TESTS = [
          steps=["Open the load balancer's DNS name in a browser — with http:// in front — and "
                 "confirm the placeholder page loads.",
                 "Open the target group and confirm both instances are healthy, in two different zones.",
-                "Connect to one instance with Session Manager and confirm it reaches the database on "
-                "port 3306.",
-                "Confirm the database is still not reachable from the internet."],
-         code=("Run this on the instance", ["Test-NetConnection <YOUR-DB-ENDPOINT> -Port 3306"]),
+                "Connect to one instance with Session Manager and run the first command below. "
+                "TcpTestSucceeded : True means the application tier reaches the database privately. "
+                "Get the endpoint from RDS → Databases → your database → Connectivity & security.",
+                "Now run the same command on your OWN computer, not on the instance — the second one "
+                "below. It must FAIL. That timeout is the evidence: the database has no public "
+                "address and its security group accepts the application tier only. Confirm it "
+                "alongside RDS → Connectivity & security, where Publicly accessible reads No."],
+         code=("Run these", ["# on the instance, via Session Manager - expect TcpTestSucceeded : True",
+                             "Test-NetConnection <YOUR-DB-ENDPOINT> -Port 3306",
+                             "",
+                             "# on your own computer - expect it to time out and fail",
+                             "# Windows, in PowerShell:",
+                             "Test-NetConnection <YOUR-DB-ENDPOINT> -Port 3306",
+                             "# macOS or Linux, in Terminal:",
+                             "nc -zv -w 10 <YOUR-DB-ENDPOINT> 3306"]),
          capture="the browser showing the page, the target group showing two healthy targets in two "
-                 "zones, and the port test returning TcpTestSucceeded : True.",
+                 "zones, the port test from the instance returning TcpTestSucceeded : True, and the "
+                 "same test from your own computer failing.",
          uoc=["ICTCLD502 PC 4.2"],
          standard="connectivity is demonstrated at every tier and across both zones — public entry "
                   "through the load balancer, application to database privately, and the database still "
@@ -621,8 +644,7 @@ TESTS = [
                 "the database came back on its standby."],
          note="if the LMS goes down and stays down, stop and fix it before continuing. A failed "
               "simulation you recovered from and documented is worth more than one you skipped.",
-         capture="the failure you caused and the evidence the service survived it — the console showing "
-                 "the terminated instance or the failover event, plus what the browser did.",
+         capture="three things, whichever simulation you ran: the ACTION you took (the terminating instance, or the RDS event showing the failover); the SERVICE while it happened (your browser still loading the page — include a clock or timestamp if you can); and the RECOVERY (the Auto Scaling group activity showing the replacement, or the target group returning to healthy). If the service did go down, capture that honestly — a recorded outage is evidence, and you compare it against what you predicted in task 18.",
          uoc=["ICTCLD502 PC 4.4", "ICTCLD502 PE 3"],
          standard="a real failure was executed against the student's own environment and the outcome "
                   "recorded with timings. The item is demonstrating fault tolerance, so the service "
@@ -708,21 +730,7 @@ CLOSEOUT = [
                 [["e.g. can the LMS survive losing a whole zone?", "Sam Walker, YAT ICT Manager",
                   "walked through the F1 and F2 results", "none — evidence already covered it"]])),
 
-    dict(n=28, title="Get it signed off",
-         resources=[
-             ("Change Management Procedure — who is authorised to accept a completed change",
-              f"{SITE}/intranet/s1-cl1-at3/policies/change-management"),
-         ],
-         prompt="The engagement closes when the ICT Manager accepts the work. Have them sign below.",
-         uoc=["ICTCLD502 PC 5.3"],
-         standard="the sign-off block is completed and signed by the role-played ICT Manager. An unsigned "
-                  "block means the engagement was not formally closed, which is what the item requires.",
-         table=(["Role", "Name", "Decision", "Date", "Signature"],
-                [["Prepared by", "the student", "—", "", ""],
-                 ["Accepted by", "Sam Walker, YAT ICT Manager",
-                  "Approved / Approved with comments / Not accepted", "", ""]])),
-
-    dict(n=29, title="File it",
+    dict(n=28, title="File it",
          resources=[
              ("Records Management Policy — where a completed engagement document has to be filed",
               f"{SITE}/intranet/s1-cl1-at3/policies/records-management"),
@@ -851,7 +859,7 @@ REFLECTIONS = [
 # ---------------------------------------------------------------- rendering
 
 
-def _element(doc, h2, el, mode, label="Task"):
+def _element(doc, h2, el, mode, label="Task", notes=False):
     """A Part A design task or a close-out task — prompt, tags, capture. Both carry performance
     criteria, so both are framed as tasks; only the knowledge section asks questions."""
     R.flag(doc, f"{label} {el['n']}")
@@ -872,6 +880,8 @@ def _element(doc, h2, el, mode, label="Task"):
         R.standard_line(doc, el["standard"], mode)
     if el.get("consider"):
         R.consider(doc, el["consider"])
+    if notes:
+        R.notes_box(doc)
 
 
 def render_front_matter(doc, h1):
@@ -892,7 +902,8 @@ def render_front_matter(doc, h1):
 
 
 def render(doc, h1, h2, mode="student", design=None, build=None, tests=None,
-           closeout=None, questions=None, reflections=None, current_arch=None):
+           closeout=None, questions=None, reflections=None, current_arch=None,
+           notes=False):
     """Render the whole workbook into `doc`. mode = student | assessor.
 
     The content lists default to AT3's own. The PRACTICE sheet passes its own — same
@@ -919,7 +930,7 @@ def render(doc, h1, h2, mode="student", design=None, build=None, tests=None,
     R.p(doc, "Your work in this assessment is the AWS side only — the campus network is not yours to "
              "change and is not in scope.", italic=True, size=9.5, colour=R.GREY, after=10)
     for el in DESIGN_:
-        _element(doc, h2, el, mode)
+        _element(doc, h2, el, mode, notes=notes)
 
     # ---- Part B ----
     h1("Part B — Implementation")
@@ -958,6 +969,8 @@ def render(doc, h1, h2, mode="student", design=None, build=None, tests=None,
             R.assessor_note(doc, task["assessor_note"], mode)
         R.p(doc, "Evidence", bold=True, after=3)
         R.screenshot_slot(doc, task["capture"], mode)
+        if notes:
+            R.notes_box(doc)
         R.uoc_line(doc, task["uoc"], mode)
         R.standard_line(doc, task["standard"], mode)
 
@@ -985,13 +998,15 @@ def render(doc, h1, h2, mode="student", design=None, build=None, tests=None,
             R.assessor_note(doc, test["assessor_note"], mode)
         R.p(doc, "Evidence", bold=True, after=3)
         R.screenshot_slot(doc, test["capture"], mode)
+        if notes:
+            R.notes_box(doc)
         R.uoc_line(doc, test["uoc"], mode)
         R.standard_line(doc, test["standard"], mode)
 
     # ---- closing out ----
     h1("Closing the engagement")
     for el in CLOSEOUT_:
-        _element(doc, h2, el, mode)
+        _element(doc, h2, el, mode, notes=notes)
 
     # ---- knowledge questions ----
     h1("Knowledge questions")

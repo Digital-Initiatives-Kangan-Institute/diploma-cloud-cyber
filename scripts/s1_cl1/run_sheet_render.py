@@ -35,12 +35,13 @@ BODY_PT = 10.5
 UOC = "6B6660"          # muted — the assessor-only traceability line
 CAPTURE = TERRACOTTA    # exemplar: what the screenshot should have shown
 MODEL = TEAL            # exemplar: the model written answer
+NOTES_BG = "EAF2F8"     # practice only: the student's own notes box
 
 __all__ = [
     "BODY_PT", "UOC", "CAPTURE", "MODEL", "GREY", "TEAL", "CREAM", "add_hyperlink",
     "p", "heading2", "settings_table", "design_table", "box", "screenshot_slot", "diagram_slot",
     "response_slot", "flag", "code", "note", "clicks", "assessor_note", "steps", "consider",
-    "uoc_line", "standard_line", "resources_block",
+    "uoc_line", "standard_line", "resources_block", "notes_box",
 ]
 
 
@@ -248,6 +249,25 @@ def heading2(doc, text):
     for r in par.runs:
         r.font.color.rgb = RGBColor.from_string(TEAL)
     return par
+
+
+def notes_box(doc):
+    """A place for the student to write their own notes — PRACTICE ONLY.
+
+    Rendered after a 'How to do it' block, which only the practice sheet has, so the
+    assessment never gets one. A light blue fill so it reads as the student's space rather
+    than ours, and a Word table cell, so it grows as they type. The point is that the run
+    sheet becomes partly theirs — the thing they worked out at the console is worth more to
+    them later than anything we wrote.
+    """
+    p(doc, "Personal notes", bold=True, size=9.5, after=3)
+    t = doc.add_table(rows=1, cols=1)
+    cell = t.rows[0].cells[0]
+    set_cell_borders(cell); shade_cell(cell, NOTES_BG); cell.width = Cm(16.6)
+    run = cell.paragraphs[0].add_run("< type any personal notes about this section here >")
+    run.italic = True; run.font.size = Pt(9.5)
+    run.font.color.rgb = RGBColor.from_string(GREY)
+    doc.add_paragraph()
 
 
 def resources_block(doc, items):

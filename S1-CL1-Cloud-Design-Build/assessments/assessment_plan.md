@@ -71,7 +71,7 @@ to QA reviewers.
 - **Mode / Format / Unit focus:** Individual; analyse the YAT strategic plan + ICT environment, evaluate
   gaps, propose changes, build the CBA + action plan, present to the superior; contextual reflective
   questions; ICTICT517 (+ cloud-fundamentals KE from 401/502 reframed against the YAT proposal).
-- **UoC coverage:** [ICTICT517 PC 1.1–1.4, 2.1–2.4, 3.1–3.3] · [ICTICT517 PE 1–6] · [ICTICT517 KE 1–4] · [ICTICT517 FS Get the work done] · [ICTICT517 FS Interact with others] · [ICTICT517 FS Navigate the world of work] · [ICTICT517 FS Numeracy] · [ICTICT517 FS Oral Communication] · [ICTICT517 FS Reading] · [ICTICT517 FS Writing] · [ICTCLD401 PC 1.8, 4.1, 4.2] · [ICTCLD401 KE 1–4, 11] · [ICTCLD502 PC 1.2, 5.2] · [ICTCLD502 KE 1–3] · [ICTCLD502 FS Oral communication]
+- **UoC coverage:** [ICTICT517 PC 1.1–1.4, 2.1–2.4, 3.1–3.3] · [ICTICT517 PE 1–6] · [ICTICT517 KE 1–4] · [ICTICT517 FS Get the work done] · [ICTICT517 FS Interact with others] · [ICTICT517 FS Navigate the world of work] · [ICTICT517 FS Numeracy] · [ICTICT517 FS Oral Communication] · [ICTICT517 FS Reading] · [ICTICT517 FS Writing] · [ICTCLD401 PC 1.8, 4.1, 4.2] · [ICTCLD401 KE 1–4, 11] · [ICTCLD502 PC 1.2, 5.2, 5.3] · [ICTCLD502 KE 1–3] · [ICTCLD502 FS Oral communication]
 - **Scenario requirements:** SR-CL1-02 · SR-CL1-03 · SR-CL1-04 · SR-CL1-06
 
 ### AT2 — Cloud foundation build
@@ -141,7 +141,7 @@ to QA reviewers.
 - **Sections:** supplied current architecture → Part A design questions → Part B run sheet (lab-pack
   deploy → build tasks → simulations → availability measurement → adjustments) → closure and filing →
   reflections → knowledge questions.
-- **UoC coverage:** [ICTCLD502 PC 1.1, 2.1–2.5, 3.1–3.5, 4.1–4.6, 5.1–5.3] · [ICTCLD502 PE 1–5] · [ICTCLD502 KE 4–9] · [ICTCLD502 FS Problem solving] · [ICTCLD502 FS Reading] · [ICTCLD502 FS Self-management] · [ICTCLD401 PC 4.3] · [ICTCLD401 FS Learning] · [ICTCLD401 FS Planning and organising] · [ICTCLD401 FS Reading] · [ICTCLD401 FS Self-management skills] · [ICTCLD401 FS Writing]
+- **UoC coverage:** [ICTCLD502 PC 1.1, 2.1–2.5, 3.1–3.5, 4.1–4.6, 5.1, 5.2] · [ICTCLD502 PE 1–5] · [ICTCLD502 KE 4–9] · [ICTCLD502 FS Problem solving] · [ICTCLD502 FS Reading] · [ICTCLD502 FS Self-management] · [ICTCLD401 PC 4.3] · [ICTCLD401 FS Learning] · [ICTCLD401 FS Planning and organising] · [ICTCLD401 FS Reading] · [ICTCLD401 FS Self-management skills] · [ICTCLD401 FS Writing]
 - **Scenario requirements:** SR-CL1-01 · SR-CL1-03 · SR-CL1-04 · SR-CL1-05 · SR-CL1-07 · SR-CL1-08
 
 ---
@@ -184,8 +184,8 @@ and AT3's design questions and run sheet.
 The per-AT **UoC coverage** in §3 is the authoritative item→AT mapping; this is the rollup proof that
 nothing is unassessed (across `consolidated_uoc.md`, 126 items: 106 PC/FS/PE/KE + 20 AC).
 
-- **PC** (52) — 401 in AT2 (`1.1–3.2, 4.3`) + AT1 (`1.8, 4.1, 4.2`) + AT3 (`4.3`); 502 split AT1 (`1.2, 5.2`) / AT2
-  (`1.3, 4.1–4.3`) / AT3 (`1.1, 2.1–5.3`); 517 in AT1 (`1.1–3.3`).
+- **PC** (52) — 401 in AT2 (`1.1–3.2, 4.3`) + AT1 (`1.8, 4.1, 4.2`) + AT3 (`4.3`); 502 split AT1 (`1.2, 5.2, 5.3`) / AT2
+  (`1.3, 4.1–4.3`) / AT3 (`1.1, 2.1–5.2`); 517 in AT1 (`1.1–3.3`).
 - **PE** (14) — 401 AT2 (`1–3`); 502 AT3 (`1–5`); 517 AT1 (`1–6`, the sub-bullets of the single PE).
 - **KE** (24) — 401 AT1 (`1–4, 11`) + AT2 (`5–10`); 502 AT1 (`1–3`) + AT3 (`4–9`); 517 AT1 (`1–4`).
 - **FS** (16) — 401 across AT2/AT3; 502 Oral→AT1, others→AT3; 517 all seven →AT1.

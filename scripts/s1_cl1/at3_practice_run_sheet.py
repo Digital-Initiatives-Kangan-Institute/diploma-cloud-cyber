@@ -527,16 +527,37 @@ BUILD = [
          job="Create the alarms you designed in task 12. Build at least the first one; build the "
              "others if you have time.",
          clicks=["Open CloudWatch → Alarms → All alarms → Create alarm.",
-                 "Choose Select metric, then find the metric from your task 12 answer. For per-zone "
-                 "target health that is ApplicationELB → Per AZ, per LB Metrics.",
+                 "Choose Select metric, then find the metric from your task 12 answer. Type the "
+                 "metric name into the filter box to narrow it down — for per-zone target "
+                 "health that is HealthyHostCount, which appears under ApplicationELB → Per "
+                 "AppELB, per AZ, per TG Metrics. The similarly-named Per AppELB, per TG "
+                 "Metrics has no zone breakdown, so pick the one with AZ in the name.",
+                 "If you designed something about the database instead, its metrics are under "
+                 "RDS → DBInstanceIdentifier — that is the per-database grouping, named for "
+                 "its dimension rather than for what it contains. DatabaseConnections and "
+                 "FreeStorageSpace both live there.",
+                 "One thing you cannot build here: a database failover is an RDS event, not a "
+                 "CloudWatch metric. If that is what you designed, it is set up under RDS → "
+                 "Event subscriptions, choosing source type Instances and the Failover "
+                 "category. That is a different screen from this one and it notifies SNS "
+                 "directly, without an alarm in between.",
+                 "If you see more than one target group listed, pick the one your load balancer is "
+                 "using now — CloudWatch keeps metrics for deleted resources, so anything you "
+                 "created and removed earlier is still shown. An alarm pointed at an old one "
+                 "never fires.",
                  "Pick the metric, choose Select metric.",
                  "Set Statistic and Period to suit what you are watching, then set the threshold "
                  "from your design.",
                  "Next → choose the existing notification topic, or skip notification if there "
                  "isn't one.",
                  "Next → give the alarm the name from your design → Next → Create alarm.",
-                 "Wait for the state to settle to OK. A new alarm reads INSUFFICIENT_DATA for a few "
-                 "minutes; that is normal, not a fault."],
+                 "Wait for the state to settle. A new alarm reads INSUFFICIENT_DATA for a few "
+                 "minutes; that is normal, not a fault.",
+                 "If you built an alarm on database connections, expect it to go straight into "
+                 "ALARM and stay there. The servers only serve a placeholder page — the "
+                 "accounting application itself was never installed, so nothing ever connects "
+                 "to the database. Your alarm is right; the practice environment just cannot "
+                 "give it anything to measure. Note that rather than changing the alarm."],
          capture="your new alarm in the CloudWatch console, showing its metric, threshold and state.",
          standard=None, uoc=[]),
 ]
@@ -551,10 +572,21 @@ TESTS = [
                 "confirm the page loads.",
                 "Open the target group and confirm both instances are healthy, in two different "
                 "zones.",
-                "Connect to one instance with Session Manager and confirm it reaches the database "
-                "on port 5432.",
-                "Confirm the database is still not reachable from the internet."],
-         code=("Run this on the instance", ["nc -zv <YOUR-DB-ENDPOINT> 5432"]),
+                "Connect to one instance with Session Manager and run the first command below. "
+                "'succeeded!' means the application tier reaches the database privately. Get the "
+                "endpoint from RDS → Databases → your database → Connectivity & security.",
+                "Now run the second command on your OWN computer, not on the instance. It must "
+                "FAIL — that failure is the evidence. The database has no public address and its "
+                "security group accepts the application tier only. Confirm it alongside RDS → "
+                "Connectivity & security, where Publicly accessible reads No."],
+         code=("Run these", ["# on the instance, via Session Manager - expect: succeeded!",
+                             "nc -zv <YOUR-DB-ENDPOINT> 5432",
+                             "",
+                             "# on your own computer - expect it to time out",
+                             "# Windows, in PowerShell:",
+                             "Test-NetConnection <YOUR-DB-ENDPOINT> -Port 5432",
+                             "# macOS or Linux, in Terminal:",
+                             "nc -zv -w 10 <YOUR-DB-ENDPOINT> 5432"]),
          capture="the page loading, the target group showing two healthy targets in two zones, and "
                  "the port test succeeding.",
          standard=None, uoc=[]),
@@ -573,7 +605,7 @@ TESTS = [
                  "To fail the database over: RDS → Databases → select it → Actions → Reboot, and "
                  "tick Reboot with failover.",
                  "Do not do both at once. You want to know which one caused what."],
-         capture="the failure you caused and the evidence the service survived it.",
+         capture="three things, whichever simulation you ran: the ACTION you took (the terminating instance, or the RDS event showing the failover); the SERVICE while it happened (your browser still loading the page — include a clock or timestamp if you can); and the RECOVERY (the Auto Scaling group activity showing the replacement, or the target group returning to healthy). If the service did go down, capture that honestly — a recorded outage is evidence, and you compare it against what you predicted in task 18.",
          standard=None, uoc=[]),
 
     dict(n="T3", title="Resize simulation",
@@ -594,7 +626,8 @@ TESTS = [
                 "Identify every period where the service was not serving.",
                 "Work out the availability percentage and show your calculation.",
                 "State one limitation of how you measured it."],
-         clicks=["CloudWatch → Metrics → All metrics → ApplicationELB → Per AZ, per LB Metrics → "
+         clicks=["CloudWatch → Metrics → All metrics → ApplicationELB → Per AppELB, per AZ, per TG "
+                 "Metrics → "
                  "HealthyHostCount. Set the time range to cover your session.",
                  "Availability is uptime divided by total time. If you were working for 3 hours and "
                  "the service was down for 90 seconds, that is 1.5/180 — work it out properly and "

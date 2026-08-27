@@ -70,7 +70,7 @@ def build(path):
         doc, h1, h2, mode="student",
         design=content.DESIGN, build=content.BUILD, tests=content.TESTS,
         closeout=content.CLOSEOUT, questions=[], reflections=[],
-        current_arch=content.CURRENT_ARCH)
+        current_arch=content.CURRENT_ARCH, notes=True)
 
     h1("Cleaning up your environment")
     for para in content.CLEANUP_INTRO:

@@ -165,13 +165,11 @@ CRITERIA_TABLE = [
     "justified from evidence that nothing needed changing",
     "A15 Feedback (task 27) — you took the completed work to the YAT ICT Manager and recorded the "
     "feedback and your response to it",
-    "A16 Sign-off (task 28) — the YAT ICT Manager has accepted the work and the sign-off block is "
-    "completed and signed",
-    "A17 Filing (task 29) — you named where you filed the completed workbook and which YAT policy "
+    "A16 Filing (task 28) — you named where you filed the completed workbook and which YAT policy "
     "required that location",
-    "A18 Knowledge questions (Q1–Q6) — you answered all six with reference to your own design and your "
+    "A17 Knowledge questions (Q1–Q6) — you answered all six with reference to your own design and your "
     "own build, in clear written English",
-    "A19 Reflection (R1–R3) — three honest reflective responses, all specific to your own work",
+    "A18 Reflection (R1–R3) — three honest reflective responses, all specific to your own work",
 ]
 
 RESULTS = [

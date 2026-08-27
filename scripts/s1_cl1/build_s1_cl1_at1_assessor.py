@@ -122,7 +122,7 @@ MARKING_A = [
     ['A10 - Executive Summary — one-page summary covering the recommendation, 5-year cost position, top 2–3 risks of the recommended option, and the asked-for decision. Numbers reconcile with A5 ', '[ICTICT517 PC 1.4] (written report-out to superior)'],
     ['A11 - Appendix 2 Knowledge Evidence — student answers all 9 KE questions (5 selection-style + 4 demonstration-style) with reference to specific sections of their own Business Case (not generic textbook answers)', '[ICTCLD401 KE 1] · [ICTCLD401 KE 2] · [ICTCLD401 KE 3] · [ICTCLD401 KE 4] · [ICTCLD401 KE 11] · [ICTCLD502 KE 1] · [ICTCLD502 KE 2] · [ICTCLD502 KE 3] · [ICTICT517 KE 1] · [ICTICT517 KE 2] · [ICTICT517 KE 3] · [ICTICT517 KE 4]'],
     ['A12 - §11 Feedback — completed during/after the Part B presentation event; one row per item of board feedback received, with the student\'s response and the resulting action ', '[ICTICT517 PC 2.4] (documented evaluation provided to superior for feedback)'],
-    ['A13 - Sign-off block — signed by the role-played YAT ICT Manager at the end of the Part B presentation event [ICTICT517 PC 3.3] (granted approval) ·', '[ICTCLD401 PC 4.1] (documented + communicated work formally signed off)'],
+    ['A13 - Sign-off block — signed by the role-played YAT ICT Manager at the end of the Part B presentation event [ICTICT517 PC 3.3] (granted approval) ·', '[ICTCLD401 PC 4.1] (documented + communicated work formally signed off) · [ICTCLD502 PC 5.3] (final sign off obtained from required personnel)'],
     ['A14 - Document quality — Business Case uses plain English, appropriate vocabulary, terminology, diagrams, numerical information, formatting and structure relevant to a professional consulting deliverable for an RTO client ', '[ICTICT517 FS Writing]'],
 ]
 
@@ -493,7 +493,7 @@ ASSESSOR_BODY = [
     ('p', "Includes student's response or follow-up action where applicable"),
     ('p', 'NYS: absent, blank, or evidently not completed at the event.'),
     ('p', '13. Marking the Sign-off block'),
-    ('p', 'UoC evidenced: [ICTICT517 PC 3.3] Obtain approval from required personnel · [ICTCLD401 PC 4.1] Document and communicate work to required personnel — the deck and its verbal delivery at the presentation event are the documenting and communicating; the sign-off is the required personnel receiving it.'),
+    ('p', 'UoC evidenced: [ICTICT517 PC 3.3] Obtain approval from required personnel · [ICTCLD401 PC 4.1] Document and communicate work to required personnel · [ICTCLD502 PC 5.3] Obtain final sign off from required personnel — the deck and its verbal delivery at the presentation event are the documenting and communicating; the sign-off is the required personnel receiving it.'),
     ('p', 'This is a critical artefact — NYS here forces overall NYS.'),
     ('p', 'Satisfactory looks like:'),
     ('p', 'Sign-off block populated with names, dates, signatures'),
