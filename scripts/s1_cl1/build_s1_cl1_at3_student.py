@@ -81,7 +81,7 @@ RESOURCES = [
 
 CRITERIA = [
     'To receive a Satisfactory result for AT3 you must:',
-    'Achieve Satisfactory on every criterion in the Part A Assessment Criteria table (HA Design — A1 through A7)',
+    'Achieve Satisfactory on every criterion in the Part A Assessment Criteria table (HA Design — A1 through A8)',
     'Achieve Satisfactory on every criterion in the Part B Assessment Criteria table (HA Deployment Report — B1 through B16)',
     'Submit both deliverables (.docx) with all sections and appendices populated, using the YAT-provided templates',
 ]
@@ -96,8 +96,9 @@ MARKING_A = [
     'A3 - §3.5 Review findings documented — you produced a clear summary of the review findings (the gap between AT2 baseline and the §2 HA requirements) suitable for stakeholder review',
     'A4 - §4.1–§4.12 HA architecture designed — you produced an HA-equivalent architecture covering all layers (IAM, network cross-AZ, compute cross-AZ, ALB cross-AZ, RDS Multi-AZ, storage, security, monitoring HA-tuned, naming, backup)',
     'A5 - §4.13–§4.15 HA design state — recovery objectives, vertical-scaling considerations, SPOFs removed — you documented the recovery objectives the HA design achieves, the components still requiring vertical scaling, and the SPOFs from the baseline that the HA design removes',
-    "A6 - §4 (overall) Design documented per business needs — your design is complete, internally consistent, and addresses YAT's business needs (99.9% availability, ≤1h RPO, ≤4h RTO, data residency)",
-    'A7 - HA Design document quality — uses plain English, appropriate technical vocabulary, structure, and depth relevant to a professional consulting design deliverable',
+    'A6 - §5 Implementation sequencing — you planned the order you would apply the HA changes during the maintenance window, giving each change a duration, its expected impact, a verification step and a rollback, and stated the total window and the buffer left',
+    "A7 - §4 (overall) Design documented per business needs — your design is complete, internally consistent, and addresses YAT's business needs (99.9% availability, ≤1h RPO, ≤4h RTO, data residency)",
+    'A8 - HA Design document quality — uses plain English, appropriate technical vocabulary, structure, and depth relevant to a professional consulting design deliverable',
 ]
 
 MARKING_B = [

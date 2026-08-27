@@ -493,6 +493,7 @@ ASSESSOR_BODY = [
     ('p', "Includes student's response or follow-up action where applicable"),
     ('p', 'NYS: absent, blank, or evidently not completed at the event.'),
     ('p', '13. Marking the Sign-off block'),
+    ('p', 'UoC evidenced: [ICTICT517 PC 3.3] Obtain approval from required personnel · [ICTCLD401 PC 4.1] Document and communicate work to required personnel — the deck and its verbal delivery at the presentation event are the documenting and communicating; the sign-off is the required personnel receiving it.'),
     ('p', 'This is a critical artefact — NYS here forces overall NYS.'),
     ('p', 'Satisfactory looks like:'),
     ('p', 'Sign-off block populated with names, dates, signatures'),
