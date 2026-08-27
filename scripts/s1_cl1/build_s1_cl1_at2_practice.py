@@ -60,7 +60,8 @@ def build(path):
 
     render_run_sheet(doc, h1, h2, mode="student",
                      tasks=content.TASKS, tests=content.TESTS,
-                     questions=[], handover=False, region_note=content.REGION_NOTE)
+                     questions=[], handover=False, region_note=content.REGION_NOTE,
+                     notes=True)
 
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     doc.save(path)

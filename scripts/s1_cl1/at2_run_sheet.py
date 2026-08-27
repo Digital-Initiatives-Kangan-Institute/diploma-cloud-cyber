@@ -30,6 +30,7 @@ from docx.shared import Pt, Cm, RGBColor  # noqa: E402
 
 BODY_PT = 10.5
 IMAGE_CM = 16.0         # exemplar captures, sized to sit inside the 16.6 cm evidence box
+NOTES_BG = "EAF2F8"     # practice only: the student's own notes box
 UOC = "6B6660"          # muted — the assessor-only traceability line
 CAPTURE = TERRACOTTA    # exemplar: what the screenshot should have shown
 MODEL = TEAL            # exemplar: the model written answer
@@ -658,6 +659,27 @@ def _screenshot_slot(doc, capture, mode, image=None):
                    (capture, GREY, False, True)])
 
 
+def _notes_box(doc):
+    """A place for the student to write their own notes — PRACTICE ONLY.
+
+    Matches the AT3 practice sheet's box (run_sheet_render.notes_box): same fill, same width,
+    same placeholder, so the two practice sheets read as one thing. Deliberately duplicated
+    rather than imported while AT2 still carries its own copy of the renderer — the two
+    converge when AT2 moves onto the shared one.
+
+    One line tall to begin with, because a Word table cell grows as it is typed into. Students
+    who type a page of notes get a page; students who write nothing lose nothing to it.
+    """
+    _p(doc, "Personal notes", bold=True, size=9.5, after=3)
+    t = doc.add_table(rows=1, cols=1)
+    cell = t.rows[0].cells[0]
+    set_cell_borders(cell); shade_cell(cell, NOTES_BG); cell.width = Cm(16.6)
+    run = cell.paragraphs[0].add_run("< type any personal notes about this section here >")
+    run.italic = True; run.font.size = Pt(9.5)
+    run.font.color.rgb = RGBColor.from_string(GREY)
+    doc.add_paragraph()
+
+
 def _evidence_images(evidence_dir, key):
     """The exemplar captures filed for one task or test, in order.
 
@@ -819,7 +841,8 @@ def render_front_matter(doc, h1):
 
 
 def render_run_sheet(doc, h1, h2, mode="student", tasks=None, tests=None,
-                     questions=None, handover=None, region_note=None, evidence_dir=None):
+                     questions=None, handover=None, region_note=None, evidence_dir=None,
+                     notes=False):
     """Render the run sheet into `doc`. mode = student | assessor.
 
     evidence_dir — a folder of exemplar captures (see _evidence_images for the naming). When
@@ -827,6 +850,10 @@ def render_run_sheet(doc, h1, h2, mode="student", tasks=None, tests=None,
     description instead of the description alone, so a regenerated assessor copy is worked
     rather than blank. Defaults to None: every other caller renders exactly as before, and no
     other run sheet can pick up this one's captures.
+
+    notes — add a "Personal notes" box after each task and test. PRACTICE ONLY: the sheet a
+    student is working through to learn becomes partly theirs, and what they worked out at the
+    console is worth more to them later than anything we wrote. The assessment never gets one.
     """
     tasks = TASKS if tasks is None else tasks
     tests = TESTS if tests is None else tests
@@ -863,6 +890,8 @@ def render_run_sheet(doc, h1, h2, mode="student", tasks=None, tests=None,
         else:
             _place_evidence(doc, task.get("captures", [task.get("capture")]), mode,
                             _evidence_images(evidence_dir, f"task-{task['n']:02d}"))
+        if notes:
+            _notes_box(doc)
 
     # ---- tests ----
     h1("Testing")
@@ -889,6 +918,8 @@ def render_run_sheet(doc, h1, h2, mode="student", tasks=None, tests=None,
         _p(doc, "Evidence", bold=True, after=3)
         _place_evidence(doc, [test["capture"]], mode,
                         _evidence_images(evidence_dir, f"test-{i:02d}"))
+        if notes:
+            _notes_box(doc)
 
     # ---- knowledge questions ----
     if questions:
