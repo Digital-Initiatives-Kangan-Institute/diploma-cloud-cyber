@@ -339,8 +339,8 @@ TASKS = [
                    ("Datapoints to alarm", "1 out of 1"),
                    ("Name", "ledgerline-unhealthy-hosts"),
                    ("─ Alarm 2 ─", "the database is running out of room"),
-                   ("Metric", "RDS → Per-Database Metrics → FreeStorageSpace, filtered to your "
-                              "database"),
+                   ("Metric", "RDS → DBInstanceIdentifier, then filter for FreeStorageSpace "
+                              "and tick the row for your database"),
                    ("Statistic", "Minimum"), ("Period", "5 minutes"),
                    ("Condition", "Lower than 20% of the 20 GiB you allocated"),
                    ("Working that out", "the field takes bytes, not gigabytes. 20 GiB is "
@@ -359,7 +359,7 @@ TASKS = [
                  "Create an SNS topic named ledgerline-alerts with your email. Next, name the "
                  "alarm, and finish.",
                  "Create alarm again for the second one. Select metric, choose RDS, then "
-                 "Per-Database Metrics.",
+                 "DBInstanceIdentifier.",
                  "Filter for FreeStorageSpace, tick the row for your database, Select metric.",
                  "Set Statistic to Minimum and Period to 5 minutes.",
                  "Under Conditions choose Lower and type the byte figure you worked out above.",

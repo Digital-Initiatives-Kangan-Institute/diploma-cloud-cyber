@@ -366,8 +366,8 @@ TASKS = [
                    ("Name", "yat-lms-unhealthy-hosts"),
                    ("Description", "any target behind the load balancer has failed its health check"),
                    ("\u2500 Alarm 2 \u2500", "the database is running out of room"),
-                   ("Metric", "RDS \u2192 Per-Database Metrics \u2192 FreeStorageSpace, filtered to your "
-                              "database instance"),
+                   ("Metric", "RDS \u2192 DBInstanceIdentifier, then filter for FreeStorageSpace "
+                              "and tick the row for your database"),
                    ("Statistic", "Minimum"),
                    ("Period", "5 minutes"),
                    ("Threshold type", "Static"),
