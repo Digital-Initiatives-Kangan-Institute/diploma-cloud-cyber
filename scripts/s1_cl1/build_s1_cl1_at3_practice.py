@@ -72,6 +72,16 @@ def build(path):
         closeout=content.CLOSEOUT, questions=[], reflections=[],
         current_arch=content.CURRENT_ARCH)
 
+    h1("Cleaning up your environment")
+    for para in content.CLEANUP_INTRO:
+        R.p(doc, para, after=8)
+    for i, (title, detail) in enumerate(content.CLEANUP, 1):
+        par = doc.add_paragraph()
+        par.paragraph_format.space_after = Pt(2)
+        lead = par.add_run(f"{i}.  "); lead.bold = True; lead.font.size = Pt(R.BODY_PT)
+        head = par.add_run(title); head.bold = True; head.font.size = Pt(R.BODY_PT)
+        R.p(doc, detail, size=9.5, indent=0.6, after=8)
+
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     doc.save(path)
     print(f"Wrote {path}")

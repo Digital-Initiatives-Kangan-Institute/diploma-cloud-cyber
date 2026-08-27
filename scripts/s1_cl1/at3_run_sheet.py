@@ -507,9 +507,11 @@ BUILD = [
                   "environment, Sydney will not be listed — choose us-east-1, or whichever region "
                   "you do have. The template builds the same thing in any region.", True)],
                 "Open CloudFormation → Create stack → Upload a template file, and select it.",
-                "Give the stack a name, provide any parameters it asks for, and launch it.",
+                "Give the stack a name. Every parameter is defaulted except the database master "
+                "password — type one of at least 8 characters and keep a note of it. Then "
+                "launch the stack.",
                 "Wait until the stack reads CREATE_COMPLETE. This takes 10–15 minutes.",
-                "Open the load balancer's DNS name in a browser and confirm the placeholder page loads."],
+                "Open the load balancer's DNS name in a browser and confirm the placeholder page loads. Type http:// in front of it — the load balancer only listens on HTTP port 80, and a browser left to itself will try HTTPS and fail."],
          note="if the stack fails, read the Events tab — the first failure in the list is the cause; the "
               "rest are rollbacks of it. Tell your assessor before you start again.",
          capture="the stack at CREATE_COMPLETE, and the placeholder page loading through the load balancer.",
@@ -542,6 +544,13 @@ BUILD = [
          from_q=8,
          job="Edit the Auto Scaling group to match your design — the subnets it launches into, and its "
              "capacity. Then wait for the second instance to launch and become healthy.",
+         note="a new instance is not healthy the moment it launches. It has to boot and install its "
+              "web server first, and while that happens the target group reports it Unhealthy with "
+              "Request timed out — correctly, because nothing is listening on port 80 yet. On "
+              "Windows it takes about six minutes, and can take ten. Wait for it. Do not change "
+              "settings, terminate the instance or start over: an instance that looks stuck is "
+              "almost always one that is still installing, and intervening is how you turn a "
+              "five-minute wait into a rebuild.",
          capture="the Auto Scaling group's instances, showing instances in two different Availability "
                  "Zones, and the target group showing both healthy.",
          uoc=["ICTCLD502 PC 4.1", "ICTCLD502 PE 2"],
@@ -584,7 +593,8 @@ TESTS = [
     dict(n="T1", title="Confirm every tier still works, in both zones",
          job="Before you break anything deliberately, confirm the environment you have just changed is "
              "healthy. A simulation against a broken environment tells you nothing.",
-         steps=["Open the load balancer's DNS name in a browser and confirm the placeholder page loads.",
+         steps=["Open the load balancer's DNS name in a browser — with http:// in front — and "
+                "confirm the placeholder page loads.",
                 "Open the target group and confirm both instances are healthy, in two different zones.",
                 "Connect to one instance with Session Manager and confirm it reaches the database on "
                 "port 3306.",
@@ -601,7 +611,7 @@ TESTS = [
     dict(n="T2", title="Failure simulation",
          job="Run the failure simulation you planned in task 18. Watch what happens to the LMS while "
              "you do it — that is the evidence, not the console screen afterwards.",
-         steps=["Open the load balancer's address in a browser and set it refreshing, or keep reloading "
+         steps=["Open the load balancer's address in a browser (http://, not https://) and set it refreshing, or keep reloading "
                 "it by hand. This is how you will see whether the LMS stayed up.",
                 "Execute the failure you planned — terminate an instance, or reboot the database with "
                 "failover.",
@@ -936,6 +946,8 @@ def render(doc, h1, h2, mode="student", design=None, build=None, tests=None,
                            given=src.get("given", 0))
         if task.get("steps"):
             R.steps(doc, task["steps"])
+        if task.get("clicks"):
+            R.clicks(doc, task["clicks"])
         if task.get("code"):
             label, lines = task["code"]
             R.p(doc, label, bold=True, after=3)
@@ -961,6 +973,8 @@ def render(doc, h1, h2, mode="student", design=None, build=None, tests=None,
         if test.get("resources"):
             R.resources_block(doc, test["resources"])
         R.steps(doc, test["steps"])
+        if test.get("clicks"):
+            R.clicks(doc, test["clicks"])
         if test.get("code"):
             label, lines = test["code"]
             R.p(doc, label, bold=True, after=3)

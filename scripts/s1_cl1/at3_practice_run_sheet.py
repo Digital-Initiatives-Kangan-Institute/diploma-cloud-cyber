@@ -423,10 +423,13 @@ BUILD = [
                  ("In the Learner Lab choose us-east-1.", True)],
                 "Open CloudFormation → Create stack → With new resources (standard).",
                 "Choose Upload a template file, select the template, and choose Next.",
-                "Give the stack a name, fill in any parameters, and choose Next twice, then Submit.",
+                "Give the stack a name. Every parameter is already filled in except one: type a "
+                "database master password, at least 8 characters. Write it down — you will not "
+                "be shown it again, and nothing will remind you of it.",
+                "Choose Next, then Next again, then Submit.",
                 "Wait for CREATE_COMPLETE — about 10 minutes. The Events tab shows progress.",
                 "Open EC2 → Load Balancers, copy the DNS name of ledgerline-alb, and open it in a "
-                "browser tab to confirm the page loads."],
+                "browser tab to confirm the page loads. Type http:// in front of it — the load balancer only listens on HTTP port 80, and a browser left to itself will try HTTPS and fail."],
          clicks=["If the stack fails, open the Events tab and scroll to the FIRST red row — that is "
                  "the cause. Everything below it is the rollback.",
                  "A stack that rolled back has to be deleted before you can try again with the same "
@@ -479,11 +482,17 @@ BUILD = [
          from_q=8,
          job="Edit the Auto Scaling group to match your task 8 design — the subnets it launches "
              "into, and its capacity. Then wait for the second instance to become healthy.",
+         note="a new instance is not healthy the moment it launches — it has to boot and start its "
+              "web server first, and until it does the target group reports it Unhealthy with "
+              "Request timed out. On Linux that is quick — a minute or two. On a Windows server, which "
+              "is what the assessment uses, expect about six minutes and allow up to ten. Either "
+              "way the rule is the same: wait. Do "
+              "not terminate it or change settings because it looks stuck.",
          clicks=["Open EC2 → Auto Scaling groups and select ledgerline-asg.",
                  "Details tab → Network → Edit. Add your new subnet so BOTH application subnets are "
                  "selected, then Update.",
-                 "Details tab → Group details → Edit. Set Desired, Minimum and Maximum to your task "
-                 "8 numbers, then Update.",
+                 "Details tab → Capacity overview → Edit. Set Desired capacity, and the Scaling "
+                 "limits minimum and maximum, to your task 8 numbers, then Update.",
                  "Activity tab — watch for a new instance launching. It takes a few minutes.",
                  "Instance management tab — confirm you have two instances and that their "
                  "Availability Zone values are different.",
@@ -538,7 +547,8 @@ TESTS = [
     dict(n="T1", title="Confirm every tier still works, in both zones",
          job="Before you break anything deliberately, confirm what you have just changed is "
              "healthy. A simulation against a broken environment tells you nothing.",
-         steps=["Open the load balancer's DNS name in a browser and confirm the page loads.",
+         steps=["Open the load balancer's DNS name in a browser — with http:// in front — and "
+                "confirm the page loads.",
                 "Open the target group and confirm both instances are healthy, in two different "
                 "zones.",
                 "Connect to one instance with Session Manager and confirm it reaches the database "
@@ -552,7 +562,8 @@ TESTS = [
     dict(n="T2", title="Failure simulation",
          job="Run the failure simulation you planned in task 18. Watch what happens to Ledgerline "
              "while you do it — that is the evidence, not the console screen afterwards.",
-         steps=["Open the load balancer address in a browser and keep reloading it.",
+         steps=["Open the load balancer address in a browser (http://, not https://) and keep "
+                "reloading it.",
                 "Execute the failure you planned — terminate an instance, or reboot the database "
                 "with failover.",
                 "Record the time, what the browser did, and how long before it was normal again.",
@@ -616,4 +627,50 @@ CLOSEOUT = [
                    "you do about it?",
                    "If an alarm you built never fired during any of this, is that because nothing "
                    "went wrong, or because the threshold is wrong?"]),
+]
+
+
+# ---------------------------------------------------------------- cleaning up
+# Order matters and is not the reverse of the build order. The stack owns the VPC, and
+# CloudFormation cannot delete a VPC that still holds a subnet it did not create — so
+# everything built by hand has to go BEFORE the stack, and the instances have to go before
+# the subnet they sit in. Deleting the stack first fails at the last step.
+
+CLEANUP_INTRO = [
+    "Your lab has a credit budget, and everything above keeps spending it whether you are using "
+    "it or not. When you have finished, unwind it in the order below.",
+    "The order is not simply the reverse of the way you built it. The CloudFormation stack owns "
+    "the network everything sits in, so it has to go last — and it will refuse to delete while "
+    "anything you built by hand is still inside it.",
+]
+
+CLEANUP = [
+    ("Empty the Auto Scaling group",
+     "EC2 → Auto Scaling groups → your group → Capacity overview → Edit. Set Desired, Minimum "
+     "and Maximum all to 0 and update. Wait until the Instance management tab is empty. Do not "
+     "terminate the instances directly — the group will just launch replacements."),
+    ("Delete the NAT gateway you created by hand",
+     "VPC → NAT gateways → select the one you made in task 21 → Actions → Delete. Wait until "
+     "State reads Deleted. The stack's own NAT gateway is not yours to delete; the stack takes "
+     "that one."),
+    ("Release its Elastic IP",
+     "VPC → Elastic IPs. The one with no Name and nothing associated is the address that NAT "
+     "gateway was using — deleting the gateway does not release it, and an unattached address "
+     "bills by the hour. Select it → Actions → Release Elastic IP addresses. If the release "
+     "fails, the gateway has not finished deleting; wait two minutes and try again."),
+    ("Delete the route table you created by hand",
+     "VPC → Route tables → the one you made in task 21 → Actions → Delete route table. "
+     "Deleting it removes its subnet association for you."),
+    ("Delete the subnet you created by hand",
+     "VPC → Subnets → the one you made in task 20 → Actions → Delete subnet. If it refuses "
+     "because of a network interface, something in it has not finished terminating — wait a "
+     "couple of minutes and try again."),
+    ("Delete the CloudFormation stack",
+     "CloudFormation → your stack → Delete. This takes everything else with it: the VPC, the "
+     "remaining subnets, the load balancer, the database, the launch template, the alarms and "
+     "the stack's own NAT gateway and Elastic IP. Wait for it to disappear from the list."),
+    ("Check nothing survived",
+     "VPC → Your VPCs should no longer list yours. Check Elastic IPs is empty — an address left "
+     "allocated is the most common thing to miss, and the only one that keeps costing after "
+     "everything else is gone."),
 ]
