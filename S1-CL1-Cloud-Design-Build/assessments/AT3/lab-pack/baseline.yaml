@@ -346,7 +346,14 @@ Resources:
       TargetGroupARNs:
         - !Ref AppTargetGroup
       HealthCheckType: ELB
-      HealthCheckGracePeriod: 300
+      # 900, not the 300 AT2's run sheet specifies. A Windows instance has to boot and run
+      # Install-WindowsFeature Web-Server from user data before anything listens on port 80,
+      # which regularly takes longer than five minutes. At 300 the group terminated healthy
+      # instances that simply had not finished installing, launched replacements, and looped -
+      # first seen in AT3 task 22, where extending the group into the second zone is the first
+      # time an instance is launched with the ASG's health check watching the clock. The
+      # instance CloudFormation builds at stack-create time never hits it.
+      HealthCheckGracePeriod: 900
       Tags:
         - { Key: Name, Value: yat-lms-app, PropagateAtLaunch: true }
         - { Key: Project, Value: YAT-LMS, PropagateAtLaunch: true }
