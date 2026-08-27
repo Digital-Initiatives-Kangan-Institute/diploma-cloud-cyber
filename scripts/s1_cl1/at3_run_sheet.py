@@ -32,10 +32,6 @@ import run_sheet_render as R  # noqa: E402  (shared primitives; AT2 keeps its ow
 
 SITE = "https://yat.timbaird.com"
 
-REGION_NOTE = ("This engagement's production region is ap-southeast-2 (Sydney). The build "
-               "environment for this work is us-east-1 — work there, and treat it as standing "
-               "in for Sydney throughout.")
-
 # ---------------------------------------------------------------- front matter
 
 SCENARIO = [
@@ -65,10 +61,11 @@ ASSESSOR_PROVIDES = ("Your assessor will provide the baseline lab-pack — a Clo
                      "first task of Part B. Ask your assessor where to download it from.")
 
 INSTRUCTIONS = [
+    "This is an open-book assessment. You may use the YAT intranet, AWS documentation, and anything "
+    "you have from class — including your own notes and any practice work you have done. What you "
+    "may not use is another student.",
     "Part A is the design. Work the tasks in order — each one builds on the answer before it. "
     "They tell you what to decide; they do not tell you what to decide it to.",
-    "Your Part A answers are marked before you start Part B. If something in your design will not "
-    "work, you will be told, and you correct it before you build. That is the point of the order.",
     "Part B is the build. Every task names the Part A task it comes from — copy your own answer "
     "into the task before you build it. You are implementing your design, not ours.",
     "Take each screenshot as you finish the task, not at the end. Recreating a screen after you have "
@@ -79,6 +76,10 @@ INSTRUCTIONS = [
 
 # ---------------------------------------------------------------- the supplied current state
 
+NETWORK_DIAGRAM = ("Network diagram — this environment drawn out, including the campus it connects "
+                   "back to",
+                   f"{SITE}/intranet/s1-cl1-at3/ict/network-diagram-post-cutover")
+
 CURRENT_ARCH_INTRO = [
     "This is the environment you are hardening. It is what the previous phase built and handed over, "
     "and the lab-pack in Part B task 19 recreates it exactly. Read it before you answer anything — "
@@ -86,9 +87,14 @@ CURRENT_ARCH_INTRO = [
 ]
 
 CURRENT_ARCH = [
-    ("Region", "us-east-1, standing in for ap-southeast-2 (Sydney)"),
+    ("Region", [("For the scenario this infrastructure sits in the Sydney region, ap-southeast-2. "
+                 "Use that region if it is available to you. ", False),
+                ("If you are working in AWS Academy Learner Lab or a similar restricted "
+                 "environment, Sydney will not be offered — build in us-east-1, or whichever "
+                 "region you do have. The work is identical either way.", True)]),
     ("Network", "VPC yat-lms-vpc, 10.0.0.0/16"),
-    ("Subnets", "public-web-a  10.0.1.0/24  (us-east-1a)  ·  public-web-b  10.0.2.0/24  (us-east-1b)  ·  "
+    ("Subnets", "zone names below follow us-east-1; in another region read -1a and -1b as that "
+                "region's first two zones  ·  public-web-a  10.0.1.0/24  (us-east-1a)  ·  public-web-b  10.0.2.0/24  (us-east-1b)  ·  "
                 "private-app-a  10.0.11.0/24  (us-east-1a)  ·  private-data-a  10.0.21.0/24  (us-east-1a)  ·  "
                 "private-data-b  10.0.22.0/24  (us-east-1b)"),
     ("Where the load actually is", "everything that serves the LMS runs in us-east-1a. public-web-b and "
@@ -122,6 +128,12 @@ CURRENT_ARCH = [
 
 DESIGN = [
     dict(n=1, title="The targets this design has to meet",
+         resources=[
+             ("LMS Cloud Migration Requirements — the availability, recovery and service-level targets the board signed off on. The figures you need are here",
+              f"{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/migration-requirements"),
+             ("LMS Application Specification — the workload those targets are set against: who uses it, how many at once, and when",
+              f"{SITE}/intranet/s1-cl1-at3/ict/lms-application-spec"),
+         ],
          prompt="Before you design anything, establish what the design is held to. Read the LMS Cloud "
                 "Migration Requirements and the LMS Application Specification, and record the "
                 "availability, recovery and service-level targets the HA design must achieve. Name the "
@@ -131,6 +143,7 @@ DESIGN = [
                   "time objective, and attributes each to a source document rather than inventing it. "
                   "The exact figures are in the supplied documents; a student who transcribes them "
                   "correctly has met the item. Additional service-level rows are welcome, not required.",
+         given=1, blank_rows=4,
          table=(["Requirement", "Target", "Where it came from"],
                 [["Availability", "99.9%", "LMS Cloud Migration Requirements"],
                  ["Recovery point objective (RPO)", "≤ 1 hour", "LMS Cloud Migration Requirements"],
@@ -139,6 +152,12 @@ DESIGN = [
                   "LMS Application Specification"]])),
 
     dict(n=2, title="Review the current environment against those targets",
+         resources=[
+             ("Network Diagram — the environment drawn out, so you can see which tier sits where. Your work is the AWS side only",
+              f"{SITE}/intranet/s1-cl1-at3/ict/network-diagram-post-cutover"),
+             ("LMS Server Status — what is actually running post-cutover, tier by tier",
+              f"{SITE}/intranet/s1-cl1-at3/ict/lms-server-status-post-cutover"),
+         ],
          prompt="Go through the current environment tier by tier. For each, say whether it meets the "
                 "targets you recorded in task 1, and if it does not, why not. Work from what is "
                 "described above — not from what you would expect a cloud environment to look like.",
@@ -147,6 +166,7 @@ DESIGN = [
                   "general sense that something is 'not best practice'. A review that reads as a "
                   "description of the architecture rather than an assessment against targets has not met "
                   "the item.",
+         given=1, blank_rows=6,
          table=(["Tier", "Meets the targets?", "Why / why not"],
                 [["Network", "No", "every subnet carrying load is in us-east-1a; losing that zone loses the LMS"],
                  ["Compute", "No", "one instance, minimum 1 — losing it takes the LMS down until a replacement boots"],
@@ -157,15 +177,21 @@ DESIGN = [
                                           "reports per-zone health or a database failover"]])),
 
     dict(n=3, title="Single points of failure",
+         resources=[
+             ("Network Diagram — read it looking for anything there is only one of",
+              f"{SITE}/intranet/s1-cl1-at3/ict/network-diagram-post-cutover"),
+         ],
          prompt="Identify every single point of failure in the current environment — every component "
                 "whose failure takes the LMS down or degrades it below the targets. For each, say what "
                 "the failure looks like and what YAT loses. Be thorough: one you miss here is one your "
-                "design will not remove and your simulations will not catch.",
+                "design will not remove and your simulations will not catch. "
+                "Work through the environment tier by tier and ask what happens if that one component stops. Anything that exists once, in one place, is where to look.",
          uoc=["ICTCLD502 PC 2.2"],
          standard="the student identifies the availability-zone concentration, the single application "
                   "instance and the single-AZ database. Those three are the substance of the item. The "
                   "NAT gateway is a fourth and a strong answer finds it. Consequences must be stated in "
                   "terms of the LMS, not as generic risk language.",
+         given=0, blank_rows=6,
          table=(["Component", "Failure mode", "Consequence for YAT"],
                 [["us-east-1a", "availability-zone failure", "total LMS outage — every tier that serves traffic is in it"],
                  ["The single EC2 instance", "instance or host failure",
@@ -176,6 +202,12 @@ DESIGN = [
                   "app tier loses outbound access; patching and any outbound integration stop"]])),
 
     dict(n=4, title="Recovery objectives the current environment actually achieves",
+         resources=[
+             ("LMS Cloud Migration Requirements — the RPO and RTO targets you are measuring today's environment against",
+              f"{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/migration-requirements"),
+             ("LMS Server Status — the backup arrangements currently in place, which set the RPO you can actually achieve",
+              f"{SITE}/intranet/s1-cl1-at3/ict/lms-server-status-post-cutover"),
+         ],
          prompt="For each component, estimate what the current environment delivers today — how much "
                 "data would be lost, and how long recovery would take. Put numbers on it. “Worse than "
                 "target” is not an estimate.",
@@ -184,19 +216,26 @@ DESIGN = [
                   "precise numbers are estimates and will vary — what is being assessed is that the "
                   "student reasons from the actual configuration (7-day automated backups, no standby, "
                   "ASG replacement time) rather than guessing.",
+         given=1, blank_rows=3,
          table=(["Component", "Current RPO", "Current RTO", "Meets target?"],
                 [["Application tier", "n/a — stateless", "5–10 min (ASG boots a replacement)", "No"],
                  ["Database", "up to 24 h (last automated backup)", "2–6 h (restore + cutover)", "No"],
-                 ["Whole service (zone loss)", "up to 24 h", "hours — nothing to fail over to", "No"]])),
+                 ["Whole service", "up to 24 h", "hours — nothing to fail over to", "No"]])),
 
     dict(n=5, title="Components that have to scale vertically",
+         resources=[
+             ("LMS Application Specification — the load each tier carries, which is what tells you whether growth means more of them or bigger ones",
+              f"{SITE}/intranet/s1-cl1-at3/ict/lms-application-spec"),
+         ],
          prompt="Some components can only be made bigger, not more numerous. Identify which components "
                 "in this environment are in that position, and what happens to availability while they "
-                "are being resized.",
+                "are being resized. "
+                "Look across compute, storage and the database — for each, ask whether you could add another one alongside it, or whether the only option is a bigger one.",
          uoc=["ICTCLD502 PC 2.4"],
          standard="the student identifies the database as the vertically-scaled component and states that "
                   "resizing it interrupts service in the current single-AZ configuration. Recognising "
                   "that the application tier scales horizontally instead is part of a complete answer.",
+         given=0, blank_rows=4,
          table=(["Component", "Why it must scale vertically", "Availability impact while it scales"],
                 [["RDS instance", "one database instance serves all traffic; you change its class, not its count",
                   "outage for the duration of the change — single-AZ has nothing to fail over to"],
@@ -204,6 +243,10 @@ DESIGN = [
                  ["Application tier", "it does not — the ASG adds instances instead", "none, if more than one instance is running"]])),
 
     dict(n=6, title="Summarise your review",
+         resources=[
+             ("LMS Migration Role Brief — who Sam Walker is and what they are accountable for. You are writing this summary for them",
+              f"{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/role-brief"),
+         ],
          prompt="Write a short summary of what you found: the gap between the current environment and "
                 "the targets from task 1, and which components drive that gap. Sam Walker will read "
                 "this before approving the work, so write it for someone who runs YAT's ICT rather than "
@@ -219,20 +262,30 @@ DESIGN = [
                  "Written for the ICT Manager, not for another engineer."]),
 
     dict(n=7, title="Design — the network",
+         resources=[
+             ("LMS Cloud Architecture — Baseline Design — the addressing plan and naming conventions the environment already follows",
+              f"{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/cloud-architecture-baseline"),
+         ],
          prompt="Your application tier has to be able to run in two availability zones. Look at the "
                 "subnets that already exist. What do you need to add, and where? Record the subnet or "
-                "subnets you are designing in, then sketch the network you are aiming for.",
+                "subnets you are designing in, then sketch the network you are aiming for. "
+                "Name it the way the existing subnets are named — what it carries, and which zone it is in.",
          uoc=["ICTCLD502 PC 3.1", "ICTCLD502 PE 1"],
          standard="the student designs a private application subnet in the second availability zone. "
                   "That is the item — the environment has public and data subnets in us-east-1b already, "
                   "but no application subnet, so this cannot be answered by enabling something that "
                   "exists. The CIDR chosen is context; it must be inside 10.0.0.0/16 and must not "
                   "collide with an existing subnet.",
+         given=0, blank_rows=2,
          table=(["Subnet name", "CIDR", "Zone", "What it carries"],
                 [["private-app-b", "10.0.12.0/24", "us-east-1b", "application instances — the second-zone half of the tier"]]),
          diagram="the environment you are designing — both zones, and which resources sit in each"),
 
     dict(n=8, title="Design — the application tier",
+         resources=[
+             ("LMS Application Specification — the concurrent-user load and the peak periods your capacity numbers have to carry",
+              f"{SITE}/intranet/s1-cl1-at3/ict/lms-application-spec"),
+         ],
          prompt="You now have somewhere for a second application instance to run. Design the Auto "
                 "Scaling group's configuration so the loss of one availability zone leaves the LMS "
                 "serving. Give a reason for the capacity numbers you choose.",
@@ -242,6 +295,7 @@ DESIGN = [
                   "2 or 3, the maximum, the scaling target and the warm-up are all context — a workable "
                   "alternative is not a defect. A minimum of 1 does not meet the item, whatever the "
                   "reasoning, because one instance in one zone is not resilient to a zone failure.",
+         given=1, blank_rows=5,
          table=(["Setting", "Your design", "Why"],
                 [["Subnets", "private-app-a and private-app-b", "one instance in each zone"],
                  ["Minimum", "2", "a zone failure must still leave one instance serving"],
@@ -267,15 +321,23 @@ DESIGN = [
                  "A student who says 'make it highly available' without checking has missed the point of the task."]),
 
     dict(n=10, title="Design — the database",
+         resources=[
+             ("LMS HA Database Requirements — what the database specifically has to achieve, and the constraints on how",
+              f"{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/ha-database-requirements"),
+             ("LMS Cloud Migration Requirements — the RPO and RTO the database change has to deliver",
+              f"{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/migration-requirements"),
+         ],
          prompt="The database is the component with the worst recovery numbers in task 4. Design "
                 "the change that fixes it, and state what it gives you that the current configuration "
-                "does not.",
+                "does not. "
+                "The settings worth considering include how the deployment is spread across availability zones, how long backups are retained, and what the application connects to. You do not need all of them — start with what fixes the recovery numbers.",
          uoc=["ICTCLD502 PC 3.1", "ICTCLD502 PE 1"],
          standard="the student designs a Multi-AZ deployment — a standby in the second zone with "
                   "automatic failover. That is the item; nothing else in the service meets an RTO of 4 "
                   "hours. A student who proposes a read replica instead has not met it (a replica is not "
                   "automatic failover) unless they also design the promotion process and account for its "
                   "time. Retention and window settings are context.",
+         given=0, blank_rows=4,
          table=(["Setting", "Your design", "Why"],
                 [["Multi-AZ", "yes — standby in us-east-1b", "automatic failover instead of restoring a backup"],
                  ["Endpoint", "unchanged", "the application connects to the same name; failover is transparent"],
@@ -285,13 +347,15 @@ DESIGN = [
     dict(n=11, title="Design — the outbound path",
          prompt="Your application tier will now run in two zones. Think about what the instances in the "
                 "new zone use to reach the internet. Design your answer, and be explicit if you are "
-                "accepting a risk rather than removing it.",
+                "accepting a risk rather than removing it. "
+                "Things you might record here: the gateway itself, and the route table that decides where a subnet's traffic goes.",
          uoc=["ICTCLD502 PC 3.1", "ICTCLD502 PC 3.2"],
          standard="the student recognises that a single NAT gateway in us-east-1a leaves the new zone "
                   "dependent on the old one, and either designs a second NAT gateway in public-web-b with "
                   "its own route table, or explicitly accepts the shared gateway and states the residual "
                   "risk. Both are satisfactory — the item is identifying and dealing with the point of "
                   "failure, not a particular remedy. Saying nothing about it is not.",
+         given=0, blank_rows=4,
          table=(["Setting", "Your design", "Why"],
                 [["NAT gateway", "a second one in public-web-b", "so private-app-b does not depend on us-east-1a"],
                  ["Route table", "private-app-b-rt — 0.0.0.0/0 to the new NAT gateway", "each zone routes out through its own zone"],
@@ -299,14 +363,20 @@ DESIGN = [
                   "an accepted, documented risk is a legitimate design position"]])),
 
     dict(n=12, title="Design — monitoring",
+         resources=[
+             ("LMS Cloud Migration Requirements — the service levels your monitoring has to be able to report against",
+              f"{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/migration-requirements"),
+         ],
          prompt="The two existing alarms tell you a target is unhealthy or storage is low. Neither tells "
                 "you a zone has gone or a database has failed over. Design the monitoring that would tell "
-                "you, and say what each alarm detects.",
+                "you, and say what each alarm detects. "
+                "An alarm needs a metric, a threshold and a failure it would catch. The two that exist today catch an unhealthy target and low database storage — start from what they would miss.",
          uoc=["ICTCLD502 PC 3.1", "ICTCLD502 PE 5"],
          standard="the student designs at least one alarm that would reveal a loss of availability the "
                   "current set would miss — per-zone healthy host count, a database failover event, or an "
                   "equivalent. Thresholds are context. Restating the two existing alarms is not designing "
                   "monitoring for high availability.",
+         given=0, blank_rows=4,
          table=(["Alarm", "What it measures", "Threshold", "What it detects"],
                 [["Healthy hosts per zone", "HealthyHostCount, per availability zone", "below 1 in either zone",
                   "one zone has stopped serving even though the LMS is still up"],
@@ -323,6 +393,7 @@ DESIGN = [
          standard="every point of failure from the student's own task 3 is accounted for, either "
                   "removed or explicitly accepted with a reason. An unaccounted-for entry is the failure "
                   "condition here, not a wrong remedy.",
+         given=0, blank_rows=5,
          table=(["Point of failure (from task 3)", "Removed by", "Or accepted because"],
                 [["us-east-1a concentration", "application subnet, ASG capacity and database standby in us-east-1b", "—"],
                  ["Single EC2 instance", "ASG minimum of two, one per zone", "—"],
@@ -330,24 +401,31 @@ DESIGN = [
                  ["Single NAT gateway", "second NAT gateway in public-web-b", "or: accepted, with the outbound risk stated"]])),
 
     dict(n=14, title="Recovery objectives your design achieves",
+         resources=[
+             ("LMS Cloud Migration Requirements — the targets you are checking your design against",
+              f"{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/migration-requirements"),
+         ],
          prompt="Redo task 4 against your design. What does each component deliver now, and does the "
                 "whole service meet the targets from task 1?",
          uoc=["ICTCLD502 PC 3.3"],
          standard="figures are quantified and the overall service is compared against the task 1 "
                   "targets. If the design does not meet a target, saying so with a reason is "
                   "satisfactory; claiming it does when the design plainly does not is the failure.",
+         given=1, blank_rows=3,
          table=(["Component", "Designed RPO", "Designed RTO", "Meets target?"],
                 [["Application tier", "n/a — stateless", "seconds — the other zone is already serving", "Yes"],
                  ["Database", "≤ 5 min (standby is synchronous)", "1–2 min (automatic failover)", "Yes"],
-                 ["Whole service (zone loss)", "≤ 5 min", "1–2 min", "Yes — meets 99.9% / RPO 1 h / RTO 4 h"]])),
+                 ["Whole service", "≤ 5 min", "1–2 min", "Yes — meets 99.9% / RPO 1 h / RTO 4 h"]])),
 
     dict(n=15, title="What still has to scale vertically?",
          prompt="Redo task 5 against your design. Which components still can only be made bigger, "
-                "and what does resizing cost you in availability now?",
+                "and what does resizing cost you in availability now? "
+                "Start from the components you listed in task 5.",
          uoc=["ICTCLD502 PC 3.4"],
          standard="the student recognises that the database still scales vertically, but that Multi-AZ "
                   "changes the cost of doing it — the resize happens on the standby and a failover "
                   "switches to it, so the interruption is a failover rather than an outage.",
+         given=0, blank_rows=3,
          table=(["Component", "Still scales vertically?", "Availability impact now"],
                 [["RDS instance", "Yes", "resize applies to the standby, then fails over — seconds, not an outage"],
                  ["Application tier", "No", "the ASG adds instances; no resize needed"]])),
@@ -369,6 +447,10 @@ DESIGN = [
                  "Anything corrected on the read-through is noted, not silently fixed."]),
 
     dict(n=17, title="The order you will do it in",
+         resources=[
+             ("Change Management Procedure — YAT's rules for changing a production system: notice, approval, and what a rollback plan has to contain",
+              f"{SITE}/intranet/s1-cl1-at3/policies/change-management"),
+         ],
          prompt="You have a maintenance window of about 3.5 hours on a Saturday night. Plan the order "
                 "you will apply your changes in. For each change give how long you expect it to take, "
                 "what the LMS looks like to a user while it happens, how you will confirm it worked, and "
@@ -379,6 +461,7 @@ DESIGN = [
                   "verification and a rollback, and the durations total less than the window with a stated "
                   "buffer. Exact durations are estimates; the item is planning the work, not predicting "
                   "AWS accurately.",
+         given=1, blank_rows=6,
          table=(["#", "Change", "Time", "Impact on the LMS", "How you verify it", "If it fails"],
                 [["1", "Create private-app-b", "5 min", "none", "subnet visible, correct zone", "delete it and retry"],
                  ["2", "Second NAT gateway + route table", "10 min", "none", "instance in the new subnet reaches the internet", "leave private-app-b on the existing route table"],
@@ -395,6 +478,7 @@ DESIGN = [
          standard="at least one failure and one resize simulation are planned, each with a stated "
                   "expected outcome. The expected outcome is what matters — Part B compares actual "
                   "against it, and a simulation with no prediction cannot be compared to anything.",
+         given=2, blank_rows=3,
          table=(["#", "Simulation", "What you will do", "What you expect", "How you will know"],
                 [["F1", "Instance failure", "terminate one application instance",
                   "the LMS stays reachable; the ASG launches a replacement",
@@ -416,6 +500,12 @@ BUILD = [
          job="Deploy the lab-pack your assessor provided. It builds the environment described at the "
              "start of Part A, so that everyone starts the maintenance window from the same place.",
          steps=["Download the lab-pack template from wherever your assessor has made it available.",
+                [("Set your region before anything else — the stack builds into whichever region "
+                  "is selected. For the scenario this is Sydney, ap-southeast-2; use it if the "
+                  "region selector offers it. ", False),
+                 ("If you are working in AWS Academy Learner Lab or a similar restricted "
+                  "environment, Sydney will not be listed — choose us-east-1, or whichever region "
+                  "you do have. The template builds the same thing in any region.", True)],
                 "Open CloudFormation → Create stack → Upload a template file, and select it.",
                 "Give the stack a name, provide any parameters it asks for, and launch it.",
                 "Wait until the stack reads CREATE_COMPLETE. This takes 10–15 minutes.",
@@ -429,7 +519,6 @@ BUILD = [
 
     dict(n=20, title="Create the application subnet in the second zone",
          from_q=7,
-         copy=(["Subnet name", "CIDR", "Zone", "What it carries"], "your answer to task 7"),
          job="Create the subnet you designed. Copy your own answer across first, then build exactly that.",
          capture="the subnet list filtered to yat-lms-vpc, showing your new subnet and its Availability Zone.",
          uoc=["ICTCLD502 PC 4.1", "ICTCLD502 PE 1"],
@@ -439,7 +528,6 @@ BUILD = [
 
     dict(n=21, title="Give the new subnet a path out",
          from_q=11,
-         copy=(["Setting", "Your design", "Why"], "your answer to task 11"),
          job="Build the outbound path you designed. If you designed a second NAT gateway, create it and "
              "its route table now. If you accepted the shared gateway, associate the new subnet with the "
              "existing private route table instead — and say so in the box.",
@@ -452,7 +540,6 @@ BUILD = [
 
     dict(n=22, title="Extend the application tier across both zones",
          from_q=8,
-         copy=(["Setting", "Your design", "Why"], "your answer to task 8"),
          job="Edit the Auto Scaling group to match your design — the subnets it launches into, and its "
              "capacity. Then wait for the second instance to launch and become healthy.",
          capture="the Auto Scaling group's instances, showing instances in two different Availability "
@@ -468,7 +555,6 @@ BUILD = [
 
     dict(n=23, title="Convert the database",
          from_q=10,
-         copy=(["Setting", "Your design", "Why"], "your answer to task 10"),
          job="Apply the database change you designed. Start this before the alarms task — it runs in the "
              "background and takes the longest of anything in this window.",
          note="apply it immediately rather than in the next maintenance window, or it will not have "
@@ -483,7 +569,6 @@ BUILD = [
 
     dict(n=24, title="Build your HA monitoring",
          from_q=12,
-         copy=(["Alarm", "What it measures", "Threshold", "What it detects"], "your answer to task 12"),
          job="Create the alarms you designed, notifying the existing yat-lms-alerts topic. Build at least "
              "the first one; build the others if the window allows.",
          capture="your new alarm or alarms in the CloudWatch console, showing the metric, the threshold "
@@ -598,6 +683,10 @@ CLOSEOUT = [
                  "A gap the simulations exposed and the student ignored is the failure condition here."]),
 
     dict(n=27, title="Hand it over",
+         resources=[
+             ("Change Management Procedure — the feedback and approval steps this engagement closes through",
+              f"{SITE}/intranet/s1-cl1-at3/policies/change-management"),
+         ],
          prompt="Take your completed work to Sam Walker, the YAT ICT Manager — your assessor plays this "
                 "role. Walk them through what you changed and what the simulations showed. Record the "
                 "feedback you get, your response to it, and anything you changed as a result.",
@@ -610,6 +699,10 @@ CLOSEOUT = [
                   "walked through the F1 and F2 results", "none — evidence already covered it"]])),
 
     dict(n=28, title="Get it signed off",
+         resources=[
+             ("Change Management Procedure — who is authorised to accept a completed change",
+              f"{SITE}/intranet/s1-cl1-at3/policies/change-management"),
+         ],
          prompt="The engagement closes when the ICT Manager accepts the work. Have them sign below.",
          uoc=["ICTCLD502 PC 5.3"],
          standard="the sign-off block is completed and signed by the role-played ICT Manager. An unsigned "
@@ -620,6 +713,12 @@ CLOSEOUT = [
                   "Approved / Approved with comments / Not accepted", "", ""]])),
 
     dict(n=29, title="File it",
+         resources=[
+             ("Records Management Policy — where a completed engagement document has to be filed",
+              f"{SITE}/intranet/s1-cl1-at3/policies/records-management"),
+             ("Backup and Retention Policy — how long it has to be kept once it is there",
+              f"{SITE}/intranet/s1-cl1-at3/policies/backup-retention"),
+         ],
          prompt="File this completed workbook where YAT's records procedures require, so YAT ICT can "
                 "find it after the engagement ends. State where you filed it and which YAT policy "
                 "required that location.",
@@ -658,6 +757,10 @@ QUESTIONS = [
                  "Both halves answered. One half is half the item."]),
 
     dict(n="Q3", uoc=["ICTCLD502 KE 6"],
+         resources=[
+             ("LMS Cloud Migration Requirements — the availability target your measurement is reported against",
+              f"{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/migration-requirements"),
+         ],
          q="Which tools did you use to measure the availability impact of a failure? Show the "
            "calculation you did for one specific simulation, using your own timing data, and name one "
            "thing your method could not see.",
@@ -668,6 +771,10 @@ QUESTIONS = [
                  "A student who cannot show the calculation has not measured anything."]),
 
     dict(n="Q4", uoc=["ICTCLD502 KE 7"],
+         resources=[
+             ("LMS Cloud Architecture — Baseline Design — which services the environment uses, so you can draw the responsibility line for each",
+              f"{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/cloud-architecture-baseline"),
+         ],
          q="For the services in your environment — the load balancer, the database, object storage — "
            "explain which fault tolerance AWS provides for you and which you had to design yourself. Be "
            "precise about where the line falls for each.",
@@ -703,6 +810,10 @@ QUESTIONS = [
 
 REFLECTIONS = [
     dict(n="R1", title="Decisions in hindsight",
+         resources=[
+             ("LMS Cloud Migration Requirements — the service levels a monitoring metric would report against",
+              f"{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/migration-requirements"),
+         ],
          prompt="Name one decision in your HA work you would make the same way again, and why it proved "
                 "right. Then name one you would revise, and what you would do differently.",
          points=["Both halves present — a validated decision and a revised one.",
@@ -730,21 +841,27 @@ REFLECTIONS = [
 # ---------------------------------------------------------------- rendering
 
 
-def _element(doc, h2, el, mode, part_a=True):
+def _element(doc, h2, el, mode, label="Task"):
     """A Part A design task or a close-out task — prompt, tags, capture. Both carry performance
     criteria, so both are framed as tasks; only the knowledge section asks questions."""
-    R.flag(doc, f"Task {el['n']}")
+    R.flag(doc, f"{label} {el['n']}")
     h2(el["title"])
-    R.uoc_line(doc, el["uoc"], mode)
-    R.standard_line(doc, el["standard"], mode)
     R.p(doc, el["prompt"], after=6)
+    if el.get("resources"):
+        R.resources_block(doc, el["resources"])
     if el.get("table"):
         cols, rows = el["table"]
-        R.design_table(doc, cols, rows, mode)
+        R.design_table(doc, cols, rows, mode,
+                       blank_rows=el.get("blank_rows", 3), given=el.get("given", 0))
     if el.get("points"):
         R.response_slot(doc, None, mode, points=el["points"])
     if el.get("diagram"):
         R.diagram_slot(doc, el["diagram"], mode)
+    R.uoc_line(doc, el.get("uoc", []), mode)
+    if el.get("standard"):
+        R.standard_line(doc, el["standard"], mode)
+    if el.get("consider"):
+        R.consider(doc, el["consider"])
 
 
 def render_front_matter(doc, h1):
@@ -764,17 +881,34 @@ def render_front_matter(doc, h1):
         R.p(doc, para, after=8)
 
 
-def render(doc, h1, h2, mode="student"):
-    """Render the whole workbook into `doc`. mode = student | assessor."""
-    R.p(doc, REGION_NOTE, after=10)
+def render(doc, h1, h2, mode="student", design=None, build=None, tests=None,
+           closeout=None, questions=None, reflections=None, current_arch=None):
+    """Render the whole workbook into `doc`. mode = student | assessor.
 
+    The content lists default to AT3's own. The PRACTICE sheet passes its own — same
+    renderer, same shapes, Ledgerline instead of the LMS — so the two can never drift
+    structurally even though every value in them differs.
+    """
+    DESIGN_ = DESIGN if design is None else design
+    BUILD_ = BUILD if build is None else build
+    TESTS_ = TESTS if tests is None else tests
+    CLOSEOUT_ = CLOSEOUT if closeout is None else closeout
+    QUESTIONS_ = QUESTIONS if questions is None else questions
+    REFLECTIONS_ = REFLECTIONS if reflections is None else reflections
     # ---- Part A ----
     h1("Part A — Design")
     h2("The environment you are hardening")
     for para in CURRENT_ARCH_INTRO:
         R.p(doc, para, after=6)
-    R.settings_table(doc, CURRENT_ARCH)
-    for el in DESIGN:
+    R.settings_table(doc, current_arch or CURRENT_ARCH)
+    label, url = NETWORK_DIAGRAM
+    par = doc.add_paragraph()
+    par.paragraph_format.space_after = R.Pt(4)
+    par.add_run("\u2022  ").font.size = R.Pt(R.BODY_PT)
+    R.add_hyperlink(par, label, url, size_pt=R.BODY_PT)
+    R.p(doc, "Your work in this assessment is the AWS side only — the campus network is not yours to "
+             "change and is not in scope.", italic=True, size=9.5, colour=R.GREY, after=10)
+    for el in DESIGN_:
         _element(doc, h2, el, mode)
 
     # ---- Part B ----
@@ -782,17 +916,24 @@ def render(doc, h1, h2, mode="student"):
     R.p(doc, "Your maintenance window is about 3.5 hours. Work the tasks in order — the order you "
              "planned in task 17 is the one to follow where it differs from the numbering here.",
         italic=True, size=9.5, colour=R.GREY, after=10)
-    for task in BUILD:
+    for task in BUILD_:
         R.flag(doc, f"Task {task['n']}")
         h2(task["title"])
-        R.uoc_line(doc, task["uoc"], mode)
-        R.standard_line(doc, task["standard"], mode)
         R.p(doc, task["job"], after=6)
-        if task.get("copy"):
-            cols, source = task["copy"]
-            R.p(doc, f"From your design — copy {source} into this table before you build.",
-                bold=True, size=9.5, after=3)
-            R.design_table(doc, cols, [], mode, blank_rows=4)
+        if task.get("resources"):
+            R.resources_block(doc, task["resources"])
+        if task.get("from_q"):
+            # Columns, model rows and scaffolding all come from the Part A task this builds,
+            # so the copy-forward table cannot drift from the design task it copies. The
+            # assessor copy shows that task's model answer filled in — what a correctly
+            # carried-forward design looks like; the student copy is theirs to fill.
+            src = next(d for d in DESIGN_ if d["n"] == task["from_q"])
+            cols, rows = src["table"]
+            R.p(doc, f"From your design — copy your answer to task {task['from_q']} into this "
+                     f"table before you build.", bold=True, size=9.5, after=3)
+            R.design_table(doc, cols, rows, mode,
+                           blank_rows=src.get("blank_rows", 3),
+                           given=src.get("given", 0))
         if task.get("steps"):
             R.steps(doc, task["steps"])
         if task.get("code"):
@@ -805,18 +946,20 @@ def render(doc, h1, h2, mode="student"):
             R.assessor_note(doc, task["assessor_note"], mode)
         R.p(doc, "Evidence", bold=True, after=3)
         R.screenshot_slot(doc, task["capture"], mode)
+        R.uoc_line(doc, task["uoc"], mode)
+        R.standard_line(doc, task["standard"], mode)
 
     # ---- tests ----
     h1("Testing and simulation")
     R.p(doc, "These prove the design works. Run them yourself and record what actually happened — a "
              "simulation that exposed a problem you then fixed is worth more than one you skipped.",
         italic=True, size=9.5, colour=R.GREY, after=10)
-    for test in TESTS:
+    for test in TESTS_:
         R.flag(doc, f"Test {test['n']}")
         h2(test["title"])
-        R.uoc_line(doc, test["uoc"], mode)
-        R.standard_line(doc, test["standard"], mode)
         R.p(doc, test["job"], after=6)
+        if test.get("resources"):
+            R.resources_block(doc, test["resources"])
         R.steps(doc, test["steps"])
         if test.get("code"):
             label, lines = test["code"]
@@ -828,32 +971,36 @@ def render(doc, h1, h2, mode="student"):
             R.assessor_note(doc, test["assessor_note"], mode)
         R.p(doc, "Evidence", bold=True, after=3)
         R.screenshot_slot(doc, test["capture"], mode)
+        R.uoc_line(doc, test["uoc"], mode)
+        R.standard_line(doc, test["standard"], mode)
 
     # ---- closing out ----
     h1("Closing the engagement")
-    for el in CLOSEOUT:
+    for el in CLOSEOUT_:
         _element(doc, h2, el, mode)
 
     # ---- knowledge questions ----
     h1("Knowledge questions")
     R.p(doc, "Answer each question about your own design and your own build. Refer to what you actually "
              "decided and what actually happened.", italic=True, size=9.5, colour=R.GREY, after=10)
-    for q in QUESTIONS:
+    for q in QUESTIONS_:
         R.flag(doc, f"Knowledge question {q['n'][1:]}")
         h2(q["q"][:70] + ("…" if len(q["q"]) > 70 else ""))
-        R.uoc_line(doc, q["uoc"], mode)
         R.p(doc, q["q"], after=6)
+        if q.get("resources"):
+            R.resources_block(doc, q["resources"])
         R.response_slot(doc, None, mode, points=q["points"])
+        R.uoc_line(doc, q["uoc"], mode)
 
     # ---- reflections ----
     h1("Reflection")
     R.p(doc, "Reflect on your own work — your judgement and your experience, not a summary of what you "
              "built. An honest “here is what I would change” earns more credit than “everything "
              "went perfectly”.", italic=True, size=9.5, colour=R.GREY, after=10)
-    for r in REFLECTIONS:
+    for r in REFLECTIONS_:
         R.flag(doc, f"Reflection {r['n'][1:]}")
         h2(r["title"])
-        R.uoc_line(doc, ["ICTCLD401 FS Learning", "ICTCLD401 FS Self-management skills",
-                         "ICTCLD502 FS Problem solving", "ICTCLD502 FS Self-management"], mode)
         R.p(doc, r["prompt"], after=6)
         R.response_slot(doc, None, mode, points=r["points"])
+        R.uoc_line(doc, ["ICTCLD401 FS Learning", "ICTCLD401 FS Self-management skills",
+                         "ICTCLD502 FS Problem solving", "ICTCLD502 FS Self-management"], mode)

@@ -38,9 +38,9 @@ MODEL = TEAL            # exemplar: the model written answer
 
 __all__ = [
     "BODY_PT", "UOC", "CAPTURE", "MODEL", "GREY", "TEAL", "CREAM", "add_hyperlink",
-    "p", "settings_table", "design_table", "box", "screenshot_slot", "diagram_slot",
-    "response_slot", "flag", "code", "note", "clicks", "assessor_note", "steps",
-    "uoc_line", "standard_line",
+    "p", "heading2", "settings_table", "design_table", "box", "screenshot_slot", "diagram_slot",
+    "response_slot", "flag", "code", "note", "clicks", "assessor_note", "steps", "consider",
+    "uoc_line", "standard_line", "resources_block",
 ]
 
 
@@ -58,23 +58,37 @@ def p(doc, text, size=BODY_PT, bold=False, italic=False, colour=None, indent=Non
 
 
 def settings_table(doc, settings):
-    """A given (label, value) table — what the student builds to. Values are supplied."""
+    """A given (label, value) table — what the student builds to. Values are supplied.
+
+    `value` is a plain string, or a list of (text, bold) segments where part of the value
+    needs to stand out from the rest.
+    """
     t = doc.add_table(rows=0, cols=2)
     for label, value in settings:
         cells = t.add_row().cells
         set_cell_borders(cells[0]); set_cell_borders(cells[1]); shade_cell(cells[0], CREAM)
         lr = cells[0].paragraphs[0].add_run(label); lr.bold = True; lr.font.size = Pt(9.5)
-        cells[1].paragraphs[0].add_run(value).font.size = Pt(9.5)
+        par = cells[1].paragraphs[0]
+        for text, bold in ([(value, False)] if isinstance(value, str) else value):
+            r = par.add_run(text); r.bold = bold; r.font.size = Pt(9.5)
         cells[0].width = Cm(4.2); cells[1].width = Cm(11.6)
     doc.add_paragraph()
 
 
-def design_table(doc, columns, rows, mode, blank_rows=3):
+def design_table(doc, columns, rows, mode, blank_rows=3, given=0):
     """A capture table the STUDENT fills in — the inverse of settings_table.
 
-    `rows` are the model answers, shown teal in the assessor copy. The student copy shows
-    the same grid with empty cells, `blank_rows` of them (or as many as the model has,
-    whichever is greater), so there is visibly room to answer.
+    `rows` are the model answers, shown teal in the assessor copy.
+
+    `given` is how many LEADING columns are pre-filled in the student copy too. It is the
+    scaffolding dial: pre-fill a column when knowing it is not the evidence (a student does
+    not demonstrate PC 2.3 by knowing that a database has a recovery objective), and leave it
+    blank when the column IS the finding the item asks for (naming the single points of
+    failure is the whole of PC 2.2). Given cells render as ordinary body text, not as model
+    answers — to the student they are part of the question.
+
+    `blank_rows` sets how much room an un-given table offers. Set it deliberately: three
+    blank rows on a "list every single point of failure" table reads as "there are three".
     """
     n = max(blank_rows, len(rows)) if mode != "assessor" else len(rows)
     t = doc.add_table(rows=0, cols=len(columns))
@@ -82,7 +96,14 @@ def design_table(doc, columns, rows, mode, blank_rows=3):
     for i, col in enumerate(columns):
         set_cell_borders(hdr[i]); shade_cell(hdr[i], CREAM)
         r = hdr[i].paragraphs[0].add_run(col); r.bold = True; r.font.size = Pt(9)
-    body = rows if mode == "assessor" else [[""] * len(columns)] * n
+
+    if mode == "assessor":
+        body = rows
+    else:
+        body = [[(row[i] if i < given else "") for i in range(len(columns))]
+                for row in rows[:n]]
+        body += [[""] * len(columns) for _ in range(n - len(body))]
+
     for row in body:
         cells = t.add_row().cells
         for i, val in enumerate(row):
@@ -204,12 +225,66 @@ def assessor_note(doc, text, mode):
 
 
 def steps(doc, items):
+    """Numbered steps. A step is a plain string, or a list of (text, bold) segments where
+    part of it needs to stand out."""
     for i, step in enumerate(items, 1):
         par = doc.add_paragraph()
         par.paragraph_format.left_indent = Cm(0.6)
         par.paragraph_format.space_after = Pt(3)
         lead = par.add_run(f"{i}.  "); lead.bold = True; lead.font.size = Pt(BODY_PT)
-        par.add_run(step).font.size = Pt(BODY_PT)
+        for text, bold in ([(step, False)] if isinstance(step, str) else step):
+            r = par.add_run(text); r.bold = bold; r.font.size = Pt(BODY_PT)
+    doc.add_paragraph()
+
+
+def heading2(doc, text):
+    """A task heading.
+
+    The Kangan template defines Heading 2 as WHITE text — presumably for a coloured band it
+    no longer sits on. Left alone, every task title in this document is invisible. The run
+    colour is set explicitly here rather than redefining the institutional style.
+    """
+    par = doc.add_paragraph(text, style="Heading 2")
+    for r in par.runs:
+        r.font.color.rgb = RGBColor.from_string(TEAL)
+    return par
+
+
+def resources_block(doc, items):
+    """'Related resources' — the scenario documents this element actually needs.
+
+    A task that asks a student to record an availability target without saying where the
+    target is written makes them hunt for it. The work is making the linkage — this document
+    tells me that figure — not the search. Each label says WHY the resource matters here, so
+    the student knows what they are opening it for, and links deep to a section anchor where
+    the document is long.
+    """
+    p(doc, "Related resources", bold=True, size=9.5, after=3)
+    for label, url in items:
+        par = doc.add_paragraph()
+        par.paragraph_format.left_indent = Cm(0.6)
+        par.paragraph_format.space_after = Pt(3)
+        par.add_run("\u2022  ").font.size = Pt(9.5)
+        add_hyperlink(par, label, url, size_pt=9.5)
+    doc.add_paragraph()
+
+
+def consider(doc, questions):
+    """'Things to consider' — the leading questions on a PRACTICE design task.
+
+    The practice sheet presents each design task exactly as the assessment does, then adds
+    these underneath. They are the teaching half: questions pointed enough that a student
+    who is awake cannot miss the answer, without ever stating it. The assessment has no
+    equivalent — there, the task stands on its own.
+    """
+    p(doc, "Things to consider", bold=True, size=9.5, after=3)
+    for q in questions:
+        par = doc.add_paragraph()
+        par.paragraph_format.left_indent = Cm(0.6)
+        par.paragraph_format.space_after = Pt(3)
+        par.add_run("•  ").font.size = Pt(9.5)
+        r = par.add_run(q); r.font.size = Pt(9.5); r.italic = True
+        r.font.color.rgb = RGBColor.from_string(TEAL)
     doc.add_paragraph()
 
 

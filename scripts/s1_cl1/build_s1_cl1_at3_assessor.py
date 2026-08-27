@@ -58,8 +58,7 @@ TIME_ALLOWED = [
     "Part A — Design: 4 hours",
     "Part B — Implementation window: 3.5 hours",
     "Knowledge questions and reflection: 1 hour",
-    "Part A is marked before Part B begins. A student whose design will not work is told so and "
-    "corrects it before building — see Assessment overview.",
+    "One continuous worksheet — the parts are worked in order, not split across separate sittings.",
 ]
 
 OVERVIEW = [
@@ -72,11 +71,7 @@ OVERVIEW = [
     "run sheet: the student deploys a supplied baseline, then builds their own Part A answers, runs "
     "failure and resize simulations, measures availability across the window, and closes the "
     "engagement with feedback and sign-off. There is no presentation or observation event.",
-    "PART A IS MARKED BEFORE PART B BEGINS. This is not optional sequencing. A student whose design "
-    "would not deliver high availability — most commonly an Auto Scaling minimum left at one — is told "
-    "so, corrects the design, and then implements the corrected version. Part B builds the student's "
-    "own design; without the Part A checkpoint, a student can spend the whole window faithfully "
-    "building something that cannot meet the requirement.",
+    "ONE CONTINUOUS WORKSHEET. The parts are worked in order but are not split across sittings, and Part A is not marked before Part B starts. Part B builds the student's own Part A answers — each build task names the design task it implements and asks the student to copy that answer across first. That copy-forward is what evidences [ICTCLD502 PE 1] and [ICTCLD502 PE 2], both of which require the same candidate to design AND implement the same infrastructure. A design that would not deliver high availability fails at its own design task and again at the build task that implements it; the standard is stated at both.",
     "WHAT IS BEING MARKED. Every settings table and worked answer in this document contains values we "
     "chose so that there is a concrete task to perform — the unit's wording is deliberately general. "
     "Each element therefore carries two assessor-only lines: 'Evidences', naming the UoC items, and "
@@ -98,8 +93,10 @@ OVERVIEW = [
     "work across more sittings.",
     "Teacher/assessor support level: the assessor may clarify what a task is asking, the scenario "
     "context, and the current architecture, but must not identify single points of failure for the "
-    "student, supply design values, or confirm whether a design decision is correct before Part A is "
-    "marked. The design is the student's own work.",
+    "student, supply design values, or confirm whether a design decision is correct. Correcting a "
+    "design before the student builds it would make the build an implementation of the assessor's "
+    "design rather than the student's, which is precisely what [ICTCLD502 PE 1] and [ICTCLD502 PE 2] "
+    "require it not to be. The design is the student's own work, and they build what they designed.",
     "Submission: the completed workbook (.docx) with every task and question answered and every evidence box "
     "populated, submitted via the LMS.",
     "The assessment will not proceed if for any reason it is not safe to do so. You must advise the "
@@ -412,7 +409,7 @@ def build(path):
                                "you can incorporate a Practical Observation Checklist.")
 
     h1 = lambda t: doc.add_paragraph(t, style="Heading 1")
-    h2 = lambda t: doc.add_paragraph(t, style="Heading 2")
+    h2 = lambda t: at3_run_sheet.R.heading2(doc, t)
     at3_run_sheet.render_front_matter(doc, h1)
     at3_run_sheet.render(doc, h1, h2, mode="assessor")
 
