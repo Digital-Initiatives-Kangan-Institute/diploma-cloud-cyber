@@ -59,7 +59,8 @@ TASKS = [
                  "want to create them yourself.",
                  "Enter the name and the CIDR, leave the rest as it is, and Create VPC.",
                  "On the VPC page, Actions, Edit VPC settings, and tick both DNS options."],
-         capture="the VPC details page showing the CIDR and both DNS settings enabled."),
+         evidence_note="No screenshot needed. Creating the VPC is a prerequisite step — "
+                       "everything that follows is built inside it."),
 
     dict(n=3, title="Create the subnets",
          job="Create five subnets: three for the workload, two more that exist only because two "
@@ -138,7 +139,40 @@ TASKS = [
                  "ledgerline-app-sg. Save."],
          capture="all three security groups with their inbound rules expanded."),
 
-    dict(n=8, title="Look at the role your servers will use",
+    dict(n=8, title="Configure the access model",
+         job="Create the group that will run Ledgerline after the migration, and an account in it. "
+             "Fill in each form with the values below, submit it, and capture what comes back.",
+         note="the lab environment does not let you create groups or users. You will be refused. "
+              "That is the environment, not your work — and the refusal is what you capture. Do "
+              "the task properly anyway: filling the form correctly is the part worth practising.",
+         settings=[("Group name", "YAT-Finance-Ops"),
+                   ("Policy on the group", "ReadOnlyAccess — filter for it and pick the policy "
+                                           "named exactly that, not a service-specific one"),
+                   ("User name", "ledgerline-ops"),
+                   ("Policy on the user", "CloudWatchFullAccess"),
+                   ("Expected result", "both submissions refused with a permissions error")],
+         clicks=["Search IAM in the top search bar and open it.",
+                 "Choose User groups, then Create group. Enter the group name.",
+                 "Under Attach permissions policies, filter for ReadOnlyAccess and tick the one "
+                 "named exactly that. Create group. Capture the error.",
+                 "Now choose Users, then Create user. Enter the user name.",
+                 "On the permissions page choose Attach policies directly, filter for "
+                 "CloudWatchFullAccess and tick it. Work through to Create user, and capture the "
+                 "error."],
+         captures=["the completed group form — YAT-Finance-Ops with ReadOnlyAccess attached — and "
+                   "the error returned.",
+                   "the completed user form — ledgerline-ops with CloudWatchFullAccess attached — "
+                   "and the error returned."],
+         decision=("This group can see everything but cannot change anyone's permissions — "
+                   "including its own. Why not simply let the team that runs Ledgerline manage "
+                   "its own access?",
+                   "Because a group that can rewrite its own permissions has no limit at all — it "
+                   "can grant itself anything, so the boundary is only as strong as everyone's "
+                   "restraint. Keeping identity with whoever governs the account means the "
+                   "finance team can operate the system fully without being able to widen their "
+                   "own access.")),
+
+    dict(n=9, title="Look at the role your servers will use",
          job="Find the role the lab provides for instances and read what it allows. You cannot "
              "create your own here, so this is a look rather than a build.",
          settings=[("Where", "IAM → Roles"), ("Open", "LabRole"),
@@ -148,12 +182,12 @@ TASKS = [
                  "Look at the Permissions tab and read which services it grants access to."],
          capture="the LabRole page with its permissions visible."),
 
-    dict(n=9, title="Create the launch template",
+    dict(n=10, title="Create the launch template",
          job="Create the template that defines how every application server is built. The Auto "
              "Scaling group builds servers from it, so nothing is configured by hand.",
          settings=[("Name", "ledgerline-lt"),
                    ("AMI", "Amazon Linux 2023"),
-                   ("Instance type", "t3.micro"),
+                   ("Instance type", "your choice — see the decision below"),
                    ("Key pair", "do not include"),
                    ("Subnet", "do not include"),
                    ("Security group", "ledgerline-app-sg"),
@@ -170,7 +204,7 @@ TASKS = [
          clicks=["EC2 console, Launch templates, Create launch template.",
                  "Name it. Tick Provide guidance to help me set up a template.",
                  "Application and OS Images: choose Amazon Linux 2023.",
-                 "Instance type: t3.micro.",
+                 "Instance type: whichever of the two you chose below.",
                  "Key pair: choose Don't include in launch template.",
                  "Network settings: leave the subnet blank. Under Security groups pick "
                  "ledgerline-app-sg. Getting this wrong is the most common reason the servers "
@@ -182,9 +216,19 @@ TASKS = [
                  "exactly as written, including the first line.",
                  "Create launch template."],
          capture="the launch template summary showing the AMI, instance type, security group and "
-                 "instance profile."),
+                 "instance profile.",
+         decision=("Choose the instance type for the application tier: t3.micro or t3.small. Name "
+                   "the one you did not choose, say which you chose, and explain why against what "
+                   "Ledgerline actually has to do — a finance system used by a small team, all of "
+                   "them on campus or at home, never by students.",
+                   "t3.micro has 1 GiB of memory and t3.small has 2 GiB. Amazon Linux and nginx "
+                   "together use a small fraction of 1 GiB, and Ledgerline serves a finance team "
+                   "rather than a whole college, so t3.micro carries this workload comfortably "
+                   "and t3.small would be paying for headroom nothing uses. I chose t3.micro. If "
+                   "the user count grew, the Auto Scaling group adds servers before the instance "
+                   "type needs revisiting.")),
 
-    dict(n=10, title="Create the target group",
+    dict(n=11, title="Create the target group",
          job="Create the list of servers the load balancer will send traffic to, and the health "
              "check that decides which of them are fit to receive it.",
          settings=[("Name", "ledgerline-tg"), ("Target type", "Instances"),
@@ -196,9 +240,11 @@ TASKS = [
                  "Leave the health check as HTTP with path /.",
                  "Next. On the register targets page, register nothing and choose Create target "
                  "group. The Auto Scaling group will add servers for you."],
-         capture="the target group summary showing its VPC and health-check settings."),
+         evidence_note="No screenshot needed. Creating the target group is a prerequisite step — "
+                       "the load balancer sends traffic to it, and the Auto Scaling group fills "
+                       "it with servers."),
 
-    dict(n=11, title="Create the load balancer",
+    dict(n=12, title="Create the load balancer",
          job="Create the load balancer that takes traffic from the internet and passes it to "
              "whichever servers are healthy.",
          settings=[("Type", "Application Load Balancer"), ("Name", "ledgerline-alb"),
@@ -217,7 +263,7 @@ TASKS = [
                  "Create load balancer, then wait for it to leave Provisioning."],
          capture="the load balancer summary showing its scheme, DNS name and security group."),
 
-    dict(n=12, title="Create the Auto Scaling group",
+    dict(n=13, title="Create the Auto Scaling group",
          job="Create the group that launches and removes servers on its own.",
          settings=[("Launch template", "ledgerline-lt"), ("VPC", "ledgerline-vpc"),
                    ("Subnet", "ledgerline-app-a only"),
@@ -238,7 +284,7 @@ TASKS = [
                  "Watch the Activity tab. A server should launch within a minute or two."],
          capture="the Auto Scaling group showing its size, target group and scaling policy."),
 
-    dict(n=13, title="Create the database subnet group",
+    dict(n=14, title="Create the database subnet group",
          job="Create the group that tells the database service which subnets it may use.",
          settings=[("Name", "ledgerline-db-subnet-group"), ("VPC", "ledgerline-vpc"),
                    ("Zones", "us-east-1a and us-east-1b"),
@@ -248,12 +294,14 @@ TASKS = [
                  "Create DB subnet group. Name it, choose ledgerline-vpc.",
                  "Tick both availability zones, then choose the matching data subnet under each.",
                  "Create."],
-         capture="the subnet group showing its VPC and both subnets."),
+         evidence_note="No screenshot needed. Creating the subnet group is a prerequisite step — "
+                       "the database cannot be created without one."),
 
-    dict(n=14, title="Create the database",
+    dict(n=15, title="Create the database",
          job="Create the database, empty. Loading data is somebody else's job.",
          settings=[("Creation method", "Standard create"), ("Engine", "PostgreSQL"),
-                   ("Template", "Free tier"), ("Instance class", "db.t3.micro"),
+                   ("Template", "Free tier"),
+                   ("Instance class", "your choice — see the decision below"),
                    ("Storage", "gp3, 20 GB"), ("VPC", "ledgerline-vpc"),
                    ("Subnet group", "ledgerline-db-subnet-group"),
                    ("Public access", "No"), ("Security group", "ledgerline-db-sg"),
@@ -263,30 +311,62 @@ TASKS = [
                  "you and will not let you change them.",
                  "Choose PostgreSQL, then the Free tier template.",
                  "Give it a name and set a master username and password. Write the password down.",
-                 "Instance class db.t3.micro, storage 20 GB gp3.",
+                 "Instance class: whichever of the two you chose below. Storage 20 GB gp3.",
                  "Under Connectivity choose ledgerline-vpc and your subnet group, set Public "
                  "access to No, remove the default security group and add ledgerline-db-sg.",
                  "Under Additional configuration confirm encryption is enabled.",
                  "Create database, then wait. It takes several minutes to reach Available."],
-         capture="the database summary showing Available, Public access No, and encryption on."),
+         capture="the database summary showing Available, Public access No, and encryption on.",
+         decision=("Choose the database instance class: db.t3.micro or db.t3.small. Name the one "
+                   "you did not choose, say which you chose, and explain why against the "
+                   "workload.",
+                   "db.t3.micro has 1 GiB of memory and db.t3.small has 2 GiB. Ledgerline's "
+                   "working set is small — a single finance team's ledgers, not a college's worth "
+                   "of student records — so db.t3.micro holds what is frequently read in memory "
+                   "without difficulty. I chose db.t3.micro. The reasoning would change if month-"
+                   "end reporting turned out to read far more than day-to-day use does.")),
 
-    dict(n=15, title="Create a monitoring alarm",
-         job="Create an alarm that tells you when the application tier stops serving.",
-         settings=[("Name", "ledgerline-unhealthy-hosts"),
+    dict(n=16, title="Create the two monitoring alarms",
+         job="Create two alarms — one that tells you when the application tier stops serving, one "
+             "that tells you when the database is running out of room.",
+         settings=[("Notification topic", "create an SNS topic named ledgerline-alerts with your "
+                                          "own email address and use it for both alarms. You do "
+                                          "not need to confirm the subscription email"),
+                   ("─ Alarm 1 ─", "the application tier is not serving"),
                    ("Metric", "Application ELB → Per AppELB, per TG Metrics → UnHealthyHostCount"),
                    ("Statistic", "Maximum"), ("Period", "1 minute"),
                    ("Condition", "Greater/Equal than 1"),
                    ("Datapoints to alarm", "1 out of 1"),
-                   ("Notification", "create an SNS topic with your own email, or skip if offered")],
+                   ("Name", "ledgerline-unhealthy-hosts"),
+                   ("─ Alarm 2 ─", "the database is running out of room"),
+                   ("Metric", "RDS → Per-Database Metrics → FreeStorageSpace, filtered to your "
+                              "database"),
+                   ("Statistic", "Minimum"), ("Period", "5 minutes"),
+                   ("Condition", "Lower than 20% of the 20 GiB you allocated"),
+                   ("Working that out", "the field takes bytes, not gigabytes. 20 GiB is "
+                                        "21474836480 bytes, so 20% of it is 4294967296. Type the "
+                                        "raw digits — no commas, no units. The graph above the "
+                                        "field is drawn in GB, which makes it easy to type a "
+                                        "number a thousand times too small"),
+                   ("Datapoints to alarm", "2 out of 2"),
+                   ("Name", "ledgerline-db-storage-low")],
          clicks=["Search CloudWatch and open it. Choose Alarms, then Create alarm.",
                  "Select metric. Choose Application ELB, then Per AppELB, per TG Metrics.",
                  "Filter the list for UnHealthyHostCount and tick the row for your load balancer "
                  "and target group. Select metric.",
                  "Set Statistic to Maximum and Period to 1 minute.",
                  "Under Conditions choose Greater/equal and enter 1. Next.",
-                 "Create or select an SNS topic if it asks for one. Next.",
-                 "Name the alarm and finish."],
-         capture="the alarm showing its metric, threshold and state."),
+                 "Create an SNS topic named ledgerline-alerts with your email. Next, name the "
+                 "alarm, and finish.",
+                 "Create alarm again for the second one. Select metric, choose RDS, then "
+                 "Per-Database Metrics.",
+                 "Filter for FreeStorageSpace, tick the row for your database, Select metric.",
+                 "Set Statistic to Minimum and Period to 5 minutes.",
+                 "Under Conditions choose Lower and type the byte figure you worked out above.",
+                 "Under Additional configuration set Datapoints to alarm to 2 out of 2.",
+                 "Choose the ledgerline-alerts topic you already made, name the alarm, finish."],
+         capture="the alarm list showing both alarms with their metrics, thresholds and current "
+                 "state."),
 ]
 
 TESTS = [
