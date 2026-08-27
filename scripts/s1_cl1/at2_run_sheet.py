@@ -643,6 +643,18 @@ def _note(doc, text):
     r.font.color.rgb = RGBColor.from_string(TERRACOTTA)
 
 
+def _clicks(doc, clicks):
+    """Click-by-click detail. The practice sheet has this; the assessment deliberately does not."""
+    _p(doc, "How to do it", bold=True, after=3)
+    for i, step in enumerate(clicks, 1):
+        p = doc.add_paragraph()
+        p.paragraph_format.left_indent = Cm(0.6)
+        p.paragraph_format.space_after = Pt(2)
+        lead = p.add_run(f"{i}.  "); lead.bold = True; lead.font.size = Pt(10)
+        p.add_run(step).font.size = Pt(10)
+    doc.add_paragraph()
+
+
 def _assessor_note(doc, text, mode):
     """Guidance for the assessor only — never rendered in the student copy."""
     if mode != "assessor":
@@ -686,11 +698,16 @@ def render_front_matter(doc, h1):
         _p(doc, para, after=8)
 
 
-def render_run_sheet(doc, h1, h2, mode="student"):
+def render_run_sheet(doc, h1, h2, mode="student", tasks=None, tests=None,
+                     questions=None, handover=None, region_note=None):
     """Render the run sheet into `doc`. mode = student | assessor."""
-    _p(doc, REGION_NOTE, after=10)
+    tasks = TASKS if tasks is None else tasks
+    tests = TESTS if tests is None else tests
+    questions = QUESTIONS if questions is None else questions
+    handover = HANDOVER if handover is None else handover
+    _p(doc, REGION_NOTE if region_note is None else region_note, after=10)
 
-    for task in TASKS:
+    for task in tasks:
         _flag(doc, f"Task {task['n']}")
         h2(task["title"])
         if mode == "assessor":
@@ -704,6 +721,8 @@ def render_run_sheet(doc, h1, h2, mode="student"):
             label, lines = task["code"]
             _p(doc, label, bold=True, after=3)
             _code(doc, lines)
+        if task.get("clicks"):
+            _clicks(doc, task["clicks"])
         if task.get("decision"):
             prompt, model = task["decision"]
             _p(doc, "Your decision", bold=True, after=3)
@@ -719,7 +738,7 @@ def render_run_sheet(doc, h1, h2, mode="student"):
             "to run it. Follow the steps, then paste the screenshot into the box. If a test does "
             "not pass, fix the problem, run it again, and note what you changed.",
        italic=True, size=9.5, colour=GREY, after=10)
-    for i, test in enumerate(TESTS, 1):
+    for i, test in enumerate(tests, 1):
         _flag(doc, f"Test {i}")
         h2(test["title"])
         if mode == "assessor":
@@ -739,25 +758,27 @@ def render_run_sheet(doc, h1, h2, mode="student"):
         _screenshot_slot(doc, test["capture"], mode)
 
     # ---- knowledge questions ----
-    h1("Knowledge questions")
-    _p(doc, "Answer each question about your own build, not in general terms. Refer to what you "
-            "actually created and the choices you actually made.",
-       italic=True, size=9.5, colour=GREY, after=10)
-    for i, q in enumerate(QUESTIONS, 1):
-        _flag(doc, f"Question {i}")
-        h2(q["q"][:58].rstrip() + ("..." if len(q["q"]) > 58 else ""))
-        if mode == "assessor":
-            _p(doc, "Evidences: " + " \u00b7 ".join(f"[{u}]" for u in q["uoc"]),
-               size=9, italic=True, colour=UOC, after=4)
-        _p(doc, q["q"], after=6)
-        _response_slot(doc, None, mode, points=q["points"])
+    if questions:
+        h1("Knowledge questions")
+        _p(doc, "Answer each question about your own build, not in general terms. Refer to what "
+                "you actually created and the choices you actually made.",
+           italic=True, size=9.5, colour=GREY, after=10)
+        for i, q in enumerate(questions, 1):
+            _flag(doc, f"Question {i}")
+            h2(q["q"][:58].rstrip() + ("..." if len(q["q"]) > 58 else ""))
+            if mode == "assessor":
+                _p(doc, "Evidences: " + " \u00b7 ".join(f"[{u}]" for u in q["uoc"]),
+                   size=9, italic=True, colour=UOC, after=4)
+            _p(doc, q["q"], after=6)
+            _response_slot(doc, None, mode, points=q["points"])
 
     # ---- handover ----
-    h1("Handover")
-    h2(HANDOVER["title"])
-    if mode == "assessor":
-        _p(doc, "Evidences: " + " \u00b7 ".join(f"[{u}]" for u in HANDOVER["uoc"]),
-           size=9, italic=True, colour=UOC, after=4)
-    _p(doc, HANDOVER["job"], after=6)
-    _p(doc, HANDOVER["prompt"], italic=True, size=9.5, colour=GREY, after=6)
-    _response_slot(doc, None, mode, points=HANDOVER["points"])
+    if handover:
+        h1("Handover")
+        h2(handover["title"])
+        if mode == "assessor":
+            _p(doc, "Evidences: " + " \u00b7 ".join(f"[{u}]" for u in handover["uoc"]),
+               size=9, italic=True, colour=UOC, after=4)
+        _p(doc, handover["job"], after=6)
+        _p(doc, handover["prompt"], italic=True, size=9.5, colour=GREY, after=6)
+        _response_slot(doc, None, mode, points=handover["points"])
