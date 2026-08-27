@@ -29,6 +29,7 @@ from docx.enum.text import WD_ALIGN_PARAGRAPH  # noqa: E402
 from docx.shared import Pt, Cm, RGBColor  # noqa: E402
 
 BODY_PT = 10.5
+IMAGE_CM = 16.0         # exemplar captures, sized to sit inside the 16.6 cm evidence box
 UOC = "6B6660"          # muted — the assessor-only traceability line
 CAPTURE = TERRACOTTA    # exemplar: what the screenshot should have shown
 MODEL = TEAL            # exemplar: the model written answer
@@ -625,12 +626,71 @@ def _box(doc, lines, height_hint=True):
     doc.add_paragraph()
 
 
-def _screenshot_slot(doc, capture, mode):
+def _image_box(doc, caption, image):
+    """A bordered drop-zone holding a real exemplar capture, under its description."""
+    t = doc.add_table(rows=1, cols=1)
+    cell = t.rows[0].cells[0]
+    set_cell_borders(cell); shade_cell(cell, CREAM); cell.width = Cm(16.6)
+    p = cell.paragraphs[0]
+    r = p.add_run(caption)
+    r.font.size = Pt(9.5); r.italic = True
+    r.font.color.rgb = RGBColor.from_string(CAPTURE)
+    pic = cell.add_paragraph()
+    pic.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    pic.add_run().add_picture(str(image), width=Cm(IMAGE_CM))
+    doc.add_paragraph()
+
+
+def _screenshot_slot(doc, capture, mode, image=None):
     if mode == "assessor":
-        _box(doc, [(f"SCREENSHOT — {capture}", CAPTURE, False, True)])
+        if image is not None:
+            _image_box(doc, f"SCREENSHOT — {capture}", image)
+        else:
+            _box(doc, [(f"SCREENSHOT — {capture}", CAPTURE, False, True)])
     else:
         _box(doc, [("[ PASTE YOUR SCREENSHOT HERE ]", None, True, False),
                    (capture, GREY, False, True)])
+
+
+def _evidence_images(evidence_dir, key):
+    """The exemplar captures filed for one task or test, in order.
+
+    Convention: <key>.png for a single capture, <key>.<n>.png where a task needed several
+    (three security groups are three screenshots). A task with more captures on disk than
+    evidence boxes in the run sheet is fine — the extras are placed after the last box.
+    """
+    if evidence_dir is None:
+        return []
+    return sorted(Path(evidence_dir).glob(f"{key}.*.png")) + \
+        sorted(Path(evidence_dir).glob(f"{key}.png"))
+
+
+def _place_evidence(doc, captures, mode, images):
+    """Render each evidence box, pairing it with its capture where one was filed."""
+    for i, cap in enumerate(captures):
+        _screenshot_slot(doc, cap, mode, image=images[i] if i < len(images) else None)
+    for extra in images[len(captures):]:
+        _image_box(doc, "SCREENSHOT — continued", extra)
+
+
+def report_evidence(evidence_dir, tasks=None, tests=None):
+    """What the exemplar folder covers, printed at build time so a gap is not silent."""
+    tasks = TASKS if tasks is None else tasks
+    tests = TESTS if tests is None else tests
+    keys = [f"task-{t['n']:02d}" for t in tasks] + \
+           [f"test-{i:02d}" for i, _ in enumerate(tests, 1)]
+    found = {k: _evidence_images(evidence_dir, k) for k in keys}
+    missing = [k for k, v in found.items() if not v]
+    placed = sum(len(v) for v in found.values())
+    print(f"Exemplar evidence: {placed} capture(s) placed across "
+          f"{len(keys) - len(missing)}/{len(keys)} tasks and tests.")
+    if missing:
+        print(f"  NO CAPTURE ON FILE for: {', '.join(missing)} — "
+              f"these render as the description alone.")
+    orphans = sorted(p.name for p in Path(evidence_dir).glob("*.png")
+                     if not any(p in v for v in found.values()))
+    if orphans:
+        print(f"  NOT PLACED (name matches no task or test): {', '.join(orphans)}")
 
 
 def _response_slot(doc, model, mode, points=None):
@@ -751,8 +811,15 @@ def render_front_matter(doc, h1):
 
 
 def render_run_sheet(doc, h1, h2, mode="student", tasks=None, tests=None,
-                     questions=None, handover=None, region_note=None):
-    """Render the run sheet into `doc`. mode = student | assessor."""
+                     questions=None, handover=None, region_note=None, evidence_dir=None):
+    """Render the run sheet into `doc`. mode = student | assessor.
+
+    evidence_dir — a folder of exemplar captures (see _evidence_images for the naming). When
+    given AND mode is assessor, each evidence box carries the real screenshot under its
+    description instead of the description alone, so a regenerated assessor copy is worked
+    rather than blank. Defaults to None: every other caller renders exactly as before, and no
+    other run sheet can pick up this one's captures.
+    """
     tasks = TASKS if tasks is None else tasks
     tests = TESTS if tests is None else tests
     questions = QUESTIONS if questions is None else questions
@@ -781,8 +848,8 @@ def render_run_sheet(doc, h1, h2, mode="student", tasks=None, tests=None,
             _p(doc, prompt, italic=True, size=9.5, colour=GREY, after=6)
             _response_slot(doc, model, mode)
         _p(doc, "Evidence", bold=True, after=3)
-        for cap in task.get("captures", [task.get("capture")]):
-            _screenshot_slot(doc, cap, mode)
+        _place_evidence(doc, task.get("captures", [task.get("capture")]), mode,
+                        _evidence_images(evidence_dir, f"task-{task['n']:02d}"))
 
     # ---- tests ----
     h1("Testing")
@@ -807,7 +874,8 @@ def render_run_sheet(doc, h1, h2, mode="student", tasks=None, tests=None,
         if test.get("assessor_note"):
             _assessor_note(doc, test["assessor_note"], mode)
         _p(doc, "Evidence", bold=True, after=3)
-        _screenshot_slot(doc, test["capture"], mode)
+        _place_evidence(doc, [test["capture"]], mode,
+                        _evidence_images(evidence_dir, f"test-{i:02d}"))
 
     # ---- knowledge questions ----
     if questions:

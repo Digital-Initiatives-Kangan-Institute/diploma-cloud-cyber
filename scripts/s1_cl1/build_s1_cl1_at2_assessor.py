@@ -29,6 +29,13 @@ from docx import Document  # noqa: E402
 
 TEMPLATE = str(Path(__file__).resolve().parents[2] / "kangan-templates" / "Project Assessment - Assessor.docx")
 
+# Exemplar captures from a worked run of the assessment, placed into the evidence boxes so the
+# assessor copy regenerates worked rather than blank. Committed alongside the generator: the
+# document is a pure function of its sources, and pasting screenshots in by hand after every
+# rebuild is exactly the manual step this removes.
+EVIDENCE_DIR = Path(__file__).resolve().parents[2] / \
+    "S1-CL1-Cloud-Design-Build" / "assessments" / "AT2" / "exemplar-evidence"
+
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # content-repo scripts/ (brand + registry)  # noqa: E402
 sys.path.insert(0, str(next(d / "scripts" for d in Path(__file__).resolve().parents if (d / "scripts" / "helpers" / "__init__.py").exists())))  # umbrella scripts/ (engine)  # noqa: E402
 from helpers.instrument_layout import render_benchmark, render_prose, set_cell_rich  # noqa: E402
@@ -256,12 +263,13 @@ def build(path):
     # ---- Instructions to Student (shared prose; assessor Part 1 variant) ----
     at2_run_sheet.render_front_matter(doc, lambda t: doc.add_paragraph(t, style="Heading 1"))
 
-    # ---- The run sheet, worked: screenshot descriptions, model answers, per-task UoC tags ----
+    # ---- The run sheet, worked: exemplar screenshots, model answers, per-task UoC tags ----
     at2_run_sheet.render_run_sheet(
         doc,
         lambda t: doc.add_paragraph(t, style="Heading 1"),
         lambda t: doc.add_paragraph(t, style="Heading 2"),
-        mode="assessor")
+        mode="assessor",
+        evidence_dir=EVIDENCE_DIR)
 
     # ---- Reverse map ----
     render_benchmark(doc, ASSESSOR_BODY, render_table, STYLE)
@@ -269,6 +277,7 @@ def build(path):
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     doc.save(path)
     print(f"Wrote {path}")
+    at2_run_sheet.report_evidence(EVIDENCE_DIR)
 
 
 if __name__ == "__main__":
