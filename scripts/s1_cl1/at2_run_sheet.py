@@ -97,8 +97,10 @@ TASKS = [
          job="Create the virtual private cloud all of this engagement's infrastructure sits in.",
          settings=[("Name", "yat-lms-vpc"), ("IPv4 CIDR", "10.0.0.0/16"),
                    ("DNS hostnames", "Enabled"), ("DNS resolution", "Enabled")],
-         capture="the VPC details page, showing the name, the CIDR and both DNS settings enabled.",
-         uoc=["ICTCLD401 PC 2.2", "ICTCLD401 PE 1"]),
+         evidence_note="No screenshot required. Creating the VPC is not an assessable action on "
+                       "its own — it is the prerequisite for everything that follows, all of "
+                       "which is built inside it.",
+         uoc=[]),
 
     dict(n=3, title="Create the subnets",
          job="Create five subnets, using the names, address ranges and zones below. Set the zone "
@@ -251,9 +253,11 @@ TASKS = [
                    ("Unhealthy threshold", "2"),
                    ("Register targets", "skip this step and create the group with no targets. The "
                                         "Auto Scaling group registers them for you in task 13")],
-         capture="the target group summary, showing its protocol, port, VPC and health-check "
-                 "settings.",
-         uoc=["ICTCLD401 PC 2.2"]),
+         evidence_note="No screenshot required. Creating the target group is not an assessable "
+                       "action on its own — it is the prerequisite for the load balancer, which "
+                       "sends traffic to it, and the Auto Scaling group, which fills it with "
+                       "servers.",
+         uoc=[]),
 
     dict(n=12, title="Create the load balancer",
          job="Create an Application Load Balancer, using the settings below. It sits in front of "
@@ -305,8 +309,10 @@ TASKS = [
                    ("Subnets", "private-data-a and private-data-b"),
                    ("Why two", "the service requires subnets in two zones even though this database "
                                "is single-AZ. The second one stays empty until the next phase")],
-         capture="the subnet group summary, showing its VPC and both subnets.",
-         uoc=["ICTCLD401 PC 2.2"]),
+         evidence_note="No screenshot required. Creating the subnet group is not an assessable "
+                       "action on its own — it is the prerequisite for the database, which "
+                       "cannot be created without one.",
+         uoc=[]),
 
     dict(n=15, title="Deploy the database",
          job="Create the database, using the settings below. Create it empty \u2014 loading the schema "
@@ -677,13 +683,15 @@ def report_evidence(evidence_dir, tasks=None, tests=None):
     """What the exemplar folder covers, printed at build time so a gap is not silent."""
     tasks = TASKS if tasks is None else tasks
     tests = TESTS if tests is None else tests
-    keys = [f"task-{t['n']:02d}" for t in tasks] + \
+    keys = [f"task-{t['n']:02d}" for t in tasks if not t.get("evidence_note")] + \
            [f"test-{i:02d}" for i, _ in enumerate(tests, 1)]
+    exempt = [f"task-{t['n']:02d}" for t in tasks if t.get("evidence_note")]
     found = {k: _evidence_images(evidence_dir, k) for k in keys}
     missing = [k for k, v in found.items() if not v]
     placed = sum(len(v) for v in found.values())
     print(f"Exemplar evidence: {placed} capture(s) placed across "
-          f"{len(keys) - len(missing)}/{len(keys)} tasks and tests.")
+          f"{len(keys) - len(missing)}/{len(keys)} tasks and tests"
+          + (f" ({', '.join(exempt)} ask for none)." if exempt else "."))
     if missing:
         print(f"  NO CAPTURE ON FILE for: {', '.join(missing)} — "
               f"these render as the description alone.")
@@ -829,7 +837,9 @@ def render_run_sheet(doc, h1, h2, mode="student", tasks=None, tests=None,
     for task in tasks:
         _flag(doc, f"Task {task['n']}")
         h2(task["title"])
-        if mode == "assessor":
+        # A prerequisite step carries no tags, so it makes no claim to evidence — the assessor
+        # sees nothing to mark rather than a criterion with no capture behind it.
+        if mode == "assessor" and task["uoc"]:
             _p(doc, "Evidences: " + " · ".join(f"[{u}]" for u in task["uoc"]),
                size=9, italic=True, colour=UOC, after=4)
         _p(doc, task["job"], after=6)
@@ -848,8 +858,11 @@ def render_run_sheet(doc, h1, h2, mode="student", tasks=None, tests=None,
             _p(doc, prompt, italic=True, size=9.5, colour=GREY, after=6)
             _response_slot(doc, model, mode)
         _p(doc, "Evidence", bold=True, after=3)
-        _place_evidence(doc, task.get("captures", [task.get("capture")]), mode,
-                        _evidence_images(evidence_dir, f"task-{task['n']:02d}"))
+        if task.get("evidence_note"):
+            _p(doc, task["evidence_note"], italic=True, size=9.5, colour=GREY, after=10)
+        else:
+            _place_evidence(doc, task.get("captures", [task.get("capture")]), mode,
+                            _evidence_images(evidence_dir, f"task-{task['n']:02d}"))
 
     # ---- tests ----
     h1("Testing")
