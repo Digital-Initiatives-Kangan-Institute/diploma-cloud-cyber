@@ -725,40 +725,51 @@ CLOSEOUT = [
 # the subnet they sit in. Deleting the stack first fails at the last step.
 
 CLEANUP_INTRO = [
-    "Your lab has a credit budget, and everything above keeps spending it whether you are using "
-    "it or not. When you have finished, unwind it in the order below.",
-    "The order is not simply the reverse of the way you built it. The CloudFormation stack owns "
-    "the network everything sits in, so it has to go last — and it will refuse to delete while "
-    "anything you built by hand is still inside it.",
+    "Your lab has a credit budget, and everything you built keeps spending it whether you are "
+    "using it or not. When you have finished, take it all back down.",
+    "Work BACKWARDS. The last thing you made is the first thing you remove, and you undo your way "
+    "down to the stack you started with. That order is not just tidy — it is the order that works, "
+    "because each thing you built depends on something built before it. The CloudFormation stack "
+    "owns the network everything else sits in, so it goes last and will refuse to delete while "
+    "anything you added by hand is still inside it.",
+    "Each step below names the task that created the thing you are removing.",
 ]
 
 CLEANUP = [
-    ("Empty the Auto Scaling group",
-     "EC2 → Auto Scaling groups → your group → Capacity overview → Edit. Set Desired, Minimum "
-     "and Maximum all to 0 and update. Wait until the Instance management tab is empty. Do not "
-     "terminate the instances directly — the group will just launch replacements."),
-    ("Delete the NAT gateway you created by hand",
-     "VPC → NAT gateways → select the one you made in task 21 → Actions → Delete. Wait until "
-     "State reads Deleted. The stack's own NAT gateway is not yours to delete; the stack takes "
-     "that one."),
-    ("Release its Elastic IP",
-     "VPC → Elastic IPs. The one with no Name and nothing associated is the address that NAT "
-     "gateway was using — deleting the gateway does not release it, and an unattached address "
-     "bills by the hour. Select it → Actions → Release Elastic IP addresses. If the release "
-     "fails, the gateway has not finished deleting; wait two minutes and try again."),
-    ("Delete the route table you created by hand",
-     "VPC → Route tables → the one you made in task 21 → Actions → Delete route table. "
-     "Deleting it removes its subnet association for you."),
-    ("Delete the subnet you created by hand",
-     "VPC → Subnets → the one you made in task 20 → Actions → Delete subnet. If it refuses "
-     "because of a network interface, something in it has not finished terminating — wait a "
-     "couple of minutes and try again."),
-    ("Delete the CloudFormation stack",
-     "CloudFormation → your stack → Delete. This takes everything else with it: the VPC, the "
-     "remaining subnets, the load balancer, the database, the launch template, the alarms and "
-     "the stack's own NAT gateway and Elastic IP. Wait for it to disappear from the list."),
+    ("Delete the alarms you created — task 24",
+     "CloudWatch → Alarms → All alarms. Tick the alarms YOU created and choose Actions → Delete. "
+     "Leave any alarm the lab-pack deployed; the stack removes those itself. If you are not sure "
+     "which is which, yours are the ones you named."),
+    ("Undo the instance refresh, if you did one — test T3",
+     "If you resized by changing the launch template, EC2 → Launch templates → your template → "
+     "Versions. You can leave the extra version; it disappears with the stack. Nothing else to do "
+     "here — an instance refresh leaves no separate resource behind."),
+    ("Empty the Auto Scaling group — task 22",
+     "EC2 → Auto Scaling groups → your group → Capacity overview → Edit. Set Desired, Minimum and "
+     "Maximum all to 0 and update. Wait until the Instance management tab is empty. Do this before "
+     "you touch the subnet — and do not terminate the instances directly, because the group will "
+     "just replace them."),
+    ("Delete the route table you created — task 21",
+     "VPC → Route tables → the one you made → Actions → Delete route table. Deleting it removes its "
+     "subnet association for you."),
+    ("Delete the NAT gateway you created — task 21",
+     "VPC → NAT gateways → the one you made → Actions → Delete. Wait until State reads Deleted. The "
+     "lab-pack's own NAT gateway is not yours to remove; the stack takes that one."),
+    ("Release the Elastic IP that NAT gateway used — task 21",
+     "VPC → Elastic IPs. The one with no Name and nothing associated is it — deleting a NAT gateway "
+     "does NOT release its address, and an unattached address bills by the hour. Select it → "
+     "Actions → Release Elastic IP addresses. If the release fails, the gateway has not finished "
+     "deleting; wait two minutes and try again."),
+    ("Delete the subnet you created — task 20",
+     "VPC → Subnets → the one you made → Actions → Delete subnet. If it refuses because of a "
+     "network interface, something in it has not finished terminating — wait a couple of minutes "
+     "and try again."),
+    ("Delete the CloudFormation stack — task 19",
+     "CloudFormation → your stack → Delete. This takes everything the lab-pack built: the VPC, its "
+     "subnets, the load balancer, the target group, the database, the launch template, the "
+     "lab-pack's alarm and NAT gateway, and the notification topic. Wait for it to leave the list."),
     ("Check nothing survived",
-     "VPC → Your VPCs should no longer list yours. Check Elastic IPs is empty — an address left "
-     "allocated is the most common thing to miss, and the only one that keeps costing after "
-     "everything else is gone."),
+     "VPC → Your VPCs should no longer list yours. Then check Elastic IPs is empty and CloudWatch → "
+     "Alarms has none of yours left. An allocated address and an orphaned alarm are the two things "
+     "that outlive everything else, and the address is the one that keeps costing."),
 ]
