@@ -1,0 +1,417 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Description: >-
+  Ledgerline - practice baseline. Deploys an exact replica of a correctly completed AT2
+  PRACTICE build run sheet, the same way the AT3 lab pack replicates AT2 itself. Students who
+  practised the build get the finished practice environment to improve, without rebuilding it.
+
+  EXACT REPLICA: every resource is one a practice task builds, with the name and settings that
+  task specifies, and nothing else. Change the practice run sheet, change this with it.
+
+  DIFFERENT SCENARIO, SAME SHAPE as the assessment: 10.20.0.0/16 rather than 10.0.0.0/16,
+  Amazon Linux and PostgreSQL rather than Windows and MySQL, ledgerline- names, and one alarm
+  rather than two. Practice rehearses the moves; it is not the answer.
+
+  Creates NO IAM (the Learner Lab forbids it) and is deliberately non-HA - the Auto Scaling
+  group runs in ONE AZ and RDS is Single-AZ.
+
+Parameters:
+  AmazonLinuxAmiId:
+    Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+    Description: Auto-resolves the latest Amazon Linux 2023 AMI (no hardcoded AMI to age).
+
+  DBMasterUsername:
+    Type: String
+    Default: ledgeradmin
+    MinLength: 4
+    Description: RDS master username.
+
+  DBMasterPassword:
+    Type: String
+    NoEcho: true
+    MinLength: 8
+    Description: RDS master password (8+ chars). Supplied at deploy time, not stored.
+
+  InstanceProfileName:
+    Type: String
+    Default: LabInstanceProfile
+    Description: >-
+      EC2 instance profile, as selected in practice task 9. The app instances sit in a private
+      subnet with no public IP, so this profile is the only route to a shell on them (Session
+      Manager). Clear it to blank only if your lab does not provide this profile.
+
+  AlertEmail:
+    Type: String
+    Default: ''
+    Description: >-
+      Email subscribed to the ledgerline-alerts topic. Leave blank to create the topic with no
+      subscription (the alarm still works).
+
+Conditions:
+  HasInstanceProfile: !Not [!Equals [!Ref InstanceProfileName, '']]
+  HasAlertEmail: !Not [!Equals [!Ref AlertEmail, '']]
+
+Resources:
+
+  # ---------- Task 2 - the VPC ----------
+  Vpc:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.20.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - { Key: Name, Value: ledgerline-vpc }
+        - { Key: Project, Value: Ledgerline }
+
+  # ---------- Task 3 - the five subnets ----------
+  PublicA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.20.1.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - { Key: Name, Value: ledgerline-public-a }
+
+  PublicB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.20.2.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - { Key: Name, Value: ledgerline-public-b }
+
+  AppA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.20.11.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      Tags:
+        - { Key: Name, Value: ledgerline-app-a }
+
+  DataA:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.20.21.0/24
+      AvailabilityZone: !Select [0, !GetAZs '']
+      Tags:
+        - { Key: Name, Value: ledgerline-data-a }
+
+  DataB:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref Vpc
+      CidrBlock: 10.20.22.0/24
+      AvailabilityZone: !Select [1, !GetAZs '']
+      Tags:
+        - { Key: Name, Value: ledgerline-data-b }
+
+  # ---------- Task 4 - the internet gateway ----------
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - { Key: Name, Value: ledgerline-igw }
+
+  IgwAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Vpc
+      InternetGatewayId: !Ref InternetGateway
+
+  # ---------- Task 5 - the NAT gateway ----------
+  NatEip:
+    Type: AWS::EC2::EIP
+    Properties:
+      Domain: vpc
+      Tags:
+        - { Key: Name, Value: ledgerline-nat-eip }
+
+  NatGateway:
+    Type: AWS::EC2::NatGateway
+    DependsOn: IgwAttachment
+    Properties:
+      AllocationId: !GetAtt NatEip.AllocationId
+      SubnetId: !Ref PublicA
+      ConnectivityType: public
+      Tags:
+        - { Key: Name, Value: ledgerline-nat }
+
+  # ---------- Task 6 - the two route tables ----------
+  # The data subnets get neither. They stay on the VPC default, which has no route out.
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - { Key: Name, Value: ledgerline-public-rt }
+
+  PublicDefaultRoute:
+    Type: AWS::EC2::Route
+    DependsOn: IgwAttachment
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref InternetGateway
+
+  PublicAAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicA
+
+  PublicBAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref PublicRouteTable
+      SubnetId: !Ref PublicB
+
+  AppRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref Vpc
+      Tags:
+        - { Key: Name, Value: ledgerline-app-rt }
+
+  AppDefaultRoute:
+    Type: AWS::EC2::Route
+    Properties:
+      RouteTableId: !Ref AppRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      NatGatewayId: !Ref NatGateway
+
+  AppAAssoc:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref AppRouteTable
+      SubnetId: !Ref AppA
+
+  # ---------- Task 7 - the three security groups ----------
+  AlbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: ledgerline-alb-sg
+      GroupDescription: Load balancer - HTTP from the internet
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - { IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: 0.0.0.0/0, Description: HTTP from internet }
+      Tags:
+        - { Key: Name, Value: ledgerline-alb-sg }
+
+  AppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: ledgerline-app-sg
+      GroupDescription: Application tier - HTTP from the load balancer only
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - { IpProtocol: tcp, FromPort: 80, ToPort: 80, SourceSecurityGroupId: !Ref AlbSecurityGroup, Description: HTTP from the ALB }
+      Tags:
+        - { Key: Name, Value: ledgerline-app-sg }
+
+  DbSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupName: ledgerline-db-sg
+      GroupDescription: Database - PostgreSQL from the application tier only
+      VpcId: !Ref Vpc
+      SecurityGroupIngress:
+        - { IpProtocol: tcp, FromPort: 5432, ToPort: 5432, SourceSecurityGroupId: !Ref AppSecurityGroup, Description: PostgreSQL from the app tier }
+      Tags:
+        - { Key: Name, Value: ledgerline-db-sg }
+
+  # ---------- Task 9 - the launch template ----------
+  AppLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateName: ledgerline-lt
+      LaunchTemplateData:
+        ImageId: !Ref AmazonLinuxAmiId
+        InstanceType: t3.micro
+        IamInstanceProfile: !If
+          - HasInstanceProfile
+          - Name: !Ref InstanceProfileName
+          - !Ref AWS::NoValue
+        SecurityGroupIds:
+          - !Ref AppSecurityGroup
+        BlockDeviceMappings:
+          - DeviceName: /dev/xvda           # Amazon Linux root volume
+            Ebs: { VolumeType: gp3, VolumeSize: 8, DeleteOnTermination: true }
+        UserData:
+          Fn::Base64: |
+            #!/bin/bash
+            dnf install -y nginx
+            echo '<h1>Ledgerline</h1><p>Infrastructure ready.</p>' \
+                 > /usr/share/nginx/html/index.html
+            systemctl enable --now nginx
+        TagSpecifications:
+          - ResourceType: instance
+            Tags:
+              - { Key: Name, Value: ledgerline-app }
+              - { Key: Project, Value: Ledgerline }
+
+  # ---------- Task 10 - the target group ----------
+  AppTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: ledgerline-tg
+      VpcId: !Ref Vpc
+      Port: 80
+      Protocol: HTTP
+      TargetType: instance
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: /
+      Matcher:
+        HttpCode: '200'
+      Tags:
+        - { Key: Name, Value: ledgerline-tg }
+
+  # ---------- Task 11 - the load balancer ----------
+  # Internet-facing on purpose: the practice environment is reachable from a browser so students
+  # can see the page they built. Ledgerline's real design would not be, and that is fine - the
+  # scenario yields where staying faithful to it would cost the student the lesson.
+  AppLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: ledgerline-alb
+      Scheme: internet-facing
+      Type: application
+      Subnets:
+        - !Ref PublicA
+        - !Ref PublicB
+      SecurityGroups:
+        - !Ref AlbSecurityGroup
+      Tags:
+        - { Key: Name, Value: ledgerline-alb }
+
+  AppListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref AppLoadBalancer
+      Port: 80
+      Protocol: HTTP
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref AppTargetGroup
+
+  # ---------- Task 12 - the Auto Scaling group ----------
+  AppAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    DependsOn: AppDefaultRoute              # instances need the NAT route before they boot
+    Properties:
+      AutoScalingGroupName: ledgerline-asg
+      MinSize: '1'
+      MaxSize: '2'
+      DesiredCapacity: '1'
+      VPCZoneIdentifier:
+        - !Ref AppA                         # single AZ, as the practice run sheet builds it
+      LaunchTemplate:
+        LaunchTemplateId: !Ref AppLaunchTemplate
+        Version: !GetAtt AppLaunchTemplate.LatestVersionNumber
+      TargetGroupARNs:
+        - !Ref AppTargetGroup
+      HealthCheckType: ELB
+      HealthCheckGracePeriod: 300
+      Tags:
+        - { Key: Name, Value: ledgerline-app, PropagateAtLaunch: true }
+        - { Key: Project, Value: Ledgerline, PropagateAtLaunch: true }
+
+  AppScalingPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref AppAutoScalingGroup
+      PolicyType: TargetTrackingScaling
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 70
+
+  # ---------- Task 13 - the database subnet group ----------
+  DbSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupName: ledgerline-db-subnet-group
+      DBSubnetGroupDescription: Ledgerline data subnets (spans 2 AZs - required even for Single-AZ)
+      SubnetIds:
+        - !Ref DataA
+        - !Ref DataB
+
+  # ---------- Task 14 - the database ----------
+  Database:
+    Type: AWS::RDS::DBInstance
+    DeletionPolicy: Delete
+    UpdateReplacePolicy: Delete
+    Properties:
+      DBInstanceIdentifier: ledgerline-db
+      Engine: postgres
+      DBInstanceClass: db.t3.micro
+      AllocatedStorage: '20'
+      StorageType: gp3
+      MultiAZ: false
+      StorageEncrypted: true
+      MasterUsername: !Ref DBMasterUsername
+      MasterUserPassword: !Ref DBMasterPassword
+      DBSubnetGroupName: !Ref DbSubnetGroup
+      VPCSecurityGroups:
+        - !Ref DbSecurityGroup
+      PubliclyAccessible: false
+      Tags:
+        - { Key: Name, Value: ledgerline-db }
+        - { Key: Project, Value: Ledgerline }
+
+  # ---------- Task 15 - the alarm ----------
+  # One alarm, not two: the practice run sheet builds only the unhealthy-hosts alarm.
+  AlertsTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName: ledgerline-alerts
+      DisplayName: Ledgerline alerts
+
+  AlertsSubscription:
+    Type: AWS::SNS::Subscription
+    Condition: HasAlertEmail
+    Properties:
+      TopicArn: !Ref AlertsTopic
+      Protocol: email
+      Endpoint: !Ref AlertEmail
+
+  AlarmUnhealthyHosts:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: ledgerline-unhealthy-hosts
+      AlarmDescription: any target behind the load balancer has failed its health check
+      Namespace: AWS/ApplicationELB
+      MetricName: UnHealthyHostCount
+      Dimensions:
+        - Name: LoadBalancer
+          Value: !GetAtt AppLoadBalancer.LoadBalancerFullName
+        - Name: TargetGroup
+          Value: !GetAtt AppTargetGroup.TargetGroupFullName
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: missing
+      AlarmActions:
+        - !Ref AlertsTopic
+
+Outputs:
+  AlbDnsName:
+    Description: Public DNS of the load balancer - browse to this to see the Ledgerline page.
+    Value: !GetAtt AppLoadBalancer.DNSName
+
+  RdsEndpoint:
+    Description: RDS endpoint address.
+    Value: !GetAtt Database.Endpoint.Address
+
+  VpcId:
+    Value: !Ref Vpc

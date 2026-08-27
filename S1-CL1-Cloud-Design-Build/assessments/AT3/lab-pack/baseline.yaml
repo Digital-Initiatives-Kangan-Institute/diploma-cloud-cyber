@@ -1,41 +1,46 @@
 AWSTemplateFormatVersion: '2010-09-09'
 
 Description: >-
-  YAT LMS - AT3 baseline environment (single-AZ, non-HA). Students deploy this at the START
-  of AT3 to get a consistent, known starting state, then harden it to multi-AZ high
-  availability. Instantiates the AT2 supplied design (design region ap-southeast-2 Sydney; deploys to
-  us-east-1 in the Learner Lab).
+  YAT LMS - AT3 baseline. Deploys an exact replica of a correctly completed AT2 build run
+  sheet, so every student starts AT3 from the same known-good state regardless of how their
+  own AT2 build went. The scenario region is ap-southeast-2 Sydney; deploy there if it is
+  offered, otherwise wherever you have (us-east-1 in the Learner Lab). AZs come from GetAZs,
+  so it builds the same thing in any region.
 
-  AWS Academy: creates NO IAM (the lab forbids it) - the EC2 instance profile is optional and
-  defaults to none. The Windows AMI is resolved from an SSM public parameter so it never goes
-  stale. Proven deployed in the AWS Academy Learner Lab, us-east-1.
+  EXACT REPLICA: every resource is one an AT2 task builds, with the name and settings that
+  task specifies, and nothing else. Change AT2's run sheet, change this too.
 
-  NON-HA BY DESIGN: an internet-facing ALB and an RDS subnet group each require >= 2 AZs, so a
-  second public subnet and a second data subnet are present - but the COMPUTE (the Auto Scaling
-  group) runs in ONE AZ and RDS is Single-AZ. Spreading the ASG across AZs and enabling RDS
-  Multi-AZ is the AT3 hardening work.
+  AT2 tasks 8 and 9 build nothing - task 8 is a deliberate refusal (the lab forbids creating
+  IAM; the refusal is the evidence) and task 9 reviews the supplied LabRole. So this creates
+  no IAM, which is also what the Learner Lab requires.
+
+  NON-HA BY DESIGN: the ALB and the RDS subnet group each need >= 2 AZs, so a second public
+  and data subnet exist - but the Auto Scaling group runs in ONE AZ and RDS is Single-AZ,
+  as AT2 builds it. Making it HA is the AT3 work.
 
 Parameters:
-  EnvName:
-    Type: String
-    Default: dev
-    AllowedValues: [dev, prod]
-    Description: Environment suffix used in resource names.
-
   WindowsAmiId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
-    Default: /aws/service/ami-windows-latest/Windows_Server-2016-English-Full-Base
-    Description: Auto-resolves the latest Windows Server 2016 AMI (no hardcoded AMI to age).
+    Default: /aws/service/ami-windows-latest/Windows_Server-2022-English-Full-Base
+    Description: >-
+      Auto-resolves the latest Windows Server AMI (no hardcoded AMI to age). AT2 task 10 tells
+      the student to pick the latest Windows Server available, which is what this resolves.
 
   InstanceType:
     Type: String
-    Default: t3.medium
-    Description: App tier EC2 instance type (AWS Academy may restrict the allowed types).
+    Default: t3.small
+    AllowedValues: [t3.micro, t3.small]
+    Description: >-
+      App tier instance type. These are the two options AT2's decision C1 offers; t3.small is
+      the better answer (Windows Server alone uses most of t3.micro's 1 GiB).
 
   DBInstanceClass:
     Type: String
-    Default: db.t3.medium
-    Description: RDS instance class (Academy may restrict; the baseline RDS is Single-AZ).
+    Default: db.t3.small
+    AllowedValues: [db.t3.micro, db.t3.small]
+    Description: >-
+      RDS instance class. The two options AT2's decision C2 offers; db.t3.small is the better
+      answer. The baseline RDS is Single-AZ either way.
 
   DBMasterUsername:
     Type: String
@@ -51,25 +56,27 @@ Parameters:
 
   InstanceProfileName:
     Type: String
+    Default: LabInstanceProfile
+    Description: >-
+      EC2 instance profile, as selected in AT2 task 10. The app instances sit in a private
+      subnet with no public IP, so this profile is the only route to a shell on them (Session
+      Manager). Clear it to blank only if your lab does not provide this profile - the
+      instances will still serve the placeholder page, but nothing will be able to log in.
+
+  AlertEmail:
+    Type: String
     Default: ''
     Description: >-
-      EC2 instance profile name. LEAVE BLANK (default) to launch with NO instance profile - the
-      baseline instances only serve a placeholder page, so they need no IAM, and this works in any
-      lab. Set it only if your lab provides a usable instance profile and you want the instances to
-      carry a role (e.g. for SSM Session Manager access). Names vary by lab product.
-
-  AdminCidr:
-    Type: String
-    Default: 10.0.0.0/16
-    Description: CIDR allowed RDP to the app instance. Set to your-ip/32 to RDP in from outside.
+      Email address subscribed to the yat-lms-alerts topic, as AT2 task 16 asks for. Leave
+      blank to create the topic with no subscription (the alarms still work).
 
 Conditions:
-  # Only attach an instance profile if a name was supplied (default is none).
   HasInstanceProfile: !Not [!Equals [!Ref InstanceProfileName, '']]
+  HasAlertEmail: !Not [!Equals [!Ref AlertEmail, '']]
 
 Resources:
 
-  # ---------- Network ----------
+  # ---------- Task 2 - the VPC ----------
   Vpc:
     Type: AWS::EC2::VPC
     Properties:
@@ -77,22 +84,12 @@ Resources:
       EnableDnsHostnames: true
       EnableDnsSupport: true
       Tags:
-        - { Key: Name, Value: !Sub 'yat-lms-${EnvName}' }
+        - { Key: Name, Value: yat-lms-vpc }
         - { Key: Project, Value: YAT-LMS }
-        - { Key: Environment, Value: !Ref EnvName }
 
-  InternetGateway:
-    Type: AWS::EC2::InternetGateway
-    Properties:
-      Tags:
-        - { Key: Name, Value: !Sub 'yat-lms-igw-${EnvName}' }
-
-  IgwAttachment:
-    Type: AWS::EC2::VPCGatewayAttachment
-    Properties:
-      VpcId: !Ref Vpc
-      InternetGatewayId: !Ref InternetGateway
-
+  # ---------- Task 3 - the five subnets ----------
+  # Three carry the workload, all in one AZ. The two -b subnets exist only because the ALB and
+  # the RDS subnet group each refuse to be created with subnets in a single zone.
   PublicWebA:
     Type: AWS::EC2::Subnet
     Properties:
@@ -101,7 +98,7 @@ Resources:
       AvailabilityZone: !Select [0, !GetAZs '']
       MapPublicIpOnLaunch: true
       Tags:
-        - { Key: Name, Value: !Sub 'public-web-a-${EnvName}' }
+        - { Key: Name, Value: public-web-a }
 
   PublicWebB:
     Type: AWS::EC2::Subnet
@@ -111,7 +108,7 @@ Resources:
       AvailabilityZone: !Select [1, !GetAZs '']
       MapPublicIpOnLaunch: true
       Tags:
-        - { Key: Name, Value: !Sub 'public-web-b-${EnvName}' }
+        - { Key: Name, Value: public-web-b }
 
   PrivateAppA:
     Type: AWS::EC2::Subnet
@@ -120,7 +117,7 @@ Resources:
       CidrBlock: 10.0.11.0/24
       AvailabilityZone: !Select [0, !GetAZs '']
       Tags:
-        - { Key: Name, Value: !Sub 'private-app-a-${EnvName}' }
+        - { Key: Name, Value: private-app-a }
 
   PrivateDataA:
     Type: AWS::EC2::Subnet
@@ -129,7 +126,7 @@ Resources:
       CidrBlock: 10.0.21.0/24
       AvailabilityZone: !Select [0, !GetAZs '']
       Tags:
-        - { Key: Name, Value: !Sub 'private-data-a-${EnvName}' }
+        - { Key: Name, Value: private-data-a }
 
   PrivateDataB:
     Type: AWS::EC2::Subnet
@@ -138,27 +135,49 @@ Resources:
       CidrBlock: 10.0.22.0/24
       AvailabilityZone: !Select [1, !GetAZs '']
       Tags:
-        - { Key: Name, Value: !Sub 'private-data-b-${EnvName}' }
+        - { Key: Name, Value: private-data-b }
 
+  # ---------- Task 4 - the internet gateway ----------
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - { Key: Name, Value: yat-lms-igw }
+
+  IgwAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref Vpc
+      InternetGatewayId: !Ref InternetGateway
+
+  # ---------- Task 5 - the NAT gateway ----------
   NatEip:
     Type: AWS::EC2::EIP
     Properties:
       Domain: vpc
+      Tags:
+        - { Key: Name, Value: yat-lms-nat-eip }
 
   NatGateway:
     Type: AWS::EC2::NatGateway
+    DependsOn: IgwAttachment
     Properties:
       AllocationId: !GetAtt NatEip.AllocationId
       SubnetId: !Ref PublicWebA
+      ConnectivityType: public
       Tags:
-        - { Key: Name, Value: !Sub 'yat-lms-nat-${EnvName}' }
+        - { Key: Name, Value: yat-lms-nat }
 
+  # ---------- Task 6 - the two route tables ----------
+  # The data subnets get neither. They stay on the VPC's default route table, which carries no
+  # internet route at all - which is what a database tier should have. That is why there are no
+  # PrivateData*Assoc resources here.
   PublicRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref Vpc
       Tags:
-        - { Key: Name, Value: !Sub 'public-rt-${EnvName}' }
+        - { Key: Name, Value: public-rt }
 
   PublicDefaultRoute:
     Type: AWS::EC2::Route
@@ -180,63 +199,67 @@ Resources:
       RouteTableId: !Ref PublicRouteTable
       SubnetId: !Ref PublicWebB
 
-  PrivateRouteTable:
+  PrivateAppRouteTable:
     Type: AWS::EC2::RouteTable
     Properties:
       VpcId: !Ref Vpc
       Tags:
-        - { Key: Name, Value: !Sub 'private-rt-${EnvName}' }
+        - { Key: Name, Value: private-app-rt }
 
-  PrivateDefaultRoute:
+  PrivateAppDefaultRoute:
     Type: AWS::EC2::Route
     Properties:
-      RouteTableId: !Ref PrivateRouteTable
+      RouteTableId: !Ref PrivateAppRouteTable
       DestinationCidrBlock: 0.0.0.0/0
       NatGatewayId: !Ref NatGateway
 
   PrivateAppAAssoc:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
-      RouteTableId: !Ref PrivateRouteTable
+      RouteTableId: !Ref PrivateAppRouteTable
       SubnetId: !Ref PrivateAppA
 
-  # ---------- Security groups ----------
+  # ---------- Task 7 - the three security groups ----------
+  # No RDP rule: AT2 does not create one. The app instances are private with no public IP, and
+  # Session Manager (via the instance profile) is the route to a shell on them.
   AlbSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: ALB - HTTP from the internet
+      GroupName: yat-lms-alb-sg
+      GroupDescription: Load balancer - HTTP from the internet
       VpcId: !Ref Vpc
       SecurityGroupIngress:
         - { IpProtocol: tcp, FromPort: 80, ToPort: 80, CidrIp: 0.0.0.0/0, Description: HTTP from internet }
       Tags:
-        - { Key: Name, Value: !Sub 'sg-alb-${EnvName}' }
+        - { Key: Name, Value: yat-lms-alb-sg }
 
   AppSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: App tier - HTTP from the ALB, RDP from the admin CIDR
+      GroupName: yat-lms-app-sg
+      GroupDescription: Application tier - HTTP from the load balancer only
       VpcId: !Ref Vpc
       SecurityGroupIngress:
-        - { IpProtocol: tcp, FromPort: 80, ToPort: 80, SourceSecurityGroupId: !Ref AlbSecurityGroup, Description: HTTP from ALB }
-        - { IpProtocol: tcp, FromPort: 3389, ToPort: 3389, CidrIp: !Ref AdminCidr, Description: RDP from admin }
+        - { IpProtocol: tcp, FromPort: 80, ToPort: 80, SourceSecurityGroupId: !Ref AlbSecurityGroup, Description: HTTP from the ALB }
       Tags:
-        - { Key: Name, Value: !Sub 'sg-app-${EnvName}' }
+        - { Key: Name, Value: yat-lms-app-sg }
 
   DbSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Database - MySQL from the app tier only
+      GroupName: yat-lms-db-sg
+      GroupDescription: Database - MySQL from the application tier only
       VpcId: !Ref Vpc
       SecurityGroupIngress:
-        - { IpProtocol: tcp, FromPort: 3306, ToPort: 3306, SourceSecurityGroupId: !Ref AppSecurityGroup, Description: MySQL from app }
+        - { IpProtocol: tcp, FromPort: 3306, ToPort: 3306, SourceSecurityGroupId: !Ref AppSecurityGroup, Description: MySQL from the app tier }
       Tags:
-        - { Key: Name, Value: !Sub 'sg-db-${EnvName}' }
+        - { Key: Name, Value: yat-lms-db-sg }
 
-  # ---------- Compute (single-AZ - the non-HA state) ----------
+  # ---------- Task 10 - the launch template ----------
   AppLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
-      LaunchTemplateName: !Sub 'yat-lms-app-${EnvName}'
+      LaunchTemplateName: yat-lms-lt
       LaunchTemplateData:
         ImageId: !Ref WindowsAmiId
         InstanceType: !Ref InstanceType
@@ -246,52 +269,46 @@ Resources:
           - !Ref AWS::NoValue
         SecurityGroupIds:
           - !Ref AppSecurityGroup
+        BlockDeviceMappings:
+          - DeviceName: /dev/sda1          # Windows root volume
+            Ebs: { VolumeType: gp3, VolumeSize: 30, DeleteOnTermination: true }
+          - DeviceName: xvdb               # the second volume AT2 task 10 adds
+            Ebs: { VolumeType: gp3, VolumeSize: 8, DeleteOnTermination: true }
         UserData:
           Fn::Base64: |
             <powershell>
             Install-WindowsFeature -Name Web-Server -IncludeManagementTools
-            Set-Content -Path "C:\inetpub\wwwroot\index.html" -Value "Infrastructure ready - awaiting application deployment"
+            Set-Content -Path "C:\inetpub\wwwroot\index.html" -Value "<html><body><h1>YAT LMS</h1><p>Infrastructure ready - awaiting application deployment.</p></body></html>"
             </powershell>
         TagSpecifications:
           - ResourceType: instance
             Tags:
-              - { Key: Name, Value: !Sub 'yat-lms-app-${EnvName}' }
+              - { Key: Name, Value: yat-lms-app }
               - { Key: Project, Value: YAT-LMS }
 
-  AppAutoScalingGroup:
-    Type: AWS::AutoScaling::AutoScalingGroup
+  # ---------- Task 11 - the target group ----------
+  AppTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
-      AutoScalingGroupName: !Sub 'yat-lms-app-${EnvName}'
-      MinSize: '1'
-      MaxSize: '2'
-      DesiredCapacity: '1'
-      VPCZoneIdentifier:
-        - !Ref PrivateAppA            # single AZ on purpose - AT3 spreads this across AZs
-      LaunchTemplate:
-        LaunchTemplateId: !Ref AppLaunchTemplate
-        Version: !GetAtt AppLaunchTemplate.LatestVersionNumber
-      TargetGroupARNs:
-        - !Ref AppTargetGroup
-      HealthCheckType: ELB
-      HealthCheckGracePeriod: 300
+      Name: yat-lms-tg
+      VpcId: !Ref Vpc
+      Port: 80
+      Protocol: HTTP
+      TargetType: instance
+      HealthCheckProtocol: HTTP
+      HealthCheckPath: /
+      HealthCheckIntervalSeconds: 30
+      UnhealthyThresholdCount: 2
+      Matcher:
+        HttpCode: '200'
       Tags:
-        - { Key: Name, Value: !Sub 'yat-lms-app-${EnvName}', PropagateAtLaunch: true }
+        - { Key: Name, Value: yat-lms-tg }
 
-  AppScalingPolicy:
-    Type: AWS::AutoScaling::ScalingPolicy
-    Properties:
-      AutoScalingGroupName: !Ref AppAutoScalingGroup
-      PolicyType: TargetTrackingScaling
-      TargetTrackingConfiguration:
-        PredefinedMetricSpecification:
-          PredefinedMetricType: ASGAverageCPUUtilization
-        TargetValue: 60
-
-  # ---------- Load balancer (2-AZ by requirement; targets are single-AZ) ----------
+  # ---------- Task 12 - the load balancer ----------
   AppLoadBalancer:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
     Properties:
-      Name: !Sub 'yat-lms-${EnvName}'
+      Name: yat-lms-alb
       Scheme: internet-facing
       Type: application
       Subnets:
@@ -299,19 +316,8 @@ Resources:
         - !Ref PublicWebB
       SecurityGroups:
         - !Ref AlbSecurityGroup
-
-  AppTargetGroup:
-    Type: AWS::ElasticLoadBalancingV2::TargetGroup
-    Properties:
-      Name: !Sub 'yat-lms-${EnvName}'
-      VpcId: !Ref Vpc
-      Port: 80
-      Protocol: HTTP
-      TargetType: instance
-      HealthCheckPath: /
-      HealthCheckProtocol: HTTP
-      Matcher:
-        HttpCode: '200'
+      Tags:
+        - { Key: Name, Value: yat-lms-alb }
 
   AppListener:
     Type: AWS::ElasticLoadBalancingV2::Listener
@@ -323,25 +329,61 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref AppTargetGroup
 
-  # ---------- Database (Single-AZ - the non-HA state) ----------
+  # ---------- Task 13 - the Auto Scaling group ----------
+  AppAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    DependsOn: PrivateAppDefaultRoute      # instances need the NAT route before they boot
+    Properties:
+      AutoScalingGroupName: yat-lms-asg
+      MinSize: '1'
+      MaxSize: '2'
+      DesiredCapacity: '1'
+      VPCZoneIdentifier:
+        - !Ref PrivateAppA                 # single AZ on purpose - AT3 spreads this across AZs
+      LaunchTemplate:
+        LaunchTemplateId: !Ref AppLaunchTemplate
+        Version: !GetAtt AppLaunchTemplate.LatestVersionNumber
+      TargetGroupARNs:
+        - !Ref AppTargetGroup
+      HealthCheckType: ELB
+      HealthCheckGracePeriod: 300
+      Tags:
+        - { Key: Name, Value: yat-lms-app, PropagateAtLaunch: true }
+        - { Key: Project, Value: YAT-LMS, PropagateAtLaunch: true }
+
+  AppScalingPolicy:
+    Type: AWS::AutoScaling::ScalingPolicy
+    Properties:
+      AutoScalingGroupName: !Ref AppAutoScalingGroup
+      PolicyType: TargetTrackingScaling
+      EstimatedInstanceWarmup: 60
+      TargetTrackingConfiguration:
+        PredefinedMetricSpecification:
+          PredefinedMetricType: ASGAverageCPUUtilization
+        TargetValue: 70
+
+  # ---------- Task 14 - the database subnet group ----------
   DbSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
+      DBSubnetGroupName: yat-lms-db-subnet-group
       DBSubnetGroupDescription: YAT LMS data subnets (spans 2 AZs - required even for Single-AZ)
       SubnetIds:
         - !Ref PrivateDataA
         - !Ref PrivateDataB
 
+  # ---------- Task 15 - the database ----------
   Database:
     Type: AWS::RDS::DBInstance
     DeletionPolicy: Delete
     UpdateReplacePolicy: Delete
     Properties:
-      DBInstanceIdentifier: !Sub 'yat-lms-${EnvName}'
+      DBInstanceIdentifier: yat-lms-db
       Engine: mysql
       DBInstanceClass: !Ref DBInstanceClass
       AllocatedStorage: '20'
-      MultiAZ: false                  # AT3 hardening enables this
+      StorageType: gp3
+      MultiAZ: false                       # AT3 hardening enables this
       StorageEncrypted: true
       MasterUsername: !Ref DBMasterUsername
       MasterUserPassword: !Ref DBMasterPassword
@@ -351,137 +393,76 @@ Resources:
       BackupRetentionPeriod: 7
       PubliclyAccessible: false
       Tags:
-        - { Key: Name, Value: !Sub 'yat-lms-${EnvName}' }
+        - { Key: Name, Value: yat-lms-db }
         - { Key: Project, Value: YAT-LMS }
 
-  # ---------- Storage ----------
-  AttachmentsBucket:
-    Type: AWS::S3::Bucket
+  # ---------- Task 16 - the notification topic and the two alarms ----------
+  AlertsTopic:
+    Type: AWS::SNS::Topic
     Properties:
-      BucketName: !Sub 'yat-lms-attachments-${EnvName}-${AWS::Region}-${AWS::AccountId}'
-      VersioningConfiguration:
-        Status: Enabled
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
+      TopicName: yat-lms-alerts
+      DisplayName: YAT LMS alerts
 
-  BackupsBucket:
-    Type: AWS::S3::Bucket
+  AlertsSubscription:
+    Type: AWS::SNS::Subscription
+    Condition: HasAlertEmail
     Properties:
-      BucketName: !Sub 'yat-lms-backups-${EnvName}-${AWS::Region}-${AWS::AccountId}'
-      VersioningConfiguration:
-        Status: Enabled
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: true
-        BlockPublicPolicy: true
-        IgnorePublicAcls: true
-        RestrictPublicBuckets: true
+      TopicArn: !Ref AlertsTopic
+      Protocol: email
+      Endpoint: !Ref AlertEmail
 
-  # ---------- Monitoring (baseline alarms) ----------
-  AlarmAppCpuHigh:
+  AlarmUnhealthyHosts:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmName: !Sub 'yat-lms-app-cpu-high-${EnvName}'
-      Namespace: AWS/EC2
-      MetricName: CPUUtilization
+      AlarmName: yat-lms-unhealthy-hosts
+      AlarmDescription: any target behind the load balancer has failed its health check
+      Namespace: AWS/ApplicationELB
+      MetricName: UnHealthyHostCount
       Dimensions:
-        - Name: AutoScalingGroupName
-          Value: !Ref AppAutoScalingGroup
-      Statistic: Average
-      Period: 300
-      EvaluationPeriods: 2
-      Threshold: 80
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
+        - Name: LoadBalancer
+          Value: !GetAtt AppLoadBalancer.LoadBalancerFullName
+        - Name: TargetGroup
+          Value: !GetAtt AppTargetGroup.TargetGroupFullName
+      Statistic: Maximum
+      Period: 60
+      EvaluationPeriods: 1
+      DatapointsToAlarm: 1
+      Threshold: 1
+      ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: missing
+      AlarmActions:
+        - !Ref AlertsTopic
 
-  AlarmRdsCpuHigh:
+  AlarmDbStorageLow:
     Type: AWS::CloudWatch::Alarm
     Properties:
-      AlarmName: !Sub 'yat-lms-rds-cpu-high-${EnvName}'
-      Namespace: AWS/RDS
-      MetricName: CPUUtilization
-      Dimensions:
-        - Name: DBInstanceIdentifier
-          Value: !Ref Database
-      Statistic: Average
-      Period: 300
-      EvaluationPeriods: 2
-      Threshold: 80
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-
-  AlarmRdsStorageLow:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmName: !Sub 'yat-lms-rds-storage-low-${EnvName}'
+      AlarmName: yat-lms-db-storage-low
+      AlarmDescription: >-
+        free storage below 15% of the 20 GiB allocated. The threshold is in bytes; it is only
+        correct while the allocated size is 20 GiB, which is why the size is recorded here.
       Namespace: AWS/RDS
       MetricName: FreeStorageSpace
       Dimensions:
         - Name: DBInstanceIdentifier
           Value: !Ref Database
-      Statistic: Average
-      Period: 300
-      EvaluationPeriods: 1
-      Threshold: 2000000000          # ~2 GB free
-      ComparisonOperator: LessThanThreshold
-      TreatMissingData: notBreaching
-
-  AlarmAlb5xx:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmName: !Sub 'yat-lms-alb-5xx-${EnvName}'
-      Namespace: AWS/ApplicationELB
-      MetricName: HTTPCode_Target_5XX_Count
-      Dimensions:
-        - Name: LoadBalancer
-          Value: !GetAtt AppLoadBalancer.LoadBalancerFullName
-      Statistic: Sum
-      Period: 300
-      EvaluationPeriods: 1
-      Threshold: 5
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
-
-  AlarmRdsConnectionsHigh:
-    Type: AWS::CloudWatch::Alarm
-    Properties:
-      AlarmName: !Sub 'yat-lms-rds-connections-high-${EnvName}'
-      Namespace: AWS/RDS
-      MetricName: DatabaseConnections
-      Dimensions:
-        - Name: DBInstanceIdentifier
-          Value: !Ref Database
-      Statistic: Average
+      Statistic: Minimum
       Period: 300
       EvaluationPeriods: 2
-      Threshold: 100
-      ComparisonOperator: GreaterThanThreshold
-      TreatMissingData: notBreaching
+      DatapointsToAlarm: 2
+      Threshold: 3221225472                # 15% of 20 GiB, in bytes
+      ComparisonOperator: LessThanThreshold
+      TreatMissingData: missing
+      AlarmActions:
+        - !Ref AlertsTopic
 
 Outputs:
   AlbDnsName:
-    Description: Public DNS of the load balancer - curl this to confirm the placeholder page.
+    Description: Public DNS of the load balancer - browse to this to confirm the placeholder page.
     Value: !GetAtt AppLoadBalancer.DNSName
 
   RdsEndpoint:
     Description: RDS endpoint address.
     Value: !GetAtt Database.Endpoint.Address
-
-  AttachmentsBucketName:
-    Value: !Ref AttachmentsBucket
-
-  BackupsBucketName:
-    Value: !Ref BackupsBucket
 
   VpcId:
     Value: !Ref Vpc

@@ -3,9 +3,13 @@
 Before you start the AT3 assessment you need to build the **starting environment** in AWS.
 This guide walks you through it, step by step. You only do this once, at the start of AT3.
 
-**What you are building:** a working (but not yet highly available) version of the YAT LMS
-infrastructure — a web server behind a load balancer, with a database. During AT3 you will
-improve this into a highly available design.
+**What you are building:** the YAT LMS infrastructure exactly as it stands at the end of AT2 —
+the same VPC, subnets, security groups, load balancer, Auto Scaling group and database, built to
+the same settings, under the same names. It is a working system, but it is not yet highly
+available. During AT3 you will improve it into a highly available design.
+
+You get this whether or not your own AT2 build finished cleanly. Everyone starts AT3 from the
+same known-good state.
 
 **You will need:**
 - Your AWS Academy login.
@@ -33,19 +37,23 @@ You are now in the AWS console.
 
 ---
 
-## Part 2 — Check the region
+## Part 2 — Choose your region
 
-8. Look at the **top-right** of the console. The region should say *United States (N. Virginia)* —
-   `us-east-1`. The Learner Lab runs only in this region.
-9. If it shows anything else, click it and choose **US East (N. Virginia)**.
+8. Look at the **top-right** of the console and click the region selector to see what is offered.
+9. If **Asia Pacific (Sydney)** — `ap-southeast-2` — is in the list, choose it. If it is not, use
+   whichever region you do have; in the Learner Lab that is **US East (N. Virginia)**, `us-east-1`.
+   Whatever you choose, stay in it for the whole of AT3.
 
-> **Region substitution.** The YAT LMS is designed to run in Sydney, but the Learner Lab only offers
-> `us-east-1`, so that is where you build it. Wherever you see this notation, the left side is the real
-> design region and the right side is where you actually deploy:
+> **Which region?** The scenario runs this in Sydney, `ap-southeast-2` — use that region if it is
+> available to you. If you are working in the AWS Academy Learner Lab or a similar restricted
+> environment, Sydney will not be offered: build in `us-east-1`, or whichever region you do have.
+> The template builds the same thing in any region — it asks AWS which availability zones exist
+> wherever it is running, so no part of it is tied to a location.
+>
+> Where the course materials use this notation, the left side is the design region and the right
+> side is where you actually build:
 >
 > `[scenario: ap-southeast-2 (Sydney) | deploy: us-east-1]`
->
-> Deploying to `us-east-1` is identical to deploying anywhere else — only the location label changes.
 
 ---
 
@@ -78,9 +86,10 @@ The environment now starts building. You'll see a list of items turning from
 
 19. Click the **Outputs** tab (near the top, next to Events/Resources).
 20. Find the row **AlbDnsName** and copy its value (it looks like
-    `yat-lms-dev-1234567890.us-east-1.elb.amazonaws.com`).
+    `yat-lms-alb-1234567890.us-east-1.elb.amazonaws.com`).
 21. Open a new browser tab, type `http://` then paste that value, and press Enter.
-22. You should see the text: **"Infrastructure ready - awaiting application deployment"**.
+22. You should see the heading **YAT LMS** and the text **"Infrastructure ready - awaiting
+    application deployment."** — the same page your AT2 build served.
     (If it doesn't load straight away, wait 2–3 minutes and try again — the server takes a
     moment after building.)
 

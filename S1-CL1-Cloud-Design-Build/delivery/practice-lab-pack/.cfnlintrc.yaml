@@ -1,0 +1,7 @@
+# cfn-lint config for the Ledgerline practice baseline lab pack.
+# Documented suppressions only — keep this list short and justified.
+ignore_checks:
+  # W1011: the DB master password is a NoEcho parameter by design. This is a teaching practice
+  # baseline; Secrets Manager / dynamic references are out of scope (and add IAM the Academy
+  # Learner Lab restricts). The student supplies the password at deploy time.
+  - W1011

@@ -1,0 +1,12 @@
+# Local validation harness for the Ledgerline practice baseline lab pack.
+#
+# Only for validating the template locally (no AWS account needed). Not used to deploy in
+# the AWS Academy lab — the lab provides the AWS CLI in CloudShell.
+#
+# Install into a venv created inside this folder (see README.md):
+#     python -m venv .venv
+#     .venv/Scripts/python -m pip install -r requirements.txt      # Windows
+#     .venv/bin/python    -m pip install -r requirements.txt       # macOS/Linux
+
+cfn-lint>=1.0,<2     # lints the CloudFormation template (and parses it for the structural test)
+pytest>=8.0          # runs the structural test (asserts the practice baseline matches the practice run sheet)

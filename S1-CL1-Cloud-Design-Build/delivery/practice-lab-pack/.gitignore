@@ -1,0 +1,5 @@
+# Local validation harness — not committed (recreate from requirements.txt; see README)
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc
