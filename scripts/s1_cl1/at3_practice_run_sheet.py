@@ -616,22 +616,77 @@ TESTS = [
                 "instance class.",
                 "Record how long it took and whether Ledgerline was affected.",
                 "Return the setting to where it was."],
-         capture="the resize in progress or complete, and what the service did while it happened.",
+         clicks=["Whichever resize you planned, keep the browser refreshing at the load balancer "
+                 "address throughout — that is how you measure the impact.",
+                 "IF YOU PLANNED TO RESIZE THE APPLICATION TIER — EC2 → Auto Scaling groups → your "
+                 "group → Capacity overview → Edit. Raise Desired capacity by one and update. Watch "
+                 "the Activity tab for the launch, then the target group until the new instance is "
+                 "healthy. Nothing should go down: you are adding, not replacing.",
+                 "IF YOU PLANNED TO RESIZE AN INSTANCE'S TYPE — you cannot change the type of a "
+                 "running Auto Scaling instance. You change it in the LAUNCH TEMPLATE and let the "
+                 "group replace instances with it: EC2 → Launch templates → your template → Actions "
+                 "→ Modify template (create new version), change the instance type, then set the new "
+                 "version as Default. Then EC2 → Auto Scaling groups → Instance refresh → Start "
+                 "instance refresh to roll it through.",
+                 "The refresh asks how to replace instances. Choose to LAUNCH BEFORE "
+                 "TERMINATING, not terminate-and-launch. You are demonstrating a resize that "
+                 "does not cost availability, so bringing the replacement up and waiting for "
+                 "it to go healthy before killing the old one is the behaviour you want to "
+                 "show. It needs room above your desired capacity to do that — if maximum "
+                 "equals desired there is nowhere to launch into and it will fall back to "
+                 "terminating first.",
+                 "Expect the refresh to take a while: it replaces one instance at a time and "
+                 "each one has to boot and install its web server before the next starts. On "
+                 "Windows, budget fifteen to twenty minutes for two instances.",
+                 "IF YOU PLANNED TO RESIZE THE DATABASE — RDS → Databases → select it → Modify → "
+                 "change the DB instance class → Continue → Apply immediately → Modify DB instance. "
+                 "On a Multi-AZ database this resizes the standby first and then fails over to it, "
+                 "so the interruption is a failover rather than an outage — which is exactly the "
+                 "point you are demonstrating. Expect several minutes.",
+                 "Record the start and finish times and what the browser did in between. Then put "
+                 "the setting back where it was."],
+         capture="the resize in progress or complete, and what the service did while it happened — "
+                 "the console showing the change, and your timings.",
          standard=None, uoc=[]),
 
     dict(n="T4", title="Measure availability across the window",
          job="Report what Ledgerline's availability actually was across the time you were working, "
              "and say how you measured it.",
          steps=["Open the target group's healthy-host metric for the period you were working.",
-                "Identify every period where the service was not serving.",
-                "Work out the availability percentage and show your calculation.",
-                "State one limitation of how you measured it."],
-         clicks=["CloudWatch → Metrics → All metrics → ApplicationELB → Per AppELB, per AZ, per TG "
+                "Identify every period where BOTH zones were at zero — that is the only real "
+                "downtime. One zone dipping is the design working.",
+                "Write one or two sentences saying what the graph shows.",
+                "Note the time range on the capture, so the period it covers is unambiguous."],
+         clicks=["CloudWatch → Metrics → Classic metrics (the console renamed what used to be All "
+                 "metrics) → ApplicationELB → Per AppELB, per AZ, per TG "
                  "Metrics → "
                  "HealthyHostCount. Set the time range to cover your session.",
-                 "Availability is uptime divided by total time. If you were working for 3 hours and "
-                 "the service was down for 90 seconds, that is 1.5/180 — work it out properly and "
-                 "show the arithmetic."],
+                 "Tick the row for EACH ZONE of your CURRENT target group — two rows, same load "
+                 "balancer, one us-east-1a and one us-east-1b. If several load balancers are "
+                 "listed, the live one is the one with your alarms shown against it in the "
+                 "Alarms column; the others are deleted resources CloudWatch still remembers.",
+                 "Set the graph type to STACKED AREA — the dropdown at the top right of the "
+                 "graph. It is the right shape for this: the total height is the healthy "
+                 "capacity serving Ledgerline, and each band is one zone's share, so losing a "
+                 "zone makes the stack visibly shorter instead of hiding one line among "
+                 "several.",
+                 "Set the time range to cover your whole session, then read the graph.",
+                 "READ IT LIKE THIS. A dip in ONE zone is not downtime — the other zone was "
+                 "still serving, and that is exactly what your HA work bought. Downtime is "
+                 "only when BOTH zones are at zero at the same moment. Measure those periods, "
+                 "not every dip you can see.",
+                 "Your resize may show a RISE rather than a dip, if you launched a replacement "
+                 "before terminating the old instance. No dip at all is a result worth "
+                 "recording — it means the resize cost nothing in availability.",
+                 "You are NOT asked to calculate an availability percentage from this graph, and "
+                 "you could not do it honestly anyway — the axis steps in tens of minutes, so a "
+                 "short outage does not appear on it. The graph shows the shape: what was serving, "
+                 "when, and whether anything went fully dark.",
+                 "The arithmetic belongs to the knowledge questions, and it comes from YOUR OWN "
+                 "TIMINGS during the simulations, not from this picture. If you noted that the "
+                 "failover took 47 seconds out of a 3-hour window, that is 47 seconds out of "
+                 "10,800 — about 99.6% available. Keep those timings; that is the calculation you "
+                 "will be asked to show."],
          capture="the metric graph across your session, with the calculation you made from it.",
          standard=None, uoc=[]),
 ]

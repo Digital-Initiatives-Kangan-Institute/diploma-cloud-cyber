@@ -671,14 +671,22 @@ TESTS = [
                 "period of your maintenance window.",
                 "Identify every period where the service was not serving — your simulations will show "
                 "up here.",
-                "Work out the availability percentage across the window and show your calculation.",
-                "State one limitation of how you measured it."],
-         capture="the metric graph across your window, with the calculation you made from it.",
+                "Write one or two sentences reading the graph: whether the service stayed up, and "
+                "what any dips were. A dip in one zone is not an outage if the other kept "
+                "serving.",
+                "Note the time range on the capture, so the period it covers is unambiguous."],
+         capture="the metric graph across the whole window, both zones of the current target group, with "
+"the time range visible.",
          uoc=["ICTCLD502 PC 4.3", "ICTCLD502 PE 5"],
-         standard="availability is defined, measured from real data across the window and recorded as a "
-                  "figure with the working shown. A number asserted with no supporting data does not "
-                  "evidence the item. Acknowledging a limitation of the method is part of a complete "
-                  "answer.",
+         standard="the student set the measurement up, captured it across the window, and can say "
+                  "what it shows. That is the whole of [ICTCLD502 PC 4.3] and [ICTCLD502 PE 5] — "
+                  "define, monitor, record. Neither item asks for a percentage, and this graph "
+                  "cannot honestly support one: it is stacked, its axis steps in tens of minutes, "
+                  "and a short outage is invisible on it. Do NOT ask for a calculation here. "
+                  "Knowledge question Q3 carries [ICTCLD502 KE 6] and asks for one explicitly, "
+                  "worked from the student's own timings during the simulations rather than from "
+                  "this graph. What fails here is a capture of the wrong period, of the wrong "
+                  "target group, or a reading that calls a single-zone dip an outage.",
          assessor_note="expect somewhere between 99.5% and 99.9% across the window depending on how long "
                        "the failover blip ran. The figure is not the point; the measurement is."),
 ]
@@ -1009,27 +1017,28 @@ def render(doc, h1, h2, mode="student", design=None, build=None, tests=None,
         _element(doc, h2, el, mode, notes=notes)
 
     # ---- knowledge questions ----
-    h1("Knowledge questions")
-    R.p(doc, "Answer each question about your own design and your own build. Refer to what you actually "
-             "decided and what actually happened.", italic=True, size=9.5, colour=R.GREY, after=10)
-    for q in QUESTIONS_:
-        R.flag(doc, f"Knowledge question {q['n'][1:]}")
-        h2(q["q"][:70] + ("…" if len(q["q"]) > 70 else ""))
-        R.p(doc, q["q"], after=6)
-        if q.get("resources"):
-            R.resources_block(doc, q["resources"])
-        R.response_slot(doc, None, mode, points=q["points"])
-        R.uoc_line(doc, q["uoc"], mode)
-
+    if QUESTIONS_:
+        h1("Knowledge questions")
+        R.p(doc, "Answer each question about your own design and your own build. Refer to what you actually "
+                 "decided and what actually happened.", italic=True, size=9.5, colour=R.GREY, after=10)
+        for q in QUESTIONS_:
+            R.flag(doc, f"Knowledge question {q['n'][1:]}")
+            h2(q["q"][:70] + ("…" if len(q["q"]) > 70 else ""))
+            R.p(doc, q["q"], after=6)
+            if q.get("resources"):
+                R.resources_block(doc, q["resources"])
+            R.response_slot(doc, None, mode, points=q["points"])
+            R.uoc_line(doc, q["uoc"], mode)
     # ---- reflections ----
-    h1("Reflection")
-    R.p(doc, "Reflect on your own work — your judgement and your experience, not a summary of what you "
-             "built. An honest “here is what I would change” earns more credit than “everything "
-             "went perfectly”.", italic=True, size=9.5, colour=R.GREY, after=10)
-    for r in REFLECTIONS_:
-        R.flag(doc, f"Reflection {r['n'][1:]}")
-        h2(r["title"])
-        R.p(doc, r["prompt"], after=6)
-        R.response_slot(doc, None, mode, points=r["points"])
-        R.uoc_line(doc, ["ICTCLD401 FS Learning", "ICTCLD401 FS Self-management skills",
-                         "ICTCLD502 FS Problem solving", "ICTCLD502 FS Self-management"], mode)
+    if REFLECTIONS_:
+        h1("Reflection")
+        R.p(doc, "Reflect on your own work — your judgement and your experience, not a summary of what you "
+                 "built. An honest “here is what I would change” earns more credit than “everything "
+                 "went perfectly”.", italic=True, size=9.5, colour=R.GREY, after=10)
+        for r in REFLECTIONS_:
+            R.flag(doc, f"Reflection {r['n'][1:]}")
+            h2(r["title"])
+            R.p(doc, r["prompt"], after=6)
+            R.response_slot(doc, None, mode, points=r["points"])
+            R.uoc_line(doc, ["ICTCLD401 FS Learning", "ICTCLD401 FS Self-management skills",
+                             "ICTCLD502 FS Problem solving", "ICTCLD502 FS Self-management"], mode)
