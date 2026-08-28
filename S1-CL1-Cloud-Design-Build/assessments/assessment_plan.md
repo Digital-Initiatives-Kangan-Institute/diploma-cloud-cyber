@@ -20,9 +20,10 @@ project would make the student's experience of it more stressful, more confusing
 deviate. Integration is never a reason to require work that no UoC item demands.
 
 **Shape:** one continuous case-study project across the cluster in **three delivery phases**, each a
-teach → practise → assess cycle. Each AT bundles the practical work + documentation + feedback/sign-off
-cycle + a section of **contextual reflective questions** on the underlying theory *as applied to the
-student's own design choices*. There is no separate standalone questioning AT.
+teach → practise → assess cycle. Each AT bundles the practical work + documentation + a closure step +
+a section of **contextual reflective questions** on the underlying theory *as applied to the
+student's own design choices*. Closure is a feedback/sign-off cycle in AT1 and AT3, and filing under
+the records policy in AT2. There is no separate standalone questioning AT.
 
 ```
    Phase 1                  Phase 2                      Phase 3
@@ -30,9 +31,12 @@ student's own design choices*. There is no separate standalone questioning AT.
         AT1                      AT2                          AT3
 ```
 
-**Approval / thread moments:** each AT closes with its own document → feedback → sign-off cycle. The
-artefact thread is explicit: the **AT1 action plan becomes the AT2 brief**; the **AT2-built environment is
-the AT3 starting state** (AT3 hardens it rather than starting fresh).
+**Approval / thread moments:** AT1 and AT3 each close with a feedback → sign-off cycle with the
+role-played ICT Manager (AT1 at the presentation event, criteria A12/A13; AT3 at tasks 27–28,
+criteria A15/A16). AT2 has no sign-off event — it closes by filing the completed run sheet under the
+records policy (criterion A10), which is what `ICTCLD401 PC 4.3` asks of it. The artefact thread is
+explicit: the **AT1 action plan becomes the AT2 brief**; the **AT2-built environment is the AT3
+starting state** (AT3 hardens it rather than starting fresh).
 
 **Knowledge evidence — contextual, not abstract recall.** KE is assessed by asking students to reason about
 their own work — e.g. not "explain IaaS/PaaS/SaaS" but "for each layer of your proposed YAT solution,
@@ -169,9 +173,10 @@ RTO/RPO, HA cloud design + feedback + sign-off, HA implementation + failure simu
 database), rebranded Llamazonia → YAT-LMS; Activity 1's boss-interview requirements → YAT's documented ICT
 goals; Activity 2's diagram → YAT's on-prem environment; Activity 4/5 harden + convert the AT2 environment.
 The five activities supply the substance; the workbook supplies the order — each activity becomes a run of
-numbered questions or tasks rather than a section of a written deliverable. Closure reuses the 502 AT2
-feedback/sign-off pattern, carried inside the workbook's closure section as its feedback record and final
-sign-off, filed per YAT's records procedures.
+numbered questions or tasks rather than a section of a written deliverable. Closure follows the legacy
+502 AT2 feedback/sign-off pattern (not this cluster's AT2, which has no sign-off event): tasks 27 and 28
+carry the handover to the role-played ICT Manager and the filing under YAT's records procedures, inside
+the workbook rather than in a separate closure pack.
 
 **Author basis:** brownfield — the three units have standalone source assessments (audited; the YAT case
 study is the heaviest reuse asset). New authoring is the contextual-question sets, the inter-AT bridges,
@@ -217,17 +222,17 @@ Condition each environmental requirement discharges.
 
 ## 7. Worklist
 
-- **AT3 — re-author as the guided workbook described in §3.** The instrument, its criteria and its
-  benchmark are all anchored to the two-report shape and re-anchor to numbered questions and tasks. The
-  baseline lab-pack is reviewed as part of this, since Part B task 1 deploys it.
+Nothing outstanding. AT1, AT2 and AT3 are authored, their instruments generated, and the deterministic
+gates pass — traceability, student leak-lint, cluster coverage (106/106), mapping accuracy.
 
 ---
 
 ## 8. Open questions / TBDs
 
-- `[TBD — needs discussion: the baseline lab-pack's specification.]` Whether AT3's starting state stays
-  exactly what AT2 builds, or is re-specified to suit the run sheet. It needs a pass either way — it
-  currently creates an `AlarmAlb5xx` alarm the supplied design no longer specifies.
+None open.
+
+AT3's starting state is exactly what AT2 builds; the baseline lab-pack tracks the AT2 run sheet as its
+definition, and its tests assert the match.
 
 ---
 

@@ -42,11 +42,11 @@ Orientation, systems/email/LMS access, scenario introduction. Not a content Topi
 | 7 | **Network & security base** — VPC, security groups, DNS | AT2 T4,T5,T12 | AWS decks (ACF M05, ACA M07) | teach + practice build |
 | 8 | **The workload tier** — EC2/EBS, ALB+ASG, RDS, S3 | AT2 T6,T7,T8,T9 | AWS decks (ACF M06–M08/M10, ACA M04/M05/M06, M10) | teach + practice build (largest Topic) |
 | 9 | **Operability & justification** — CloudWatch baseline, config-decision justification, testing/validation | AT2 T10,T13,T14 | mixed (ACF M10 / ACA M10 + bespoke for the justify-against-workload + test discipline) | teach + practice build |
-| 10 | **Evidencing & documenting** — evidence capture, Deployment Report writing, contextual KE, reflection | AT2 T15,T16,T17,T18 | bespoke | teach + practice |
+| 10 | **Evidencing & documenting** — evidence capture inside the run sheet, contextual KE, filing under the records policy | AT2 T16-T17, T1-T5, Q1-Q6 | bespoke | teach + practice |
 
 **Non-Topic class sessions** *(AT2 — delivery order):*
 - **d — AT2 build assessment** — build the supplied YAT design in lab · *assessment*
-- **e — AT2 Deployment Report** — produce the Deployment Report (single deliverable, no presentation) · *assessment*
+- **e — AT2 run-sheet completion** — finish the run sheet in place: tests, knowledge questions, and filing (no separate deliverable, no presentation) · *assessment*
 
 *Topics 6–10 build one cumulative practice stack (the Accounting System, different workload); the real YAT LMS build is the AT2 assessment (d). Cloud literacy (Topic 1) is assumed — these Topics build the services students met conceptually there.*
 
@@ -57,13 +57,13 @@ Orientation, systems/email/LMS access, scenario introduction. Not a content Topi
 | 11 | **HA concepts** — fault tolerance/SPOFs/recovery objectives, scaling, built-in vs designed FT, LB+autoscaling for availability | AT3 T1–T4 | bespoke 502 Topics 1–3 + ACF M09 / ACA M10 | teach + light activity |
 | 12 | **HA design** — baseline review & SPOFs, design the HA-equivalent, sequencing, simulation planning | AT3 T5–T8 | bespoke 502 Topic 2–3 + ACA M06/M10 | teach + practice (Part A skills) |
 | 13 | **HA implementation & simulation** (practice) — implement in-place, failure sim, resize sim, availability measurement, compare/adjust, testing | AT3 T9–T14 | bespoke 502 Topic 4 + ACA M10/M11 | teach + practice build/simulate |
-| 14 | **Closure & documentation** — engagement closure/sign-off, deliverable writing, contextual KE, reflection | AT3 T15–T18 | bespoke | teach + practice |
+| 14 | **Closure & documentation** — handover and sign-off with the ICT Manager, filing, contextual KE, reflection | AT3 T25-T28, Q1-Q6, R1-R3 | bespoke | teach + practice |
 
 **Non-Topic class sessions** *(AT3 — delivery order):*
-- **f — AT3 Part A: HA Design assessment** — students produce their real HA Design document · *assessment*
+- **f — AT3 Part A: design** — students complete the design tasks in the workbook (no separate design document) · *assessment*
 - **g — AT3 baseline-deploy prep** *(S29, fixed)* — deploy the supplied AT2 baseline via CloudFormation to a known start state · *assessment prep*
 - **h — AT3 Part B: implementation + simulation window** *(S30, fixed)* — in-place HA hardening + failure/resize simulations in the ~3.5h maintenance window · *assessment*
-- **i — AT3 HA Deployment Report + engagement closure** — produce the HA Deployment Report, capture feedback, obtain final sign-off — closes the engagement · *assessment*
+- **i — AT3 closure** — record the simulation outcomes and adjustments, hand over to the role-played ICT Manager for feedback and sign-off, and file the completed workbook — all inside the workbook · *assessment*
 
 ## Catch-up *(class sessions S31–S32, fixed)*
 Spare / resit / extra time; finished students may skip. Not a content Topic.
