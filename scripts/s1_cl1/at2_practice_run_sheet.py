@@ -176,7 +176,7 @@ TASKS = [
          job="Find the role the lab provides for instances and read what it allows. You cannot "
              "create your own here, so this is a look rather than a build.",
          settings=[("Where", "IAM → Roles"), ("Open", "LabRole"),
-                   ("Write down", "the name, for task 9")],
+                   ("Write down", "the name, for task 10")],
          clicks=["Search IAM and open it, then choose Roles.",
                  "Find LabRole in the list and open it.",
                  "Look at the Permissions tab and read which services it grants access to."],
@@ -192,6 +192,9 @@ TASKS = [
                    ("Subnet", "do not include"),
                    ("Security group", "ledgerline-app-sg"),
                    ("Root volume", "gp3, 8 GB"),
+                   ("Data volume", "add a second volume: gp3, 8 GB, device name /dev/sdb. The "
+                                   "console will not accept a volume without a device name — you "
+                                   "have to pick one from the list"),
                    ("Advanced details → IAM instance profile", "LabInstanceProfile"),
                    ("Advanced details → User data", "the script below")],
          code=("User data", [
@@ -367,6 +370,44 @@ TASKS = [
                  "Choose the ledgerline-alerts topic you already made, name the alarm, finish."],
          capture="the alarm list showing both alarms with their metrics, thresholds and current "
                  "state."),
+
+    dict(n=17, title="Assign the security responsibilities",
+         job="Ledgerline is built. Work through it component by component and record who is "
+             "responsible for securing each part — AWS or YAT — and what securing it actually "
+             "involves. Answer for the environment you just built, naming your own resources.",
+         settings=[("The physical facilities",
+                    "the data centres, hardware and network underneath all of it"),
+                   ("The server operating system",
+                    "the Amazon Linux instances your Auto Scaling group launches"),
+                   ("The database engine and its host",
+                    "the PostgreSQL database you created in task 15"),
+                   ("Network access rules",
+                    "the three security groups and the route tables from tasks 6 and 7"),
+                   ("Identity and permissions",
+                    "the group and user from task 8, and LabRole from task 9"),
+                   ("The data itself",
+                    "the ledgers and financial records Ledgerline would hold"),
+                   ("For each one",
+                    "name the responsible party, and say in one sentence what that party "
+                    "actually does to secure it")],
+         clicks=["Take the components one at a time and ask the same question of each: if this "
+                 "were compromised tomorrow, who had the ability to prevent it?",
+                 "Whoever could have prevented it is the party responsible for securing it. That "
+                 "question resolves most rows on its own.",
+                 "Two rows are not a clean split. The database is one — the engine and the "
+                 "machine underneath it are handled for you, but something about it is still "
+                 "entirely yours. Work out which part is which.",
+                 "The data row is worth thinking about before you write it. Is there any service "
+                 "model under which responsibility for the content itself moves to the provider?",
+                 "For the last question, compare what you would have had to do if you had "
+                 "installed the database engine on one of your own servers instead. The "
+                 "difference between those two lists is what the managed service actually moved."],
+         response=("Your assignment",
+                   "For each component above, name who secures it and what securing it involves. "
+                   "Then answer one more question: which of these responsibilities moved from YAT "
+                   "to AWS because you used a managed database rather than installing the engine "
+                   "on a server yourself — and which did not move?"),
+         evidence_note="No screenshot needed. Your written assignment is the whole of this task."),
 ]
 
 TESTS = [

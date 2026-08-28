@@ -104,9 +104,20 @@ def test_resource_names_match_the_practice_run_sheet():
     assert _named(t, "AWS::RDS::DBInstance", "DBInstanceIdentifier") == {"ledgerline-db"}
 
 
-def test_exactly_one_alarm():
-    # The practice run sheet builds one alarm (task 15); the assessment builds two.
-    assert _named(_load(), "AWS::CloudWatch::Alarm", "AlarmName") == {"ledgerline-unhealthy-hosts"}
+def test_both_alarms():
+    # AT2 practice task 16 builds two alarms, so a pack claiming to reproduce a completed
+    # practice build has to carry both.
+    assert _named(_load(), "AWS::CloudWatch::Alarm", "AlarmName") == {
+        "ledgerline-unhealthy-hosts", "ledgerline-db-storage-low"}
+
+
+def test_storage_alarm_threshold_differs_from_the_assessment():
+    # The practice threshold is 20% of 20 GiB; the assessment's is 15%. Deliberate — a student
+    # cannot carry the number across from one to the other.
+    alarms = [r for r in _load()["Resources"].values()
+              if r["Type"] == "AWS::CloudWatch::Alarm"
+              and r["Properties"]["AlarmName"] == "ledgerline-db-storage-low"]
+    assert alarms and alarms[0]["Properties"]["Threshold"] == 4294967296
 
 
 def test_load_balancer_is_reachable_from_a_browser():

@@ -9,8 +9,8 @@ Description: >-
   task specifies, and nothing else. Change the practice run sheet, change this with it.
 
   DIFFERENT SCENARIO, SAME SHAPE as the assessment: 10.20.0.0/16 rather than 10.0.0.0/16,
-  Amazon Linux and PostgreSQL rather than Windows and MySQL, ledgerline- names, and one alarm
-  rather than two. Practice rehearses the moves; it is not the answer.
+  Amazon Linux and PostgreSQL rather than Windows and MySQL, ledgerline- names, and a storage
+  alarm set at 20% rather than 15%. Practice rehearses the moves; it is not the answer.
 
   Creates NO IAM (the Learner Lab forbids it) and is deliberately non-HA - the Auto Scaling
   group runs in ONE AZ and RDS is Single-AZ.
@@ -37,7 +37,7 @@ Parameters:
     Type: String
     Default: LabInstanceProfile
     Description: >-
-      EC2 instance profile, as selected in practice task 9. The app instances sit in a private
+      EC2 instance profile, as selected in practice task 10. The app instances sit in a private
       subnet with no public IP, so this profile is the only route to a shell on them (Session
       Manager). Clear it to blank only if your lab does not provide this profile.
 
@@ -227,7 +227,7 @@ Resources:
       Tags:
         - { Key: Name, Value: ledgerline-db-sg }
 
-  # ---------- Task 9 - the launch template ----------
+  # ---------- Task 10 - the launch template ----------
   AppLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
@@ -244,6 +244,8 @@ Resources:
         BlockDeviceMappings:
           - DeviceName: /dev/xvda           # Amazon Linux root volume
             Ebs: { VolumeType: gp3, VolumeSize: 8, DeleteOnTermination: true }
+          - DeviceName: /dev/sdb            # data volume — practice task 10 attaches this by hand
+            Ebs: { VolumeType: gp3, VolumeSize: 8, DeleteOnTermination: true }
         UserData:
           Fn::Base64: |
             #!/bin/bash
@@ -257,7 +259,7 @@ Resources:
               - { Key: Name, Value: ledgerline-app }
               - { Key: Project, Value: Ledgerline }
 
-  # ---------- Task 10 - the target group ----------
+  # ---------- Task 11 - the target group ----------
   AppTargetGroup:
     Type: AWS::ElasticLoadBalancingV2::TargetGroup
     Properties:
@@ -273,7 +275,7 @@ Resources:
       Tags:
         - { Key: Name, Value: ledgerline-tg }
 
-  # ---------- Task 11 - the load balancer ----------
+  # ---------- Task 12 - the load balancer ----------
   # Internet-facing on purpose: the practice environment is reachable from a browser so students
   # can see the page they built. Ledgerline's real design would not be, and that is fine - the
   # scenario yields where staying faithful to it would cost the student the lesson.
@@ -301,7 +303,7 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref AppTargetGroup
 
-  # ---------- Task 12 - the Auto Scaling group ----------
+  # ---------- Task 13 - the Auto Scaling group ----------
   AppAutoScalingGroup:
     Type: AWS::AutoScaling::AutoScalingGroup
     DependsOn: AppDefaultRoute              # instances need the NAT route before they boot
@@ -333,7 +335,7 @@ Resources:
           PredefinedMetricType: ASGAverageCPUUtilization
         TargetValue: 70
 
-  # ---------- Task 13 - the database subnet group ----------
+  # ---------- Task 14 - the database subnet group ----------
   DbSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
@@ -343,7 +345,7 @@ Resources:
         - !Ref DataA
         - !Ref DataB
 
-  # ---------- Task 14 - the database ----------
+  # ---------- Task 15 - the database ----------
   Database:
     Type: AWS::RDS::DBInstance
     DeletionPolicy: Delete
@@ -355,6 +357,10 @@ Resources:
       AllocatedStorage: '20'
       StorageType: gp3
       MultiAZ: false
+      # Matches "Backup retention | 7 days, automated" on the Accounting System Infrastructure
+      # Specifications page. Practice task 4 derives the current RPO from this, so the console and
+      # the document have to agree.
+      BackupRetentionPeriod: 7
       StorageEncrypted: true
       MasterUsername: !Ref DBMasterUsername
       MasterUserPassword: !Ref DBMasterPassword
@@ -366,8 +372,8 @@ Resources:
         - { Key: Name, Value: ledgerline-db }
         - { Key: Project, Value: Ledgerline }
 
-  # ---------- Task 15 - the alarm ----------
-  # One alarm, not two: the practice run sheet builds only the unhealthy-hosts alarm.
+  # ---------- Task 16 - the alarm ----------
+  # Two alarms, matching AT2 practice task 16.
   AlertsTopic:
     Type: AWS::SNS::Topic
     Properties:
@@ -400,6 +406,31 @@ Resources:
       DatapointsToAlarm: 1
       Threshold: 1
       ComparisonOperator: GreaterThanOrEqualToThreshold
+      TreatMissingData: missing
+      AlarmActions:
+        - !Ref AlertsTopic
+
+  # AT2 practice task 16 builds TWO alarms. This pack reproduces a correctly completed AT2 practice
+  # build, so both belong here. Note the threshold is 20% of allocated storage, not the assessment's
+  # 15% — the practice deliberately differs so a student cannot carry a number across.
+  AlarmDbStorageLow:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: ledgerline-db-storage-low
+      AlarmDescription: >-
+        free storage below 20% of the 20 GiB allocated. The threshold is in bytes; it is only
+        correct while the allocated size is 20 GiB, which is why the size is recorded here.
+      Namespace: AWS/RDS
+      MetricName: FreeStorageSpace
+      Dimensions:
+        - Name: DBInstanceIdentifier
+          Value: !Ref Database
+      Statistic: Minimum
+      Period: 300
+      EvaluationPeriods: 2
+      DatapointsToAlarm: 2
+      Threshold: 4294967296                # 20% of 20 GiB, in bytes
+      ComparisonOperator: LessThanThreshold
       TreatMissingData: missing
       AlarmActions:
         - !Ref AlertsTopic

@@ -56,32 +56,38 @@ INSTRUCTIONS = [
     "Everything you design in Part A, you build in Part B. That is how the assessment works too.",
 ]
 
+# Ledgerline's own topology — NOT the LMS diagram the assessment supplies. Passed into
+# at3_run_sheet.render() so the practice workbook links the system it is actually about.
+NETWORK_DIAGRAM = ("Network diagram — this environment drawn out",
+                   f"{SITE}/intranet/s1-cl1-at3/ict/accounting-network-diagram-cloud")
+
 CURRENT_ARCH = [
     ("Region", [("Ledgerline is destined for the Sydney region, ap-southeast-2, in production. "
                  "Use it if it is available to you. ", False),
                 ("In AWS Academy Learner Lab it will not be — build in us-east-1, or whichever "
                  "region you have.", True)]),
     ("Network", "VPC ledgerline-vpc, 10.20.0.0/16"),
-    ("Subnets", "zone names below follow us-east-1  ·  public-web-a  10.20.1.0/24  (us-east-1a)  ·  "
-                "public-web-b  10.20.2.0/24  (us-east-1b)  ·  private-app-a  10.20.11.0/24  "
-                "(us-east-1a)  ·  private-data-a  10.20.21.0/24  (us-east-1a)  ·  private-data-b  "
+    ("Subnets", "zone names below follow us-east-1  ·  ledgerline-public-a  10.20.1.0/24  (us-east-1a)  ·  "
+                "ledgerline-public-b  10.20.2.0/24  (us-east-1b)  ·  ledgerline-app-a  10.20.11.0/24  "
+                "(us-east-1a)  ·  ledgerline-data-a  10.20.21.0/24  (us-east-1a)  ·  ledgerline-data-b  "
                 "10.20.22.0/24  (us-east-1b)"),
-    ("Where the load actually is", "everything serving Ledgerline runs in us-east-1a. public-web-b "
-                                   "and private-data-b exist only because the load balancer and the "
+    ("Where the load actually is", "everything serving Ledgerline runs in us-east-1a. ledgerline-public-b "
+                                   "and ledgerline-data-b exist only because the load balancer and the "
                                    "database subnet group each refuse to be created with one zone. "
                                    "Nothing has been placed in them."),
     ("Internet in", "internet gateway ledgerline-igw; public-rt routes 0.0.0.0/0 to it"),
-    ("Internet out", "one NAT gateway ledgerline-nat in public-web-a; private-app-rt routes "
-                     "private-app-a's 0.0.0.0/0 to it"),
-    ("Compute", "Auto Scaling group across private-app-a only — desired 1, minimum 1, maximum 2; "
+    ("Internet out", "one NAT gateway ledgerline-nat in ledgerline-public-a; ledgerline-app-rt routes "
+                     "ledgerline-app-a's 0.0.0.0/0 to it"),
+    ("Compute", "Auto Scaling group across ledgerline-app-a only — desired 1, minimum 1, maximum 2; "
                 "launch template ledgerline-lt (Amazon Linux, web server installed at boot)"),
-    ("Load balancing", "internet-facing ALB ledgerline-alb in public-web-a and public-web-b, "
+    ("Load balancing", "internet-facing ALB ledgerline-alb in ledgerline-public-a and ledgerline-public-b, "
                        "HTTP :80, forwarding to target group ledgerline-tg"),
     ("Database", "PostgreSQL on RDS, single-AZ with no standby, gp3 20 GB, encrypted, in subnet "
-                 "group ledgerline-db-subnet-group (private-data-a + private-data-b)"),
+                 "group ledgerline-db-subnet-group (ledgerline-data-a + ledgerline-data-b)"),
     ("Security groups", "ledgerline-alb-sg  HTTP 80 from anywhere  ·  ledgerline-app-sg  HTTP 80 "
                         "from the ALB group  ·  ledgerline-db-sg  PostgreSQL 5432 from the app group"),
-    ("Monitoring", "one alarm, ledgerline-unhealthy-hosts, on UnHealthyHostCount"),
+    ("Monitoring", "two alarms — ledgerline-unhealthy-hosts on UnHealthyHostCount, and "
+                   "ledgerline-db-storage-low on the database's free storage"),
 ]
 
 # ---------------------------------------------------------------- Part A — design
@@ -98,9 +104,14 @@ DESIGN = [
          prompt="Before you design anything, establish what the design is held to. Record the "
                 "availability, recovery and service-level targets the HA design must achieve, and "
                 "name where each figure came from.",
-         given=1, blank_rows=4,
+         given=1, blank_rows=4, exemplar=1,
          table=(["Requirement", "Target", "Where it came from"],
-                [["Availability", "", ""], ["Recovery point objective (RPO)", "", ""],
+                [["Availability",
+                  "At least 99.5% during business hours. Ledgerline is a business-hours, "
+                  "staff-only service — it is deliberately not held to the 24/7 target the LMS "
+                  "carries.",
+                  "Ledgerline Cloud Migration Requirements — the availability requirement"],
+                 ["Recovery point objective (RPO)", "", ""],
                  ["Recovery time objective (RTO)", "", ""], ["Busiest period", "", ""]]),
          consider=["A target you cannot quote a source for is a target you invented. Where would a "
                    "figure like 'the system must be available 99.9% of the time' actually be "
@@ -117,9 +128,13 @@ DESIGN = [
          ],
          prompt="Go through the current environment tier by tier. For each, say whether it meets "
                 "the targets from task 1, and if it does not, why not.",
-         given=1, blank_rows=6,
+         given=1, blank_rows=6, exemplar=1,
          table=(["Tier", "Meets the targets?", "Why / why not"],
-                [["Network", "", ""], ["Compute", "", ""], ["Load balancing", "", ""],
+                [["Network", "Partly",
+                  "The VPC already has subnets in both availability zones, so the addressing is "
+                  "not what is holding the design back. What is missing is a subnet in the second "
+                  "zone for the application tier to run in."],
+                 ["Compute", "", ""], ["Load balancing", "", ""],
                  ["Database", "", ""], ["Internet out", "", ""], ["Monitoring", "", ""]]),
          consider=["Read the 'Where the load actually is' row again. How many availability zones "
                    "have anything running in them?",
@@ -138,8 +153,14 @@ DESIGN = [
          prompt="Identify every single point of failure in the current environment — every "
                 "component whose failure takes Ledgerline down or degrades it below the targets. "
                 "For each, say what the failure looks like and what finance loses.",
-         given=0, blank_rows=6,
-         table=(["Component", "Failure mode", "Consequence for finance"], []),
+         given=0, blank_rows=7, exemplar=1,
+         table=(["Component", "Failure mode", "Consequence for finance"],
+                [["NAT gateway ledgerline-nat — there is one, in ledgerline-public-a",
+                  "The gateway fails, or us-east-1a is lost with it. Application servers have no "
+                  "route out to the internet.",
+                  "Ledgerline keeps serving pages, so nobody rings the help desk — but operating "
+                  "system updates, agent traffic and any call to an external service stop. The "
+                  "damage is quiet, which is what makes it worth listing."]]),
          consider=["Go down the architecture table one row at a time and ask: is there exactly one "
                    "of these? A component that exists once, in one place, is where to look.",
                    "AWS occasionally loses a whole availability zone. If us-east-1a went dark this "
@@ -155,12 +176,20 @@ DESIGN = [
          resources=[
              ("Ledgerline Cloud Migration Requirements — the RPO and RTO you are measuring today's environment against",
               f"{SITE}/intranet/s1-cl1-at3/projects/accounting-cloud-migration/migration-requirements"),
+             ("Accounting System Infrastructure Specifications — the backup arrangements currently "
+              "in place, which set the RPO you can actually achieve",
+              f"{SITE}/intranet/s1-cl1-at3/ict/accounting-server-status-cloud"),
          ],
          prompt="For each component, estimate what the current environment delivers today — how "
                 "much data would be lost, and how long recovery would take. Put numbers on it.",
-         given=1, blank_rows=3,
+         given=1, blank_rows=3, exemplar=1,
          table=(["Component", "Current RPO", "Current RTO", "Meets target?"],
-                [["Application tier", "", "", ""], ["Database", "", "", ""],
+                [["Application tier", "Not applicable — the tier holds no data of its own.",
+                  "About 5 minutes if the single instance fails: the Auto Scaling group notices "
+                  "and launches a replacement. Open-ended if us-east-1a is lost, because "
+                  "ledgerline-app-a is the only subnet the group can launch into.",
+                  "Single instance: yes. Loss of a zone: no."],
+                 ["Database", "", "", ""],
                  ["Whole service", "", "", ""]]),
          consider=["The application tier holds no data. Does an RPO even mean anything for it?",
                    "If the database has automated backups and nothing else, how much work is lost "
@@ -178,8 +207,14 @@ DESIGN = [
          prompt="Some components can only be made bigger, not more numerous. Identify which "
                 "components here are in that position, and what happens to availability while they "
                 "are being resized.",
-         given=0, blank_rows=4,
-         table=(["Component", "Why it must scale vertically", "Availability impact while it scales"], []),
+         given=0, blank_rows=5, exemplar=1,
+         table=(["Component", "Why it must scale vertically", "Availability impact while it scales"],
+                [["Database storage (gp3, 20 GB)",
+                  "There is one volume attached to one database instance. More capacity means "
+                  "growing that volume — you cannot add a second one alongside it.",
+                  "Storage can be grown while the database is running, but performance is degraded "
+                  "during the optimisation that follows, and the volume cannot be shrunk again "
+                  "afterwards."]]),
          consider=["For each tier, ask: to handle more load, do I add another one, or do I replace "
                    "it with a bigger one?",
                    "The Auto Scaling group exists precisely so one tier does not have this problem. "
@@ -191,6 +226,8 @@ DESIGN = [
          resources=[
              ("Ledgerline Migration Role Brief — who you are writing this summary for",
               f"{SITE}/intranet/s1-cl1-at3/projects/accounting-cloud-migration/role-brief"),
+             ("Ledgerline Cloud Migration Requirements — the targets the gap you are summarising is measured against",
+              f"{SITE}/intranet/s1-cl1-at3/projects/accounting-cloud-migration/migration-requirements"),
          ],
          prompt="Write a short summary of what you found: the gap between the current environment "
                 "and the targets from task 1, and which components drive that gap. Write it for the "
@@ -209,8 +246,14 @@ DESIGN = [
          prompt="Your application tier has to be able to run in two availability zones. Look at the "
                 "subnets that already exist. What do you need to add, and where? Record the subnet "
                 "or subnets you are designing, then sketch the network you are aiming for.",
-         given=0, blank_rows=2,
-         table=(["Subnet name", "CIDR", "Zone", "What it carries"], []),
+         given=0, blank_rows=3, exemplar=1,
+         # The exemplar is the subnet that ALREADY EXISTS, not the one being designed — this
+         # task has one real answer, so a worked row would be that answer. Describing the
+         # existing subnet shows the level of detail wanted and gives nothing away.
+         table=(["Subnet name", "CIDR", "Zone", "What it carries"],
+                [["ledgerline-app-a  (already exists — shown as the pattern to follow)",
+                  "10.20.11.0/24", "us-east-1a",
+                  "Ledgerline application servers, launched into it by the Auto Scaling group"]]),
          diagram="the environment you are designing — both zones, and which resources sit in each",
          consider=["List the five existing subnets and mark which zone each is in. Which layer of "
                    "the architecture has a subnet in only one zone?",
@@ -229,9 +272,13 @@ DESIGN = [
          prompt="You now have somewhere for a second application server to run. Design the Auto "
                 "Scaling group's configuration so the loss of one availability zone leaves "
                 "Ledgerline serving. Give a reason for the capacity numbers you choose.",
-         given=1, blank_rows=5,
+         given=1, blank_rows=5, exemplar=1,
          table=(["Setting", "Your design", "Why"],
-                [["Subnets", "", ""], ["Minimum", "", ""], ["Desired", "", ""],
+                [["Subnets", "ledgerline-app-a and the subnet you designed in task 7.",
+                  "An Auto Scaling group can only launch into the subnets it has been given. "
+                  "Listing both is what makes the second zone reachable at all — every other "
+                  "setting below depends on this one being right."],
+                 ["Minimum", "", ""], ["Desired", "", ""],
                  ["Maximum", "", ""], ["Scaling policy", "", ""]]),
          consider=["If the group can launch into two subnets but its minimum is 1, where is that "
                    "one instance? Is it guaranteed to be in the zone that survives?",
@@ -262,8 +309,15 @@ DESIGN = [
                 "the change that fixes it, and state what it gives you that the current "
                 "configuration does not. The settings worth considering include how the deployment "
                 "is spread across availability zones and how long backups are kept.",
-         given=0, blank_rows=4,
-         table=(["Setting", "Your design", "Why"], []),
+         given=0, blank_rows=5, exemplar=1,
+         # Backup retention, not the failover setting — the exemplar shows what a filled row
+         # looks like and leaves the substantive design decision to the student.
+         table=(["Setting", "Your design", "Why"],
+                [["Backup retention",
+                  "Keep the automated backups that are already configured, at 7 days.",
+                  "Backups and a standby solve different problems. A standby covers losing the "
+                  "instance; backups cover the data itself being wrong — a bad month-end posting "
+                  "run is not fixed by failing over to a synchronous copy of it."]]),
          consider=["Your task 4 RTO for the database was measured in hours. What would have to be "
                    "true for it to be measured in minutes instead?",
                    "A standby copy in another zone can take over automatically. What does that do "
@@ -278,9 +332,17 @@ DESIGN = [
                 "the new zone use to reach the internet. Design your answer, and be explicit if you "
                 "are accepting a risk rather than removing it. Things you might record here: the "
                 "gateway itself, and the route table that decides where a subnet's traffic goes.",
-         given=0, blank_rows=4,
-         table=(["Setting", "Your design", "Why"], []),
-         consider=["There is one NAT gateway and it lives in public-web-a. Which zone is that?",
+         given=0, blank_rows=5, exemplar=1,
+         # The route table, not the gateway — the gateway row is the judgement call this task
+         # exists to make, and the exemplar must not make it for them.
+         table=(["Setting", "Your design", "Why"],
+                [["Route table for the new application subnet",
+                  "A route table of its own, associated with the new subnet, carrying a "
+                  "0.0.0.0/0 route to whichever gateway you decide on.",
+                  "A subnet with no route table of its own falls back to the VPC main route "
+                  "table, which has no path out at all. The gateway is only half the answer — "
+                  "the route is what actually sends traffic to it."]]),
+         consider=["There is one NAT gateway and it lives in ledgerline-public-a. Which zone is that?",
                    "Your new servers are in the second zone. Whose gateway are they using to reach "
                    "the internet, and what happens to them if the first zone fails?",
                    "You have just designed around a zone failure everywhere else. Would it be "
@@ -294,15 +356,24 @@ DESIGN = [
              ("Ledgerline Cloud Migration Requirements — the service levels your monitoring reports against",
               f"{SITE}/intranet/s1-cl1-at3/projects/accounting-cloud-migration/migration-requirements"),
          ],
-         prompt="The existing alarm tells you a target is unhealthy. It does not tell you a zone "
+         prompt="The existing alarms tell you a target is unhealthy and the database is filling up. "
+                "Neither tells you a zone "
                 "has gone or a database has failed over. Design the monitoring that would tell you, "
                 "and say what each alarm detects. An alarm needs a metric, a threshold and a "
                 "failure it would catch.",
-         given=0, blank_rows=4,
-         table=(["Alarm", "What it measures", "Threshold", "What it detects"], []),
+         given=0, blank_rows=5, exemplar=1,
+         # The alarm that already exists, written out in the table's own terms. It shows what a
+         # metric / threshold / detects row looks like, and its last sentence is the opening
+         # the student's own alarms have to close.
+         table=(["Alarm", "What it measures", "Threshold", "What it detects"],
+                [["ledgerline-unhealthy-hosts  (already exists — shown as the pattern to follow)",
+                  "UnHealthyHostCount on target group ledgerline-tg",
+                  "1 or more, for one period of 5 minutes",
+                  "A target that has stopped passing its health check. It counts across the whole "
+                  "target group, so it does not tell you which zone the target was in."]]),
          consider=["After your design, Ledgerline survives losing a zone. If that happened at 2am "
                    "on a Sunday, would anything tell you? Should it?",
-                   "The existing alarm counts unhealthy hosts across the whole load balancer. If "
+                   "The unhealthy-hosts alarm counts targets across the whole load balancer. If "
                    "one zone went dark and the other kept serving, would that count change enough "
                    "to fire?",
                    "A database failover is invisible to users if it works. Is 'invisible' the same "
@@ -314,8 +385,12 @@ DESIGN = [
          prompt="Go back to your answer to task 3. For each single point of failure you found "
                 "there, say what in your design removes it — or state plainly that it remains, and "
                 "why you accepted it.",
-         given=0, blank_rows=5,
-         table=(["Point of failure (from task 3)", "Removed by", "Or accepted because"], []),
+         given=0, blank_rows=6, exemplar=1,
+         table=(["Point of failure (from task 3)", "Removed by", "Or accepted because"],
+                [["Single application server — an Auto Scaling group of one, in one subnet",
+                  "The Auto Scaling group you designed in task 8: a minimum spread across two "
+                  "subnets in two zones, so losing a zone still leaves a server taking traffic.",
+                  "—"]]),
          consider=["Copy your task 3 list across first, before you write anything in the other "
                    "columns. Every row has to be accounted for.",
                    "If one of them is still there, that is not a failure — an accepted, documented "
@@ -330,9 +405,14 @@ DESIGN = [
          ],
          prompt="Redo task 4 against your design. What does each component deliver now, and does "
                 "the whole service meet the targets from task 1?",
-         given=1, blank_rows=3,
+         given=1, blank_rows=3, exemplar=1,
          table=(["Component", "Designed RPO", "Designed RTO", "Meets target?"],
-                [["Application tier", "", "", ""], ["Database", "", "", ""],
+                [["Application tier", "Not applicable — the tier still holds no data of its own.",
+                  "None for a user. A server in the surviving zone is already taking traffic, and "
+                  "the Auto Scaling group replaces the lost one in the background in about 5 "
+                  "minutes.",
+                  "Yes."],
+                 ["Database", "", "", ""],
                  ["Whole service", "", "", ""]]),
          consider=["Put this table next to your task 4 answer. The point is the difference between "
                    "them — can you state it in one sentence?",
@@ -345,8 +425,15 @@ DESIGN = [
          prompt="Redo task 5 against your design. Which components still can only be made bigger, "
                 "and what does resizing cost you in availability now? Start from the components you "
                 "listed in task 5.",
-         given=0, blank_rows=3,
-         table=(["Component", "Still scales vertically?", "Availability impact now"], []),
+         given=0, blank_rows=4, exemplar=1,
+         # The tier that came OFF the task 5 list, so the exemplar shows the form of a "no" row
+         # and leaves the components that are still vertical to the student.
+         table=(["Component", "Still scales vertically?", "Availability impact now"],
+                [["Application tier",
+                  "No. The Auto Scaling group adds instances rather than replacing one with a "
+                  "bigger one, so capacity grows sideways.",
+                  "None. New instances launch alongside the ones already serving, and nothing "
+                  "has to stop for it."]]),
          consider=["Your design did not stop the database being one database. So what changed?",
                    "If there is a standby, which one gets resized first, and what happens after "
                    "that?",
@@ -376,9 +463,14 @@ DESIGN = [
                 "your changes in. For each change give how long you expect it to take, what "
                 "Ledgerline looks like to a user while it happens, how you will confirm it worked, "
                 "and what you will do if it does not. State the total and the buffer you have left.",
-         given=1, blank_rows=6,
+         given=1, blank_rows=6, exemplar=1,
          table=(["#", "Change", "Time", "Impact on Ledgerline", "How you verify it", "If it fails"],
-                [["1", "", "", "", "", ""], ["2", "", "", "", "", ""], ["3", "", "", "", "", ""],
+                [["1", "Create the application subnet in the second zone (task 7)", "10 min",
+                  "None — nothing is using it yet.",
+                  "The subnet appears in the console in the second zone, with the CIDR you planned.",
+                  "Delete it and create it again. Nothing is serving from it, so there is nothing "
+                  "to roll back."],
+                 ["2", "", "", "", "", ""], ["3", "", "", "", "", ""],
                  ["4", "", "", "", "", ""], ["5", "", "", "", "", ""],
                  ["Total", "", "", "", "", ""]]),
          consider=["Sort your changes into two piles: the ones that add something new, and the ones "
@@ -397,9 +489,16 @@ DESIGN = [
                 "Part B: at least one failure simulation and at least one resize simulation. For "
                 "each, say what you will do, what you expect to happen, and how you will know "
                 "whether it did.",
-         given=2, blank_rows=3,
+         given=2, blank_rows=3, exemplar=1,
          table=(["#", "Simulation", "What you will do", "What you expect", "How you will know"],
-                [["F1", "Instance failure", "", "", ""], ["F2", "Database failover", "", "", ""],
+                [["F1", "Instance failure",
+                  "Terminate one of the two running application instances from the EC2 console, "
+                  "during the window.",
+                  "Ledgerline keeps serving from the other zone with no visible interruption, and "
+                  "the Auto Scaling group launches a replacement within about 5 minutes.",
+                  "A browser refreshing the load balancer address the whole time, plus the Auto "
+                  "Scaling group's Activity tab showing the replacement being launched."],
+                 ["F2", "Database failover", "", "", ""],
                  ["R1", "Resize", "", "", ""]]),
          consider=["To prove a server failure is survivable, you have to cause one. What is the "
                    "bluntest way to remove a running instance?",
@@ -462,7 +561,7 @@ BUILD = [
              "associate your new subnet with the existing private route table instead.",
          clicks=["If you designed a SECOND NAT GATEWAY — VPC console → NAT gateways → Create NAT "
                  "gateway.",
-                 "Name it, set Subnet to public-web-b (a NAT gateway goes in a PUBLIC subnet, not "
+                 "Name it, set Subnet to ledgerline-public-b (a NAT gateway goes in a PUBLIC subnet, not "
                  "the private one it serves), Connectivity type Public, and Allocate Elastic IP.",
                  "Choose Create NAT gateway, then wait until State reads Available. This takes a "
                  "few minutes and you cannot route to it until it does.",
@@ -470,7 +569,7 @@ BUILD = [
                  "Open the new route table → Routes tab → Edit routes → Add route. Destination "
                  "0.0.0.0/0, Target NAT Gateway, then pick the one you just made. Save changes.",
                  "Subnet associations tab → Edit subnet associations → tick your new subnet → Save.",
-                 "If you ACCEPTED THE SHARED GATEWAY instead — open the existing private-app-rt, go "
+                 "If you ACCEPTED THE SHARED GATEWAY instead — open the existing ledgerline-app-rt, go "
                  "to Subnet associations, and add your new subnet to it.",
                  "Either way, check the Routes tab shows 0.0.0.0/0 pointing somewhere and the "
                  "status reads Active."],
@@ -637,7 +736,8 @@ TESTS = [
                  "terminating first.",
                  "Expect the refresh to take a while: it replaces one instance at a time and "
                  "each one has to boot and install its web server before the next starts. On "
-                 "Windows, budget fifteen to twenty minutes for two instances.",
+                 "Amazon Linux, budget five to ten minutes for two instances — on the Windows "
+                 "servers the assessment uses it is closer to twenty.",
                  "IF YOU PLANNED TO RESIZE THE DATABASE — RDS → Databases → select it → Modify → "
                  "change the DB instance class → Continue → Apply immediately → Modify DB instance. "
                  "On a Multi-AZ database this resizes the standby first and then fails over to it, "

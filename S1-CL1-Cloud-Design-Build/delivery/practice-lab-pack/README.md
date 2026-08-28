@@ -1,7 +1,7 @@
 # Practice — set up the finished Ledgerline environment
 
 This builds the **finished** Ledgerline environment in one go — the same thing you would have at
-the end of the practice build run sheet, if you had worked through all fifteen tasks by hand.
+the end of the practice build run sheet, if you had worked through all sixteen tasks by hand.
 
 **Use it when** you want to practise the *next* stage of the work without spending an hour
 rebuilding the stage before it. If you have not done the practice build run sheet yet, do that
