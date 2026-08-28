@@ -3,9 +3,9 @@
 
 The PRACTICE analogue of the YAT-LMS Baseline Solution Design: the supplied cloud architecture
 students implement in the AT2 *practice* build (the Accounting System / Ledgerline engagement),
-paralleling the real AT2's LMS baseline. Parallel-but-different: Microsoft SQL Server (not MySQL),
-business-hours 99.5% (not 24/7 99.9%), internal staff-only over the campus VPN (not internet-facing),
-commercial licensing + 7-year financial-records retention. Single-AZ baseline (non-HA); HA sections
+paralleling the real AT2's LMS baseline. Parallel-but-different: PostgreSQL on Amazon Linux (not
+MySQL on Windows), 10.20.0.0/16 (not 10.0.0.0/16), business-hours 99.5% (not 24/7 99.9%), commercial
+licensing + 7-year financial-records retention. Single-AZ baseline (non-HA); HA sections
 marked "Not applicable" per the convention. In-world artefact (no UoC tags).
 
 Output to the website documents folder for printing to PDF, then wiring into the AT2/AT3 intranet states.
@@ -36,6 +36,54 @@ def na(doc, reason):
     r.font.size = Pt(10.5)
     r.font.color.rgb = RGBColor.from_string(TERRACOTTA)
     p.paragraph_format.space_after = Pt(6)
+    return p
+
+
+def lab_note(doc, text):
+    """Where the design and the build environment differ, say so in one plain sentence.
+
+    Same convention as the LMS baseline design: the design is the real design; some of it cannot be
+    built in an AWS Academy Learner Lab, and in one place it is deliberately simplified so a student
+    can see their own work running. Each point carries a note under the thing it qualifies.
+    """
+    p = doc.add_paragraph()
+    p.paragraph_format.left_indent = Cm(0.4)
+    p.paragraph_format.space_before = Pt(2)
+    p.paragraph_format.space_after = Pt(8)
+    lead = p.add_run("Building this in a lab ")
+    lead.bold = True; lead.font.size = Pt(9.5)
+    lead.font.color.rgb = RGBColor.from_string(TERRACOTTA)
+    r = p.add_run(text)
+    r.italic = True; r.font.size = Pt(9.5)
+    r.font.color.rgb = RGBColor.from_string(TERRACOTTA)
+    return p
+
+
+# Published diagrams (not for-documents-not-website): this topology is also served as an intranet
+# page, so the .drawio/.svg/.png live at the top level and one asset serves both surfaces.
+DIAGRAM_DIR = (Path(__file__).resolve().parents[3] / "diploma-cloud-cyber-website-s1"
+               / "public" / "diagrams")
+
+
+def diagram_figure(doc, caption, image_name, width_cm=16.0):
+    """Place a diagram exported alongside its .drawio, captioned.
+
+    The picture is placed by the generator, not pasted in afterwards, so it survives a rebuild.
+    The .drawio is generated from a committed spec under scripts/scenario/diagrams/; the
+    .drawio.png beside it is exported from draw.io, so the document shows the same picture as the
+    published SVG. Fails loudly if the image is absent rather than leaving a silent hole.
+    """
+    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    image = DIAGRAM_DIR / image_name
+    if not image.exists():
+        raise FileNotFoundError(
+            f"Diagram not found: {image}\n"
+            f"Render the .drawio from its spec, then export the .drawio.png from draw.io.")
+    p = doc.add_paragraph(); p.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p.add_run().add_picture(str(image), width=Cm(width_cm))
+    cap = doc.add_paragraph(); cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    cr = cap.add_run(caption)
+    cr.italic = True; cr.font.size = Pt(9); cr.font.color.rgb = RGBColor.from_string(GREY)
     return p
 
 
@@ -118,7 +166,7 @@ def build(path):
                  "direction into a concrete, implementable design for the Ledgerline finance and office-"
                  "administration system. The design stops at “infrastructure ready for application "
                  "deployment”: the EC2 instance is provisioned with the OS, the RDS instance with an empty "
-                 "Microsoft SQL Server engine, and the load balancer with placeholder health checks — no "
+                 "PostgreSQL engine, and the load balancer with placeholder health checks — no "
                  "application binaries or financial data are placed by the MTS build.")
     h3("In scope of this design")
     add_bullet_list(doc, [
@@ -126,16 +174,19 @@ def build(path):
         "All compute, networking, identity, storage, database, autoscaling and baseline monitoring needed to run Ledgerline as a staff-facing, business-hours workload in AWS.",
         "Single-region, single-Availability-Zone deployment in ap-southeast-2 (Sydney).",
     ])
+    lab_note(doc, "the design calls for ap-southeast-2 (Sydney). If you are building this in an AWS "
+                  "Academy Learner Lab, deploy to whichever region that environment gives you — us-east-1 — "
+                  "and treat it as standing in for Sydney throughout. That is acceptable.")
     h3("Out of scope — deferred to the follow-on HA design phase")
     add_bullet_list(doc, [
-        "High-availability hardening (Multi-AZ SQL Server, cross-AZ compute resilience, failure-simulation testing).",
+        "High-availability hardening (Multi-AZ database, cross-AZ compute resilience, failure-simulation testing).",
         "Disaster recovery to a second AWS region; DR runbook and tabletop testing.",
-        "Application re-platforming (Ledgerline remains Windows Server 2016 + Microsoft SQL Server).",
+        "Application re-platforming (Ledgerline remains Amazon Linux + PostgreSQL).",
     ])
     h3("Out of MTS scope entirely — YAT ICT responsibility")
     add_bullet_list(doc, [
         "Ledgerline application installation onto the EC2 instance(s) after handover.",
-        "Database migration (extract from on-prem SQL Server, load into RDS for SQL Server).",
+        "Database migration (extract from the on-premises database, load into RDS for PostgreSQL).",
         "Cutover — DNS switch, parallel running, decommissioning, user redirection (avoiding month-end and EOFY).",
         "Organisational change management — CAB approvals, communications, training, post-cutover support.",
     ])
@@ -151,13 +202,13 @@ def build(path):
     h3("2.2 Requirements the design must meet")
     add_data_table(doc, ["Requirement", "Target / note"],
               [["Region / data residency", "ap-southeast-2 (Sydney); financial records + staff/debtor PII within Australia (Privacy Act APP 8; financial-records retention)"],
-               ["Application stack", "Preserved — Windows Server 2016 · Microsoft SQL Server (Standard) · Ledgerline"],
+               ["Application stack", "Preserved — Amazon Linux 2023 · PostgreSQL · Ledgerline"],
                ["Concurrent users", "15–25 typical; 45–55 peak at month-end close and EOFY; idle out of hours"],
                ["Availability", "≥ 99.5% business-hours (Mon–Fri ~07:30–18:00); no 24/7 requirement"],
                ["Recovery", "RPO ≤ 1 hour (no loss of financial transactions); RTO ≤ 1 business day (≤ 8 business hours)"],
-               ["Data footprint", "~22 GB SQL Server data, growing ~5 GB/year, plus scanned-document attachments"],
+               ["Data footprint", "~22 GB database, growing ~5 GB/year, plus scanned-document attachments"],
                ["Retention", "Financial records and audit logs retained ≥ 7 years"],
-               ["Licensing", "Commercial — Ledgerline per-user + SQL Server; cloud licence treatment (licence-included vs BYOL) is material"],
+               ["Licensing", "Commercial — Ledgerline per-user licences; the database is open-source (no database licence) is material"],
                ["Integrations", "AD authentication; O365 SMTP; LMS fee-status; payroll-bureau SFTP; banking/payment-gateway file exchange"],
                ["High availability", "Out of baseline scope — Multi-AZ resilience deferred to the follow-on HA design"]],
               widths=[4.5, 11.5])
@@ -171,8 +222,8 @@ def build(path):
     h3("4.1 Assumptions and constraints")
     add_data_table(doc, ["#", "Assumption / constraint", "Source"],
               [["A1", "Region must be ap-southeast-2 (Sydney) for financial-records data residency", "Migration Requirements; Privacy Policy"],
-               ["A2", "Application stack preserved: Windows Server 2016, Microsoft SQL Server, Ledgerline", "Migration Requirements; Role Brief"],
-               ["A3", "Data footprint ~22 GB SQL Server data, +~5 GB/year, plus scanned attachments", "Application Spec; Server Specs"],
+               ["A2", "Application stack preserved: Amazon Linux 2023, PostgreSQL, Ledgerline", "Migration Requirements; Role Brief"],
+               ["A3", "Data footprint ~22 GB database, +~5 GB/year, plus scanned attachments", "Application Spec; Server Specs"],
                ["A4", "Concurrent users 15–25 typical, 45–55 at month-end / EOFY; idle out of hours", "Application Spec"],
                ["A5", "Financial records + staff/debtor PII must remain within Australia; retained ≥ 7 years", "Privacy Act 1988 APP 8; financial-records obligations"],
                ["A6", "Preserve AD authentication over a private network to campus AD; staff-only access", "Application Spec; Migration Requirements"],
@@ -187,22 +238,23 @@ def build(path):
     add_data_table(doc, ["Group", "Purpose", "Indicative permissions"],
               [["YAT-ICT-Admins", "YAT ICT day-to-day ops post-handover", "Read-only on infra; full CloudWatch/RDS/EC2 console; no IAM changes"],
                ["MTS-Consultants", "MTS during build + support", "Full admin during build; reduced post-handover"],
-               ["Application-Service", "EC2 instance role for Ledgerline", "RDS read/write; S3 read/write (attachments); CloudWatch logs"],
-               ["Finance-Auditors", "Finance / external auditors", "Read-only on logs, metrics, configs (financial-audit support)"]],
+                              ["Finance-Auditors", "Finance / external auditors", "Read-only on logs, metrics, configs (financial-audit support)"]],
               widths=[3.5, 5.0, 7.5])
     add_bullet_list(doc, [
-        "MFA required for all YAT-ICT-Admins and MTS-Consultants users (Essential Eight; User Access Policy).",
-        "No long-lived access keys for humans; programmatic access via IAM roles only; EC2 access via instance profile.",
+        "No long-lived access keys for humans; programmatic access via IAM roles only.",
+        "The application servers reach the database and the logging service through an EC2 instance role, so no credentials are stored on a server.",
         "Configuration decision left to the implementer: the MTS-Consultants permission boundary during build vs after handover.",
     ])
     h3("4.4 Network topology")
-    add_body_paragraph(doc, "VPC 10.0.0.0/16 (room to expand), with DNS hostnames/resolution and VPC flow logs enabled. "
+    add_body_paragraph(doc, "VPC ledgerline-vpc, 10.20.0.0/16, with DNS hostnames and DNS resolution enabled. "
                  "This is an internal, staff-only service — there is no public internet ingress to the "
                  "application. Single-AZ subnets in ap-southeast-2a:")
     add_data_table(doc, ["Subnet", "CIDR", "Tier", "Internet-facing?"],
-              [["public-egress-a", "10.0.1.0/24", "NAT gateway only (outbound patching)", "Egress only"],
-               ["private-app-a", "10.0.11.0/24", "Application / Ledgerline EC2 + internal ALB", "No"],
-               ["private-data-a", "10.0.21.0/24", "Database (RDS for SQL Server)", "No"]],
+              [["ledgerline-public-a", "10.20.1.0/24", "Load balancer, NAT gateway", "Yes"],
+               ["ledgerline-public-b", "10.20.2.0/24", "Load balancer second zone — empty", "Yes"],
+               ["ledgerline-app-a", "10.20.11.0/24", "Application / Ledgerline EC2", "No"],
+               ["ledgerline-data-a", "10.20.21.0/24", "Database (RDS for PostgreSQL)", "No"],
+               ["ledgerline-data-b", "10.20.22.0/24", "Database subnet group second zone — empty", "No"]],
               widths=[4.0, 3.5, 6.0, 2.5])
     add_bullet_list(doc, [
         "Internet Gateway used only for NAT egress (Windows Update, vendor patches); no inbound internet path to the app.",
@@ -210,63 +262,72 @@ def build(path):
         "Staff reach the service over the campus Site-to-Site VPN; AD authentication runs over the same private link.",
         "The follow-on HA design adds the corresponding -b subnets in ap-southeast-2b.",
     ])
-    diagram_placeholder(doc,
-                        "Figure 4.4 — Ledgerline baseline network topology (single-AZ, internal / staff-only over the campus VPN).",
-                        "Source diagram: network-accounting-baseline-singleaz.drawio")
+    diagram_figure(doc,
+                   "Figure 4.4 — Ledgerline baseline network topology. The workload runs in "
+                   "ap-southeast-2a; the two subnets in ap-southeast-2b carry nothing.",
+                   "network-accounting-baseline-singleaz.drawio.png")
     h3("4.5 Compute (EC2 + Auto Scaling)")
     add_bullet_list(doc, [
-        "EC2: general-purpose x86 (e.g. m6i.large — final type a C1 implementer decision); Windows Server 2016 AMI; placed in private-app-a (no public IP).",
+        "EC2: general-purpose burstable — t3.micro or t3.small, a C1 implementer decision; Amazon Linux 2023 AMI; placed in private-app-a (no public IP).",
         "EBS: gp3 root 80 GB + a gp3 data volume sized by the implementer (footprint + 12-month growth + headroom).",
         "Auto Scaling Group: min 1 / desired 1 / max 2 (baseline); target-tracking on CPU at 70%; ELB+EC2 health checks; 300 s cooldown.",
         "The workload is business-hours and idle overnight; the follow-on HA design adds cross-AZ capacity for resilience (not for load).",
     ])
+    lab_note(doc, "Ledgerline's real finance workload — 15–25 typical and 45–55 concurrent users at "
+                  "month-end close — would warrant an instance several sizes larger than either option "
+                  "above. An AWS Academy Learner Lab caps what will launch, so the two offered are ones "
+                  "that actually run there. Size between them on the reasoning you would use at full "
+                  "scale; the reasoning is what matters, not the vCPU count.")
     h3("4.6 Load balancing (ALB)")
     add_bullet_list(doc, [
-        "Internal (private) ALB in private-app-a; HTTPS:443 listener forwarding to the Ledgerline target group — reachable by staff over the campus VPN, not from the internet.",
+        "Internet-facing ALB, ledgerline-alb, spanning ledgerline-public-a and ledgerline-public-b — it will not create with only one zone; HTTP:80 listener forwarding to ledgerline-tg.",
         "Target group = the ASG instances; HTTP health check on the application health endpoint (30 s; 2 unhealthy → out of service).",
-        "TLS via an ACM-issued certificate for the internal Ledgerline DNS name (DNS strategy a C8 implementer decision).",
     ])
-    h3("4.7 Database (RDS for SQL Server)")
+    lab_note(doc, "the listener is deliberately plain HTTP on port 80 rather than HTTPS. That is a "
+                  "simplification, and a production front door for a finance system would terminate TLS "
+                  "here. It is done this way so that you can paste the load balancer's address into a "
+                  "browser and see the platform you built actually serving a page.")
+    h3("4.7 Database (RDS for PostgreSQL)")
     add_bullet_list(doc, [
-        "Amazon RDS for SQL Server, Standard edition (preserves the existing SQL Server engine and data); version confirmed against Ledgerline at build time.",
-        "General-purpose instance class (e.g. db.m6i.large — a C2 implementer decision); gp3 storage sized to ~22 GB + ~5 GB/year growth.",
-        "SQL Server licensing model — licence-included vs bring-your-own-licence — is a C3 implementer decision with a material cost impact.",
+        "Amazon RDS for PostgreSQL (preserves the existing engine and data); version confirmed against Ledgerline at build time.",
+        "General-purpose burstable instance class — db.t3.micro or db.t3.small, a C2 implementer decision; gp3 storage, 20 GB — sized to ~22 GB + ~5 GB/year growth.",
         "Multi-AZ DISABLED for the baseline (enabled in the HA design); storage encryption enabled (KMS).",
-        "Placed in private-data-a; not publicly accessible. Automated backups + transaction-log backups sized to meet RPO ≤ 1 hour; backup window 22:00–04:00 AEST; maintenance Sun 02:00–06:00 AEST.",
+        "Placed via ledgerline-db-subnet-group, spanning ledgerline-data-a and ledgerline-data-b — a subnet group requires two zones; not publicly accessible. Automated backups sized to meet RPO ≤ 1 hour, 7-day retention.",
         "Schema and data migration are YAT ICT's responsibility, not MTS's — MTS provisions an empty instance.",
     ])
+    lab_note(doc, "the same applies here as to the application tier: the ~22 GB financial data footprint "
+                  "and the month-end close profile would in reality call for a database class and storage "
+                  "allocation beyond either option above. Both are sized to what will deploy in a Learner Lab.")
     h3("4.8 Storage")
     add_data_table(doc, ["Resource", "Type", "Purpose"],
-              [["EC2 root volume", "EBS gp3 80 GB", "OS and Ledgerline application install"],
-               ["EC2 data volume", "EBS gp3 (sized by implementer)", "Ledgerline application data, report staging"],
-               ["Documents bucket", "S3", "Scanned invoices / purchase orders / supporting documents; lifecycle to Glacier for 7-year financial retention"],
-               ["Backups bucket", "S3", "Off-instance SQL backup exports, file snapshots"]],
+              [["EC2 root volume", "EBS gp3 8 GB", "OS and Ledgerline application install"],
+               ["Database storage", "RDS gp3 20 GB, encrypted", "The PostgreSQL data files"]],
               widths=[4.0, 4.5, 7.5])
-    add_bullet_list(doc, ["Both buckets: block all public access; SSE-S3 (or SSE-KMS) encryption; versioning enabled; access logging to a log bucket; Object Lock considered for the 7-year financial-records hold."])
+    add_bullet_list(doc, ["Object storage for scanned invoices, purchase orders and supporting documents is out of scope for this baseline and is a candidate for the follow-on phase, where the 7-year financial-records hold can be met with versioning and an archive lifecycle."])
     h3("4.9 Security")
     add_data_table(doc, ["Security group", "Inbound", "Outbound"],
-              [["sg-alb", "HTTPS:443 from the campus VPN / staff CIDR only", "HTTPS to sg-app"],
-               ["sg-app", "from sg-alb; RDP:3389 from MTS bastion (design left to implementer)", "SQL:1433 to sg-db; HTTPS via NAT; LDAPS to campus AD; SMTP to O365; SFTP to payroll bureau; banking endpoints"],
-               ["sg-db", "SQL Server:1433 from sg-app only", "none"]],
+              [["ledgerline-alb-sg", "HTTP:80 from 0.0.0.0/0", "default allow-all"],
+               ["ledgerline-app-sg", "HTTP:80 from ledgerline-alb-sg", "default allow-all"],
+               ["ledgerline-db-sg", "PostgreSQL:5432 from ledgerline-app-sg only", "default allow-all"]],
               widths=[3.0, 7.0, 6.0])
     add_bullet_list(doc, [
-        "Encryption in transit: HTTPS staff→ALB→EC2; TLS EC2→RDS; AWS calls over TLS via VPC endpoints where available; LDAPS and SFTP for external links.",
-        "Encryption at rest: EBS, RDS, and S3 all enabled (KMS where customer-managed keys are warranted for financial data).",
+        "Each rule names a security group as its source rather than an address range, so it follows the instances however many the Auto Scaling group launches.",
+        "Administrative access to instances is by Session Manager: no key pair, no open management port, no public IP address and no bastion host.",
+        "Encryption at rest: EBS and RDS both enabled (KMS where customer-managed keys are warranted for financial data).",
         "Operates under the AWS Shared Responsibility Model — AWS secures the cloud; YAT/MTS secure the OS, application, IAM, data and access in the cloud.",
     ])
     h3("4.10 Monitoring (baseline)")
     add_body_paragraph(doc, "Standard CloudWatch metrics for EC2, RDS, ALB and Auto Scaling. Baseline alarms (HA-tuned "
                  "alarms come in the follow-on HA design):")
-    add_data_table(doc, ["Alarm", "Threshold"],
-              [["EC2 CPU high", "≥ 80% over 10 min"],
-               ["RDS CPU high", "≥ 80% over 10 min"],
-               ["RDS free storage low", "< 15%"],
-               ["ALB target 5XX / unhealthy host", "> 5 / min or any unhealthy host"],
-               ["RDS connections high", "> 80% of max connections"]],
-              widths=[8.0, 8.0])
-    add_bullet_list(doc, ["Logging: VPC flow logs and RDS logs → CloudWatch Logs; ALB access logs → S3; EC2 OS logs via the CloudWatch Agent. Financial-audit-relevant logs retained to meet the 7-year obligation."])
+    add_data_table(doc, ["Alarm", "Metric", "Threshold"],
+              [["ledgerline-unhealthy-hosts", "UnHealthyHostCount, per load balancer per target group",
+                "Maximum ≥ 1 over 1 minute — any target has failed its health check"],
+               ["ledgerline-db-storage-low", "FreeStorageSpace on the database instance",
+                "Minimum below 15% of allocated storage, over two 5-minute periods"]],
+              widths=[4.6, 5.4, 6.0])
+    add_bullet_list(doc, ["Both alarms notify an SNS topic. The Auto Scaling policy tracks CPU and creates its own alarms, so no separate CPU alarm is required."])
     h3("4.11 Naming and tagging conventions")
-    add_body_paragraph(doc, "Naming pattern yat-acct-<resource-type>-<env>-<az-or-purpose> (e.g. yat-acct-alb-prod). Mandatory tags:")
+    add_body_paragraph(doc, "Naming pattern ledgerline-<resource-type> — ledgerline-vpc, ledgerline-alb, ledgerline-tg, ledgerline-lt, ledgerline-db. Subnets are named for their tier and zone: ledgerline-public-a/-b, ledgerline-app-a, ledgerline-data-a/-b. Mandatory tags:")
     add_data_table(doc, ["Tag", "Value"],
               [["Project", "YAT-Accounting-Migration"], ["Environment", "Production"], ["Owner", "YAT-ICT"],
                ["ManagedBy", "MTS-Migration during build → YAT-ICT post-handover"],
@@ -275,13 +336,12 @@ def build(path):
     h3("4.12 Backup")
     add_data_table(doc, ["Resource", "Mechanism", "Retention"],
               [["RDS database", "Automated daily backups + transaction-log backups (point-in-time recovery)", "Sized to RPO ≤ 1 h; long-term financial copies retained ≥ 7 years"],
-               ["EC2 EBS volumes", "Daily AMI snapshot (Data Lifecycle Manager)", "14 days"],
-               ["Documents (S3)", "Versioning + lifecycle to Glacier", "≥ 7 years (financial-records obligation)"]],
+               ["EC2 EBS volumes", "None — the servers hold no state that is not in the database. They are rebuilt from the launch template, not restored", "n/a"]],
               widths=[4.0, 7.0, 5.0])
     add_bullet_list(doc, ["Cross-Region backup copies are out of scope for the baseline — addressed in the follow-on HA design."])
     h3("4.13 Recovery objectives — baseline state")
     add_body_paragraph(doc, "The baseline meets RPO ≤ 1 hour through RDS automated + transaction-log backups (point-in-"
-                 "time recovery), and supports RTO ≤ 1 business day via a single-AZ restore. The single AZ and "
+                 "time recovery). It does NOT meet the RTO of 2 hours: recovery is by restore from backup, which does not reliably complete inside that window. The single AZ and "
                  "the single RDS instance remain known single points of failure: tolerable for a business-"
                  "hours service in the short term, but resilience against an AZ failure is the objective of the "
                  "follow-on HA design.")
@@ -296,14 +356,10 @@ def build(path):
                  "judgement. Each decision below is to be made and evidenced in the Deployment Report, "
                  "justified against the Ledgerline workload.")
     add_data_table(doc, ["#", "Decision", "Why left open"],
-              [["C1", "EC2 instance type (general-purpose family)", "Size against the Ledgerline workload (15–25 typical / 45–55 month-end peak)"],
-               ["C2", "RDS for SQL Server instance class", "Size against the SQL Server workload (read-heavy at month-end)"],
-               ["C3", "SQL Server licensing model — licence-included vs BYOL", "Material cost decision under the cloud operating model"],
-               ["C4", "EBS data volume + RDS storage size", "Compute from the ~22 GB footprint + ~5 GB/year growth"],
-               ["C5", "Backup retention + RPO mechanism", "Meet RPO ≤ 1 h and the 7-year financial-records retention"],
-               ["C6", "Bastion / jump-host design for RDP admin access", "Left to the implementer"],
-               ["C7", "Security-group ingress specifics", "Confirm AD/LDAPS, SMTP, payroll SFTP and banking endpoints"],
-               ["C8", "DNS strategy + ACM certificate domain", "Confirm the internal Ledgerline hostname with YAT ICT"]],
+              [["C1", "Application-tier instance type (general-purpose burstable)",
+                "Size against the Ledgerline workload (15–25 typical / 45–55 month-end peak)"],
+               ["C2", "Database instance class and storage size (general-purpose burstable)",
+                "Size against the database workload and its ~22 GB footprint"]],
               widths=[1.0, 7.0, 8.0])
 
     h1("5. Implementation Sequencing")
@@ -319,10 +375,10 @@ def build(path):
     add_body_paragraph(doc, "Stated explicitly so the implementer knows what not to build (these are the deliberate "
                  "inputs to the follow-on HA design):")
     add_bullet_list(doc, [
-        "Multi-AZ SQL Server; cross-AZ subnets (private-app-b, private-data-b); ASG capacity ≥ 2 across AZs.",
+        "Multi-AZ database; the ledgerline-app-b subnet; ASG capacity ≥ 2 across AZs.",
         "HA-tuned monitoring (cross-AZ latency, replica lag); cross-Region backup copies and DR runbook.",
         "Failure-simulation testing; automated availability reporting against the recovery objectives.",
-        "And, out of MTS scope entirely: Ledgerline install, SQL Server data migration, cutover, and change management (YAT ICT).",
+        "And, out of MTS scope entirely: Ledgerline install, database migration, cutover, and change management (YAT ICT).",
     ])
 
     h1("8. References")

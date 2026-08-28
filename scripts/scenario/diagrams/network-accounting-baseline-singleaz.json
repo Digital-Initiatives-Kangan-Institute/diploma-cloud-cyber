@@ -1,0 +1,240 @@
+{
+  "_source_of_truth": "This spec is the source. Render with the umbrella draw-diagram skill; never hand-edit the generated .drawio or .png.",
+  "_render": ".claude/skills/draw-diagram/.venv/bin/python .claude/skills/draw-diagram/draw_diagram.py --spec <this file> --out ../diploma-cloud-cyber-website-s1/public/diagrams/for-documents-not-website/network-accounting-baseline-singleaz.drawio --png ../diploma-cloud-cyber-website-s1/public/diagrams/for-documents-not-website/network-accounting-baseline-singleaz.png",
+  "_used_by": [
+    "content-s1/scripts/scenario/build_accounting_solution_design.py \u2014 figure in the Accounting Baseline Solution Design"
+  ],
+  "_svg_note": "The .drawio.svg and .drawio.png are exported by hand from the .drawio in draw.io. Re-export whenever this spec changes.",
+  "_intent": "How the components fit together, not how they are configured. Sizes, engine versions and settings live in the written design.",
+  "_layout_notes": [
+    "Straight lines beat routed ones. The traffic path \u2014 internet, gateway, load balancer, instance \u2014 shares one centre line so it draws as a single straight run.",
+    "Empty subnets are drawn narrower than populated ones: the geometry says 'less here' before the label is read.",
+    "Straddling boxes sit below each subnet's label band so they do not clip it.",
+    "Subnet labels carry both the scenario AZ and the Learner Lab AZ, so a student can match what the console shows them."
+  ],
+  "_matches": "delivery/practice-lab-pack/baseline.yaml and at2_practice_run_sheet.py \u2014 the environment a student ends the AT2 practice with.",
+  "title": "YAT Ledgerline - cloud baseline (single-AZ workload)",
+  "nodes": [
+    {
+      "id": "internet",
+      "label": "Internet\nFinance and administrative staff",
+      "x": 480.0,
+      "y": 40.0,
+      "w": 220.0,
+      "h": 56.0,
+      "fill": "grey",
+      "shape": "rounded"
+    },
+    {
+      "id": "igw",
+      "label": "Internet Gateway",
+      "x": 490.0,
+      "y": 150.0,
+      "w": 200.0,
+      "h": 56.0,
+      "fill": "amber",
+      "shape": "rounded"
+    },
+    {
+      "id": "vpc",
+      "label": "VPC  ledgerline-vpc   10.20.0.0/16",
+      "x": 60.0,
+      "y": 180.0,
+      "w": 920.0,
+      "h": 800.0,
+      "fill": "none",
+      "shape": "container"
+    },
+    {
+      "id": "pwa",
+      "label": "ledgerline-public-a   10.20.1.0/24\nscenario: ap-southeast-2a\nlearner lab: us-east-1a",
+      "x": 90.0,
+      "y": 250.0,
+      "w": 430.0,
+      "h": 170.0,
+      "fill": "#EEF5FD",
+      "shape": "container",
+      "parent": "vpc"
+    },
+    {
+      "id": "pwb",
+      "label": "ledgerline-public-b\n10.20.2.0/24\nap-southeast-2b\n(empty)",
+      "x": 660.0,
+      "y": 250.0,
+      "w": 280.0,
+      "h": 170.0,
+      "fill": "#EEF5FD",
+      "shape": "container",
+      "parent": "vpc"
+    },
+    {
+      "id": "alb",
+      "label": "Application Load Balancer\nledgerline-alb",
+      "x": 490.0,
+      "y": 335.0,
+      "w": 200.0,
+      "h": 65.0,
+      "fill": "blue",
+      "shape": "rounded",
+      "parent": "vpc"
+    },
+    {
+      "id": "ppa",
+      "label": "ledgerline-app-a   10.20.11.0/24\nscenario: ap-southeast-2a\nlearner lab: us-east-1a",
+      "x": 90.0,
+      "y": 500.0,
+      "w": 850.0,
+      "h": 190.0,
+      "fill": "#F1F8F1",
+      "shape": "container",
+      "parent": "vpc"
+    },
+    {
+      "id": "pda",
+      "label": "ledgerline-data-a   10.20.21.0/24\nscenario: ap-southeast-2a\nlearner lab: us-east-1a",
+      "x": 90.0,
+      "y": 770.0,
+      "w": 430.0,
+      "h": 180.0,
+      "fill": "#FAF2FC",
+      "shape": "container",
+      "parent": "vpc"
+    },
+    {
+      "id": "pdb",
+      "label": "ledgerline-data-b\n10.20.22.0/24\nap-southeast-2b\n(empty)",
+      "x": 660.0,
+      "y": 770.0,
+      "w": 280.0,
+      "h": 180.0,
+      "fill": "#FAF2FC",
+      "shape": "container",
+      "parent": "vpc"
+    },
+    {
+      "id": "dbsg",
+      "label": "DB subnet group",
+      "x": 490.0,
+      "y": 858.0,
+      "w": 200.0,
+      "h": 56.0,
+      "fill": "purple",
+      "shape": "rounded",
+      "parent": "vpc"
+    },
+    {
+      "id": "nat",
+      "label": "NAT Gateway\nledgerline-nat\noutbound for the app subnet",
+      "x": 140.0,
+      "y": 330.0,
+      "w": 190.0,
+      "h": 70.0,
+      "fill": "amber",
+      "shape": "rounded",
+      "parent": "pwa"
+    },
+    {
+      "id": "asg",
+      "label": "Auto Scaling group",
+      "x": 430.0,
+      "y": 560.0,
+      "w": 320.0,
+      "h": 110.0,
+      "fill": "#E4F0E4",
+      "shape": "container",
+      "parent": "ppa"
+    },
+    {
+      "id": "rds",
+      "label": "RDS for PostgreSQL\nledgerline-db",
+      "x": 200.0,
+      "y": 855.0,
+      "w": 240.0,
+      "h": 62.0,
+      "fill": "purple",
+      "shape": "rounded",
+      "parent": "pda"
+    },
+    {
+      "id": "ec2",
+      "label": "EC2\nAmazon Linux",
+      "x": 470.0,
+      "y": 595.0,
+      "w": 240.0,
+      "h": 62.0,
+      "fill": "green",
+      "shape": "rounded",
+      "parent": "asg"
+    }
+  ],
+  "edges": [
+    {
+      "from": "internet",
+      "to": "igw",
+      "label": "",
+      "exit": [
+        0.5,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "entry": [
+        0.5,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "from": "igw",
+      "to": "alb",
+      "label": "HTTP:80",
+      "exit": [
+        0.5,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "entry": [
+        0.5,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "from": "alb",
+      "to": "ec2",
+      "label": "HTTP:80",
+      "exit": [
+        0.5,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "entry": [
+        0.5,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "from": "ec2",
+      "to": "rds",
+      "label": "PostgreSQL:5432",
+      "exit": [
+        0.5,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "entry": [
+        0.5,
+        0.0,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}

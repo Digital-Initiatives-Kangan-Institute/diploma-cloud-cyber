@@ -340,6 +340,51 @@ def build(path):
                   "Build out the line-item tables here per option.")
     add_response_placeholder(doc, "[ Detailed CBA line-item tables ]")
 
+    h1("Appendix 2 — Knowledge Evidence")
+    add_guidance_text(doc, "Answer all nine questions. Each one is about the solution you recommended in "
+                  "this business case, so answer it against your own work and cite the section of this "
+                  "document where the thing you are describing appears. A general definition with no "
+                  "reference to your own solution does not answer the question.")
+
+    h2("Selection-style questions")
+    for q in [
+        "Q1 — For the solution you recommended, classify its main components as IaaS, PaaS or SaaS. "
+        "Name each component, say which category it falls into, and explain why that category was the "
+        "right choice for that part of the solution.",
+
+        "Q2 — Which cloud deployment model does your recommended solution use — public, private, "
+        "hybrid or community? Name it, and explain why it suits YAT better than the alternatives.",
+
+        "Q3 — Name at least three industry technology standards or frameworks that are material to your "
+        "recommendation. For each, say what it covers and which section of this business case it "
+        "informed.",
+
+        "Q4 — Identify the industry-standard hardware and software products in your recommended "
+        "solution. For each, describe its general features and the role it plays in the solution.",
+
+        "Q5 — Explain the cost model that applies to each major service in your recommendation, and "
+        "why you chose it. Then explain how your total cost changes as YAT's student population grows.",
+    ]:
+        add_guidance_text(doc, q)
+        add_response_placeholder(doc)
+
+    h2("Demonstration-style questions")
+    for q in [
+        "Q6 — What are the key sections of an ICT implementation action plan? For each, point to where "
+        "it appears in your §9.",
+
+        "Q7 — Which evaluation and planning methods did you apply in reaching your recommendation? Name "
+        "each one and cite the section where you applied it.",
+
+        "Q8 — How did you evaluate the competing options against each other? Name the method and cite "
+        "the sections where the comparison is made.",
+
+        "Q9 — Which current or emerging industry trends informed your recommendation? For each, explain "
+        "where in your reasoning it made a difference.",
+    ]:
+        add_guidance_text(doc, q)
+        add_response_placeholder(doc)
+
 
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     doc.save(path)

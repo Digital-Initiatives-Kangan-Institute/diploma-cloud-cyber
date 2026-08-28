@@ -97,18 +97,10 @@ def build(path):
                  "actually reduces YAT's ongoing maintenance burden — partly offsetting the higher "
                  "upfront cost.")
     add_body_paragraph(doc, "We recommend Option B. We ask the board to approve the replacement, the phased "
-                 "implementation plan in §10 (with cutover scheduled into the December–January teaching "
+                 "implementation plan in §9 (with cutover scheduled into the December–January teaching "
                  "break), and the Year-1 budget envelope.")
 
-    h1("2. Engagement Context")
-    add_body_paragraph(doc, "YAT College engaged AccentLoitte to deliver the end-to-end replacement of its legacy "
-                 "GrayBoard LMS, structured in three phases: (1) selection and implementation planning; "
-                 "(2) deployment and data migration; (3) stabilisation and closure. This Business Case is "
-                 "the Phase 1 deliverable: it presents the options analysis and the replacement "
-                 "recommendation for the YAT Board's approval, via the Engagement Sponsor, the YAT ICT "
-                 "Manager (Sam Walker).")
-
-    h1("3. Strategic Alignment Analysis")
+    h1("2. Strategic Alignment Analysis")
     add_body_paragraph(doc, "YAT's ICT direction in 2022 prioritises reliable, well-supported core systems; the "
                  "capacity to support continued student growth; and meeting the College's statutory "
                  "obligations as a Registered Training Organisation. The LMS is the platform through "
@@ -125,7 +117,7 @@ def build(path):
                  "with a supported product both resolves the immediate risk and positions YAT for a "
                  "future move to cloud hosting.")
 
-    h1("4. Current State — the GrayBoard LMS")
+    h1("3. Current State — the GrayBoard LMS")
     add_body_paragraph(doc, "GrayBoard is a bespoke LMS built and maintained in-house by YAT ICT, running on "
                  "on-premises infrastructure at the Cremorne campus and integrated with Active Directory "
                  "(authentication), Office 365 (email notifications), and AVETMISS/ASQA statutory "
@@ -141,35 +133,35 @@ def build(path):
                  "non-conformance, and concentration risk on in-house maintenance — are what drive the "
                  "gap analysis.")
 
-    h1("5. Gap Analysis")
+    h1("4. Gap Analysis")
     add_data_table(doc,
-              ["Objective", "Current state (GrayBoard)", "Desired future state", "Gap",
+              ["Strategic objective", "Current state (GrayBoard)", "Gap",
                "Improvement opportunity", "Proposed change"],
               [["Supported, current LMS platform", "Bespoke, end-of-life, no vendor support/roadmap",
-                "Vendor-supported product with active roadmap", "No support or roadmap; concentration risk",
+                "No support or roadmap; concentration risk",
                 "Adopt an established commercial LMS", "Replace with DOODLE (on-prem)"],
-               ["Availability ≥ 99%", "Degrading, below target", "≥ 99%",
+               ["Availability ≥ 99%", "Degrading, below target",
                 "Reliability shortfall", "Modern supported stack", "Deploy DOODLE on supported infrastructure"],
-               ["WCAG 2.1 AA accessibility", "Non-conformant (DDA exposure)", "Conformant",
+               ["WCAG 2.1 AA accessibility", "Non-conformant (DDA exposure)",
                 "Compliance gap", "Product with native AA conformance", "Replace with conformant LMS"],
-               ["Peak-load performance", "Degrades at ~3× term-end load", "Meets/exceeds, holds at peak",
+               ["Peak-load performance", "Degrades at ~3× term-end load",
                 "Performance shortfall", "Right-sized supported platform", "Provision DOODLE to peak profile"],
-               ["Preserve all student records", "Held in GrayBoard", "Migrated intact + verified",
+               ["Preserve all student records", "Held in GrayBoard",
                 "Migration risk if not managed", "Verified ETL migration", "Migrate with reconciliation + parallel run"]],
-              widths=[2.7, 2.8, 2.6, 2.4, 2.5, 2.5])
+              widths=[3.2, 3.4, 2.8, 3.1, 3.0])
     add_body_paragraph(doc, "The gaps cluster around supportability, reliability, compliance and performance — none "
                  "of which an in-house remediation truly closes, and all of which a supported replacement "
                  "addresses while also preserving the student-record history.")
 
-    h1("6. Options Considered and Evaluation")
-    h2("6.1 Solution requirements")
+    h1("5. Options Considered and Evaluation")
+    h2("5.1 Workload definition")
     add_body_paragraph(doc, "The replacement must: be a current, vendor-supported LMS product; run on YAT's Windows "
                  "Server 2016 on-premises hosting standard; preserve all GrayBoard student records with "
                  "full integrity; achieve ≥ 99% availability; meet WCAG 2.1 AA; match or exceed "
                  "GrayBoard's performance (including ~3× term-end peaks); integrate with Active Directory, "
                  "Office 365 and AVETMISS reporting; and carry vendor support with severity-1 response "
                  "within 4 hours during teaching hours.")
-    h2("6.2 Options considered")
+    h2("5.2 Options considered")
     add_bullet_list(doc, [
         "Option A — Remediate and retain GrayBoard: invest in an accessibility retrofit and a hardware "
         "refresh, and continue in-house maintenance of the legacy platform.",
@@ -178,12 +170,12 @@ def build(path):
         "A SaaS / cloud-hosted LMS was considered but not carried forward in this engagement: it is "
         "inconsistent with YAT's current on-premises operating model and is noted as a future option.",
     ])
-    h2("6.3 Evaluation method")
-    add_body_paragraph(doc, "Each option is evaluated with a five-year cost comparison (§7), an intangibles "
-                 "comparison covering support, compliance, reliability and maintenance burden (§8.1), and "
-                 "a risk register (§8.2). Because the decision turns largely on supportability and "
+    h2("5.3 Evaluation method")
+    add_body_paragraph(doc, "Each option is evaluated with a five-year cost-benefit analysis (§6), an intangibles "
+                 "comparison covering support, compliance, reliability and maintenance burden (§7.1), and "
+                 "a risk register (§7.2). Because the decision turns largely on supportability and "
                  "compliance rather than on cost alone, the intangibles carry significant weight.")
-    h2("6.4 Initial impact and difficulty assessment")
+    h2("5.4 Initial impact and difficulty assessment")
     add_data_table(doc, ["", "Option A — Remediate GrayBoard", "Option B — Replace (DOODLE)"],
               [["Strategic impact", "Defers the problem; remains a dead-end platform",
                 "Resolves it; supported, compliant, future-ready"],
@@ -195,21 +187,51 @@ def build(path):
                 "Higher Year-1 cost; migration and change effort"]],
               widths=[4.0, 6.25, 6.25])
 
-    h1("7. Cost Comparison")
+    h1("6. Cost-Benefit Analysis")
     add_body_paragraph(doc, "A five-year cost comparison of the two options (AUD ex GST, 2022 price levels; "
                  "inflation excluded for comparison clarity). Detailed line items are in Appendix 1.")
+    h2("6.1 Assumptions")
+    add_data_table(doc, ["Assumption", "Value", "Source"],
+              [["GrayBoard in-house maintenance effort", "~0.4 FTE / year",
+                "YAT ICT staffing records, FY2021–22"],
+               ["Fully-loaded ICT staff cost", "$110,000 / year",
+                "YAT Finance, 2022 salary bands"],
+               ["DOODLE licensing and vendor support", "$18,400 / year",
+                "DOODLE vendor quotation, 4 March 2022"],
+               ["GrayBoard server refresh under Option A", "$55,000 one-off",
+                "YAT ICT hardware quotation, February 2022"],
+               ["Cost of LMS downtime during teaching hours", "$620 / hour",
+                "YAT Finance estimate — teaching hours lost × delivery cost, 2022"],
+               ["Price basis", "2022 levels, AUD ex GST, inflation excluded",
+                "AccentLoitte costing convention for five-year comparisons"]],
+              widths=[5.4, 4.4, 6.7])
+    add_body_paragraph(doc, "Each figure is attributed so the board can see what the comparison rests on and "
+                 "challenge any assumption it disagrees with.")
+
     yr = ["", "Year 1", "Year 2", "Year 3", "Year 4", "Year 5", "5-year"]
-    h2("7.1 Option A — Remediate and retain GrayBoard")
+    h2("6.2 Option A — 5-year summary")
     add_data_table(doc, yr,
               [["One-off remediation", "$55,000", "—", "—", "—", "—", "$55,000"],
                ["Recurring (maintenance)", "$67,000", "$67,000", "$67,000", "$67,000", "$67,000", "$335,000"],
                ["Annual total", "$122,000", "$67,000", "$67,000", "$67,000", "$67,000", "$390,000"]])
-    h2("7.2 Option B — Replace with DOODLE (on-premises)")
+    h2("6.3 Option B — 5-year summary")
     add_data_table(doc, yr,
               [["One-off project", "$160,000", "—", "—", "—", "—", "$160,000"],
                ["Recurring (run + support)", "(in project)", "$73,400", "$73,400", "$73,400", "$73,400", "$293,600"],
                ["Annual total", "$160,000", "$73,400", "$73,400", "$73,400", "$73,400", "$453,600"]])
-    h2("7.3 Comparison summary")
+    h2("6.4 Quantified benefit — avoided downtime")
+    add_body_paragraph(doc, "GrayBoard's unplanned outages over FY2021–22 totalled approximately 71 hours during "
+                 "teaching hours. At the $620/hour cost of lost teaching delivery in §6.1, that is about "
+                 "$44,000 a year in disruption YAT is absorbing today. A supported platform meeting the "
+                 "≥ 99% availability target would hold unplanned downtime under about 18 teaching hours a "
+                 "year, avoiding roughly $33,000 of that annually — some $165,000 over the five-year "
+                 "horizon.")
+    add_body_paragraph(doc, "This benefit is stated separately from the cost tables rather than netted off them: "
+                 "it is an avoided cost YAT currently absorbs across the teaching timetable, not a line "
+                 "item in either option's budget. Counted against the $63,600 five-year cost difference, "
+                 "it more than covers the gap on its own.")
+
+    h2("6.5 Comparison summary")
     add_data_table(doc, ["", "Option A", "Option B", "Delta (B − A)"],
               [["One-off (Year 1)", "$55,000", "$160,000", "+$105,000"],
                ["Recurring (per year)", "$67,000", "$73,400", "+$6,400"],
@@ -219,19 +241,11 @@ def build(path):
                  "year, ~$63,600 more over five years. The case for it is therefore not cost but "
                  "supportability, compliance and performance: Option A's lower spend buys only a "
                  "temporary reprieve on an unsupported, non-compliant platform that must still be "
-                 "replaced. And as the sensitivity below shows, Option A's cost advantage erodes — or "
-                 "reverses — as the ageing platform's maintenance burden grows.")
-    h2("7.4 Sensitivity")
-    add_body_paragraph(doc, "Sensitivity 1 — GrayBoard maintenance effort rising from ~0.4 to ~0.6 FTE: Option A's "
-                 "recurring cost rises by ~$22,000/year (~$110,000 over five years), making Option A more "
-                 "expensive than Option B. Given the platform's trajectory this is the more likely case, "
-                 "and it reinforces the recommendation.")
-    add_body_paragraph(doc, "Sensitivity 2 — AccentLoitte fees rising from $95,000 to $115,000: Option B's five-year "
-                 "cost rises to ~$473,600. The cost gap widens, but the supportability and compliance case "
-                 "for Option B is unchanged.")
+                 "replaced. Option A's cost advantage also rests on the maintenance effort assumed in "
+                 "§6.1 holding steady, which on this platform's trajectory it will not.")
 
-    h1("8. Risk and Impact Assessment")
-    h2("8.1 Intangibles comparison")
+    h1("7. Risk and Impact Assessment")
+    h2("7.1 Intangibles comparison")
     add_data_table(doc, ["Factor", "Option A — Remediate GrayBoard", "Option B — Replace (DOODLE)"],
               [["Vendor support & roadmap", "None — bespoke dead-end", "Active vendor support + roadmap"],
                ["Accessibility (WCAG 2.1 AA / DDA)", "Fragile retrofit", "Native conformance"],
@@ -240,7 +254,7 @@ def build(path):
                ["YAT ICT maintenance burden", "High (in-house bespoke)", "Reduced (supported product)"],
                ["Future-proofing", "Replacement still looms", "Current platform; cloud-ready later"]],
               widths=[4.5, 5.75, 6.0])
-    h2("8.2 Risk register (recommended option)")
+    h2("7.2 Risk register (recommended option)")
     add_data_table(doc, ["Risk", "Likelihood", "Impact", "Mitigation"],
               [["Data loss/corruption in migration", "Low", "High",
                 "Verified ETL with record reconciliation; parallel run; tested backups"],
@@ -254,7 +268,7 @@ def build(path):
                 "Phase gates; the fixed Dec–Jan cutover window"]],
               widths=[5.2, 2.3, 2.0, 6.7])
 
-    h1("9. Recommendation")
+    h1("8. Recommendation")
     add_body_paragraph(doc, "Recommended option: Option B — replace GrayBoard with DOODLE, deployed on-premises. "
                  "Although ~$63,600 more over five years, it is the only option that delivers a supported, "
                  "accessible, performant LMS with a product roadmap, reduces YAT's ongoing maintenance "
@@ -262,14 +276,14 @@ def build(path):
                  "unavoidable replacement on an unsupported, non-compliant platform. This recommendation "
                  "drives the phased action plan below.")
 
-    h1("10. Action Plan")
-    h2("10.1 Prioritised phases")
+    h1("9. Action Plan")
+    h2("9.1 Prioritised changes")
     add_data_table(doc, ["#", "Phase", "Priority rationale"],
               [["1", "Selection & implementation plan", "Confirm the product and the deployment/migration approach first"],
                ["2", "Deployment & data migration", "Stand up DOODLE, migrate and verify records, run in parallel"],
                ["3", "Stabilisation & closure", "Support, training, as-built docs, knowledge transfer, closure"]],
               widths=[1.2, 6.0, 8.5])
-    h2("10.2 Implementation schedule")
+    h2("9.2 Implementation schedule")
     add_data_table(doc, ["Phase", "Activities", "Window", "Dependencies", "Owner"],
               [["1", "Requirements, market evaluation, implementation plan", "2022 H1", "—", "AccentLoitte"],
                ["2", "Infra provisioning, DOODLE install, ETL migration, parallel run, cutover",
@@ -279,23 +293,50 @@ def build(path):
               widths=[1.5, 5.8, 3.2, 2.7, 2.6])
     add_body_paragraph(doc, "Staff training is delivered before cutover to contain the post-cutover support burden, "
                  "and the cutover is scheduled into the December–January teaching break.")
-    h2("10.3 Standards, targets, and success metrics")
+    h2("9.3 Standards, targets, and success metrics")
     add_data_table(doc, ["Aspect", "Standard / target", "How measured"],
               [["Availability", "≥ 99%", "LMS uptime monitoring over the stabilisation period"],
                ["Accessibility", "WCAG 2.1 AA", "Accessibility audit of the deployed LMS"],
                ["Record preservation", "100% reconciliation", "Post-migration record counts vs pre-migration; sample fidelity checks"],
                ["Vendor support", "Sev-1 ≤ 4h (teaching hours)", "Support contract terms; incident logs"]],
               widths=[4.5, 5.5, 5.5])
-    h2("10.4 Alignment with the change management procedure")
+    h2("9.4 Implementation methods")
+    add_body_paragraph(doc, "Deployment follows a staged method rather than a single switch. DOODLE is stood up on "
+                 "new infrastructure alongside the running GrayBoard platform; records are migrated by a "
+                 "verified ETL process with record-count reconciliation and sample fidelity checks; the two "
+                 "platforms then run in parallel while integrations to Active Directory, Office 365 and "
+                 "AVETMISS reporting are tested against live data. Cutover happens only once parallel "
+                 "running is clean, and GrayBoard is retained in a read-only state through the "
+                 "stabilisation period so there is a rollback path.")
+
+    h2("9.5 Alignment with change-management procedure")
     add_body_paragraph(doc, "The cutover is a high-risk change requiring Change Advisory Board endorsement and YAT "
                  "senior-management sign-off; the Phase 3 Closure Pack is signed off under the YAT Change "
                  "Management Procedure.")
 
-    h1("11. Next Steps and Decision Requested")
+    h1("10. Next Steps and Decision Requested")
     add_body_paragraph(doc, "We ask the board to: (1) approve Option B — replacing GrayBoard with DOODLE on-premises; "
-                 "(2) approve the phased implementation plan in §10; and (3) authorise the Year-1 budget "
+                 "(2) approve the phased implementation plan in §9; and (3) authorise the Year-1 budget "
                  "envelope (≈$160,000). The high-risk cutover change request is submitted at the Phase 2 "
                  "gate per the change management procedure.")
+
+    h1("11. Feedback")
+    add_body_paragraph(doc, "Feedback received on this Business Case during review, and how each item was "
+                 "addressed before approval.")
+    add_data_table(doc, ["From", "Date", "Feedback", "How it was addressed"],
+              [["Sam Walker, YAT ICT Manager", "3 May 2022",
+                "The five-year comparison shows Option B costing more but does not put a number on what the "
+                "current outages are costing YAT.",
+                "Added §6.4 quantifying avoided downtime at ~$33,000 a year, and the $620/hour basis for it "
+                "in §6.1."],
+               ["Robin Ng, Chief Financial Officer", "9 May 2022",
+                "Where do the staffing and licensing figures come from?",
+                "Added a Source column to the §6.1 assumptions table attributing every figure."],
+               ["Sam Walker, YAT ICT Manager", "16 May 2022",
+                "The plan needs to be explicit that there is a way back if cutover goes badly.",
+                "Expanded §9.4 to state the parallel-run method and the read-only GrayBoard rollback path "
+                "through stabilisation."]],
+              widths=[3.5, 2.2, 5.4, 5.4])
 
     h1("Sign-off")
     add_data_table(doc, ["Role", "Name", "Date", "Signature"],
@@ -341,7 +382,7 @@ def build(path):
               widths=[11.5, 4.0])
 
     h1("Appendix 2 — LMS Market Evaluation (summary)")
-    add_body_paragraph(doc, "Candidate replacement platforms were scored against the §6.1 requirements. DOODLE was "
+    add_body_paragraph(doc, "Candidate replacement platforms were scored against the §5.1 requirements. DOODLE was "
                  "selected on the balance of functional fit, total cost of ownership, RTO-sector fit, "
                  "accessibility conformance, and vendor longevity.")
     add_data_table(doc, ["Criterion", "DOODLE (selected)", "Alternative 1", "Alternative 2"],

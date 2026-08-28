@@ -1,0 +1,446 @@
+{
+  "_source_of_truth": "This spec is the source. Render with the umbrella draw-diagram skill; never hand-edit the generated .drawio or .png.",
+  "_render": ".claude/skills/draw-diagram/.venv/bin/python .claude/skills/draw-diagram/draw_diagram.py --spec <this file> --out ../diploma-cloud-cyber-website-s1/public/diagrams/network-at3-end-ha-hardened.drawio --png ../diploma-cloud-cyber-website-s1/public/diagrams/network-at3-end-ha-hardened.png",
+  "_used_by": [
+    "website-s1/src/content/ict/network-diagram-ha-hardened.md \u2014 embeds the SVG, and offers the .drawio as a student download"
+  ],
+  "_svg_note": "The published .drawio.svg and .drawio.png are exported by hand from the .drawio in draw.io. Re-export whenever this spec changes.",
+  "_intent": "How the components fit together after the HA hardening, not how they are configured. Sizes, counts and settings live in the LMS Infrastructure Specifications.",
+  "_layout_notes": [
+    "Symmetric two-column layout: ap-southeast-2a on the left, ap-southeast-2b on the right. Anything that spans both zones \u2014 the load balancer, the Auto Scaling group, the database subnet group \u2014 sits in the centre gap, straddling.",
+    "Subnet labels carry both the scenario AZ and the Learner Lab AZ, so a student can match what the console shows them.",
+    "Straddling boxes sit below each subnet's label band so they do not clip it.",
+    "Straight lines beat routed ones. Align the centres of any two boxes an edge joins, so the renderer draws one segment rather than a dog-leg \u2014 a diagram reads far faster when the connectors are straight. Keep the whole thing tight enough to sit on one page."
+  ],
+  "_delta_from_start": "AT3 adds: private-app-b, an outbound path for it, application capacity in both zones, an RDS standby in private-data-b, and HA alarms. Everything else is unchanged from the post-cutover baseline.",
+  "title": "YAT LMS - HA hardened (end of AT3)",
+  "_nat_choice": "AT3 task 21 lets the student choose a second NAT gateway or a shared one; both pass. This diagram is published only in the CL2 states, where it is the in-world record of what YAT ended up with rather than a comparison against a student's own answer, so it commits to the redundant pair \u2014 the arrangement consistent with an HA-hardened state.",
+  "nodes": [
+    {
+      "id": "internet",
+      "label": "Internet",
+      "x": 364.22,
+      "y": 50.0,
+      "w": 200.0,
+      "h": 56.0,
+      "fill": "grey",
+      "shape": "rounded"
+    },
+    {
+      "id": "igw",
+      "label": "Internet Gateway",
+      "x": 374.22,
+      "y": 170.0,
+      "w": 180.0,
+      "h": 60.0,
+      "fill": "amber",
+      "shape": "rounded"
+    },
+    {
+      "id": "vpc",
+      "label": "VPC  yat-lms-vpc   10.0.0.0/16",
+      "x": 32.0,
+      "y": 200.0,
+      "w": 880.0,
+      "h": 980.0,
+      "fill": "none",
+      "shape": "container"
+    },
+    {
+      "id": "pwa",
+      "label": "public-web-a   10.0.1.0/24\nscenario: ap-southeast-2a\nlearner lab: us-east-1a",
+      "x": 71.11111111111111,
+      "y": 280.0,
+      "w": 332.44444444444446,
+      "h": 190.0,
+      "fill": "#EEF5FD",
+      "shape": "container",
+      "parent": "vpc"
+    },
+    {
+      "id": "nat",
+      "label": "NAT Gateway",
+      "x": 159.11111111111111,
+      "y": 384.0,
+      "w": 156.44444444444446,
+      "h": 60.0,
+      "fill": "amber",
+      "shape": "rounded",
+      "parent": "pwa"
+    },
+    {
+      "id": "pwb",
+      "label": "public-web-b   10.0.2.0/24\nscenario: ap-southeast-2b\nlearner lab: us-east-1b",
+      "x": 530.6666666666666,
+      "y": 280.0,
+      "w": 332.44444444444446,
+      "h": 190.0,
+      "fill": "#EEF5FD",
+      "shape": "container",
+      "parent": "vpc"
+    },
+    {
+      "id": "natb",
+      "label": "NAT Gateway",
+      "x": 696.8888888888889,
+      "y": 384.0,
+      "w": 156.44444444444446,
+      "h": 60.0,
+      "fill": "amber",
+      "shape": "rounded",
+      "parent": "pwb"
+    },
+    {
+      "id": "alb",
+      "label": "Application Load Balancer",
+      "x": 374.22222222222223,
+      "y": 385.0,
+      "w": 185.77777777777777,
+      "h": 60.0,
+      "fill": "blue",
+      "shape": "rounded",
+      "parent": "vpc"
+    },
+    {
+      "id": "ppa",
+      "label": "private-app-a   10.0.11.0/24\nscenario: ap-southeast-2a\nlearner lab: us-east-1a",
+      "x": 71.11111111111111,
+      "y": 570.0,
+      "w": 332.44444444444446,
+      "h": 190.0,
+      "fill": "#F1F8F1",
+      "shape": "container",
+      "parent": "vpc"
+    },
+    {
+      "id": "ec2a",
+      "label": "EC2\nWindows Server",
+      "x": 110.22222222222223,
+      "y": 670.0,
+      "w": 195.55555555555557,
+      "h": 70.0,
+      "fill": "green",
+      "shape": "rounded",
+      "parent": "ppa"
+    },
+    {
+      "id": "ppb",
+      "label": "private-app-b   10.0.12.0/24\nscenario: ap-southeast-2b\nlearner lab: us-east-1b",
+      "x": 530.6666666666666,
+      "y": 570.0,
+      "w": 332.44444444444446,
+      "h": 190.0,
+      "fill": "#F1F8F1",
+      "shape": "container",
+      "parent": "vpc"
+    },
+    {
+      "id": "ec2b",
+      "label": "EC2\nWindows Server",
+      "x": 628.4444444444445,
+      "y": 670.0,
+      "w": 195.55555555555557,
+      "h": 70.0,
+      "fill": "green",
+      "shape": "rounded",
+      "parent": "ppb"
+    },
+    {
+      "id": "asg",
+      "label": "Auto Scaling group",
+      "x": 374.22222222222223,
+      "y": 670.0,
+      "w": 185.77777777777777,
+      "h": 70.0,
+      "fill": "green",
+      "shape": "rounded",
+      "parent": "vpc"
+    },
+    {
+      "id": "pda",
+      "label": "private-data-a   10.0.21.0/24\nscenario: ap-southeast-2a\nlearner lab: us-east-1a",
+      "x": 71.11111111111111,
+      "y": 860.0,
+      "w": 332.44444444444446,
+      "h": 290.0,
+      "fill": "#FAF2FC",
+      "shape": "container",
+      "parent": "vpc"
+    },
+    {
+      "id": "rdsa",
+      "label": "RDS for MySQL\nprimary",
+      "x": 110.22222222222223,
+      "y": 950.0,
+      "w": 195.55555555555557,
+      "h": 70.0,
+      "fill": "purple",
+      "shape": "rounded",
+      "parent": "pda"
+    },
+    {
+      "id": "pdb",
+      "label": "private-data-b   10.0.22.0/24\nscenario: ap-southeast-2b\nlearner lab: us-east-1b",
+      "x": 530.6666666666666,
+      "y": 860.0,
+      "w": 332.44444444444446,
+      "h": 290.0,
+      "fill": "#FAF2FC",
+      "shape": "container",
+      "parent": "vpc"
+    },
+    {
+      "id": "rdsb",
+      "label": "RDS for MySQL\nstandby",
+      "x": 608.8888888888889,
+      "y": 950.0,
+      "w": 195.55555555555557,
+      "h": 70.0,
+      "fill": "purple",
+      "shape": "rounded",
+      "parent": "pdb"
+    },
+    {
+      "id": "dbsg",
+      "label": "DB subnet group",
+      "x": 374.22222222222223,
+      "y": 1060.0,
+      "w": 185.77777777777777,
+      "h": 56.0,
+      "fill": "purple",
+      "shape": "rounded",
+      "parent": "vpc"
+    },
+    {
+      "id": "yatict",
+      "label": "YAT ICT responsibility\nnot built in this engagement",
+      "x": 952.0,
+      "y": 550.0,
+      "w": 185.78,
+      "h": 280.0,
+      "fill": "none",
+      "shape": "container"
+    },
+    {
+      "id": "vpn",
+      "label": "Site-to-Site VPN",
+      "x": 974.29,
+      "y": 630.0,
+      "w": 147.71,
+      "h": 70.0,
+      "fill": "grey",
+      "shape": "rounded",
+      "parent": "yatict"
+    },
+    {
+      "id": "campus",
+      "label": "YAT Campus\nActive Directory",
+      "x": 974.29,
+      "y": 730.0,
+      "w": 147.71,
+      "h": 70.0,
+      "fill": "grey",
+      "shape": "rounded",
+      "parent": "yatict"
+    }
+  ],
+  "edges": [
+    {
+      "from": "internet",
+      "to": "igw",
+      "label": "",
+      "exit": [
+        0.5,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "entry": [
+        0.5,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "from": "igw",
+      "to": "alb",
+      "label": "HTTP:80",
+      "exit": [
+        0.5,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "entry": [
+        0.5,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "from": "alb",
+      "to": "ec2a",
+      "label": "HTTP:80",
+      "exit": [
+        0.5,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "entry": [
+        0.75,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "waypoints": [
+        [
+          477.0,
+          557.55
+        ],
+        [
+          262.09,
+          557.55
+        ]
+      ]
+    },
+    {
+      "from": "alb",
+      "to": "ec2b",
+      "label": "HTTP:80",
+      "exit": [
+        0.5,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "entry": [
+        0.5,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "from": "asg",
+      "to": "ec2a",
+      "label": "",
+      "exit": [
+        0.0,
+        0.5,
+        0.0,
+        0.0
+      ],
+      "entry": [
+        1.0,
+        0.5,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "from": "asg",
+      "to": "ec2b",
+      "label": "",
+      "exit": [
+        1.0,
+        0.5,
+        0.0,
+        0.0
+      ],
+      "entry": [
+        0.0,
+        0.5,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "from": "ppa",
+      "to": "nat",
+      "label": "outbound",
+      "exit": [
+        0.5,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "entry": [
+        0.5,
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "from": "ppb",
+      "to": "natb",
+      "label": "outbound",
+      "exit": [
+        0.75,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "entry": [
+        0.5,
+        1.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "from": "ec2a",
+      "to": "rdsa",
+      "label": "MySQL:3306",
+      "exit": [
+        0.5,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "entry": [
+        0.5,
+        0.0,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "from": "rdsa",
+      "to": "rdsb",
+      "label": "synchronous replication",
+      "exit": [
+        1.0,
+        0.5,
+        0.0,
+        0.0
+      ],
+      "entry": [
+        0.0,
+        0.5,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "from": "ppb",
+      "to": "vpn",
+      "label": "LDAP",
+      "exit": [
+        1.0,
+        0.5,
+        0.0,
+        0.0
+      ],
+      "entry": [
+        0.0,
+        0.5,
+        0.0,
+        0.0
+      ]
+    }
+  ]
+}
