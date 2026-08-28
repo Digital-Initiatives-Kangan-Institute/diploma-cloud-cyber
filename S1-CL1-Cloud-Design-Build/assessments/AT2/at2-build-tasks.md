@@ -4,8 +4,13 @@ The source document for the AT2 instrument. It holds the **task list**, the **se
 built to**, the **evidence each produces**, and the **UoC item each evidences** — the layer that has
 never been written down for any AT in this course, and whose absence made the AT2 review archaeology.
 
-Checked against `../assessment_plan.md` (AT2 coverage line) and `../../consolidated_uoc.md`. The
-generators are built from this; this is not built from them.
+> **Superseded as the source of truth (2026-08-28).** `scripts/s1_cl1/at2_run_sheet.py` is now the
+> single definition of the AT2 run sheet — it holds the tasks, their settings, the evidence each
+> produces and the UoC items each evidences, and both instruments render from it. The task list
+> below is the earlier draft and has NOT been kept in step: it describes three subnets rather than
+> five, a four-group IAM build with MFA rather than the single refused submission, and two S3
+> buckets that were cut. Read it as the design record of how the run sheet was arrived at, not as a
+> specification to build from or regenerate against.
 
 ## What the instrument is
 

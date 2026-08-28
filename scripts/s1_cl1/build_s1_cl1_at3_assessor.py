@@ -32,6 +32,13 @@ from docx import Document  # noqa: E402
 
 TEMPLATE = str(Path(__file__).resolve().parents[2] / "kangan-templates" / "Project Assessment - Assessor.docx")
 
+# Exemplar captures from a worked run of the assessment, placed into the Part B evidence boxes
+# so the assessor copy regenerates worked rather than blank. Committed alongside the generator:
+# the document is a pure function of its sources, and pasting screenshots in by hand after every
+# rebuild is exactly the manual step this removes.
+EVIDENCE_DIR = Path(__file__).resolve().parents[2] / \
+    "S1-CL1-Cloud-Design-Build" / "assessments" / "AT3" / "exemplar-evidence"
+
 sys.path.insert(0, str(Path(__file__).resolve().parent))  # noqa: E402
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # noqa: E402
 sys.path.insert(0, str(next(d / "scripts" for d in Path(__file__).resolve().parents if (d / "scripts" / "helpers" / "__init__.py").exists())))  # noqa: E402
@@ -406,13 +413,14 @@ def build(path):
     h1 = lambda t: doc.add_paragraph(t, style="Heading 1")
     h2 = lambda t: at3_run_sheet.R.heading2(doc, t)
     at3_run_sheet.render_front_matter(doc, h1)
-    at3_run_sheet.render(doc, h1, h2, mode="assessor")
+    at3_run_sheet.render(doc, h1, h2, mode="assessor", evidence_dir=EVIDENCE_DIR)
 
     render_benchmark(doc, ASSESSOR_BODY, render_table, STYLE)
 
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     doc.save(path)
     print(f"Wrote {path}")
+    at3_run_sheet.report_evidence(EVIDENCE_DIR)
 
 
 if __name__ == "__main__":

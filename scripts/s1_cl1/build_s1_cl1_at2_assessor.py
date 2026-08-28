@@ -64,13 +64,13 @@ DETAILS = {
 # NOTE (evergreen): the committed doc named the intranet URL here — " (https://www.placeholder.com.au)"
 # after "YAT intranet". This generator omits the URL and its wrapper; all other words verbatim.
 OVERVIEW = [
-    'Students are assessed on the implementation of a supplied AWS cloud architecture for the YAT LMS migration, and the production of a Deployment Report documenting the build.',
-    'The assessment is a single-task project delivered as one written artefact (the Deployment Report) with one populated appendix. Implementation occurs in the AWS Academy lab environment authorised for this cluster. There is no presentation or observation event — all assessment evidence is captured in the Deployment Report and its appendices.',
+    'Students are assessed on the implementation of a supplied AWS cloud architecture for the YAT LMS migration, worked through and recorded in a guided build run sheet.',
+    'The assessment is a single-task project delivered as one document: the build run sheet in the second half of this instrument, which the student works through and fills in as they build. Implementation occurs in the AWS Academy lab environment authorised for this cluster. There is no presentation or observation event — every piece of evidence is captured in the run sheet itself, in the box beside the task it evidences.',
     'This is an open-book practical assessment. Students may use the YAT intranet, the AWS Pricing Calculator, AWS Academy lab environments, AWS documentation, course reference materials, and external research (which must be cited) throughout.',
     'AT2 is the second of three assessment tasks in the S1-CL1 Cloud Design and Build cluster. It builds on AT1 (Business Case + presentation event) and feeds into AT3 (HA hardening + project closure). The student remains in the same MTS consultant role across all three.',
     'Reasonable adjustment for this assessment may include extending the time allowed, varying the lab access arrangement (e.g. extended lab hours), allowing alternative screenshot-evidence formats where assistive technology requires it, or providing one-on-one verbal explanation of the supplied design where needed.',
     'Teacher/assessor support level: the teacher/assessor may clarify task requirements, scenario context, or the supplied design but must not guide students to specific configuration decisions or correct knowledge-evidence answers. The two Configuration Decisions left to the implementer (per the supplied design §4.16) must be made by the student.',
-    'Submission: the completed Deployment Report (.docx) with the evidence appendix populated is submitted via the LMS.',
+    'Submission: the completed run sheet (.docx) is submitted via the LMS. There are no separate files — the screenshots and written answers sit in the document itself.',
     'The assessment will not proceed if for any reason it is not safe to do so. You must advise the student of the reason for suspending the assessment, and what safety action should be taken. Advise the student of revised arrangements for the assessment when it is safe to do so.',
     'There is a zero tolerance for plagiarism, cheating and collusion. Students will be expected to make a declaration that all work is their own prior to submission. Refer to the Training and Assessment Policy for further information.',
 ]
@@ -81,12 +81,12 @@ TASKS = [
     'During that time MTS Senior Architecture worked with YAT IT to translate the approved direction into a detailed technical design — the YAT LMS Cloud Architecture — Baseline Design — which is now the student\'s build specification.',
     'The student has returned to MTS to lead the foundation-build phase of the engagement. The task has two parts that combine into a single deliverable:',
     'Implement the supplied AWS architecture for the YAT LMS migration foundation build, in the AWS Academy lab environment authorised for this engagement.',
-    "Produce a Deployment Report documenting the build, using the YAT-provided Deployment Report template. The report covers what was built, configuration decisions made where the supplied design left them open, testing and validation outcomes, an operational handover for YAT IT, written responses to six contextual Knowledge Evidence questions about the student's own build, and one appendix of evidence.",
-    "The Deployment Report is the single submitted deliverable. All build evidence (screenshots, test results) is captured in the report's appendices — there is no separate portfolio submission and no presentation event.",
+    "Work through the build run sheet, recording the build as they go. It covers what was built, the two configuration decisions the supplied design leaves open, five tests with their results, written responses to six contextual Knowledge Evidence questions about the student's own build, and where the completed run sheet was filed.",
+    "The completed run sheet is the single submitted deliverable. Each screenshot sits in the box beside the task it evidences rather than in an appendix — there is no separate portfolio submission and no presentation event.",
     'The architecture being implemented is intentionally non-HA at this stage. HA hardening is the next phase (AT3) and is explicitly out of scope for AT2.',
     "MTS scope: cloud infrastructure provisioning only. Per the LMS Migration Role Brief on the YAT intranet (§ Scope of the MTS consulting engagement), students must not perform LMS application installation, MySQL data migration, cutover activities, or organisational change management as part of AT2. Those are YAT in-house IT's responsibility in-scenario. The AT2 deliverable stops at infrastructure ready for application deployment. Assessors should not award credit for application-deployment work that falls outside this scope; equally, students who include such work in their report should be redirected to focus their evidence on the in-scope infrastructure deliverables.",
     'Note:',
-    'All scenario materials, organisational policies, supplied design, report template, and previous-project examples for YAT College are available on the YAT intranet — students sign in to the intranet at the start of the engagement and refer to it throughout.',
+    'All scenario materials, organisational policies, the supplied design, and previous-project examples for YAT College are available on the YAT intranet — students sign in to the intranet at the start of the engagement and refer to it throughout.',
 ]
 
 # NOTE (evergreen): the committed doc named the intranet URL in the first item — " (https://www.placeholder.com.au)".
@@ -105,7 +105,7 @@ RESOURCES = [
 CRITERIA = [
     'To receive a Satisfactory outcome for this assessment the student must:',
     'Achieve Satisfactory on every criterion in the Marking Guide below',
-    'Submit a completed Deployment Report (.docx) using the YAT-supplied template, with every section you are asked to write and every appendix populated',
+    'Submit the completed run sheet (.docx) with every task, test, decision and question answered, and every evidence box filled',
 ]
 
 # NOTE (evergreen): C2 named the intranet URL — " at https://www.placeholder.com.au".
@@ -119,15 +119,16 @@ CONDITIONS = [
 
 # Marking Guide — single-part (A1-A13); each criterion is [statement, UoC-traceability line].
 MARKING = [
-    ['A1 Network foundation (tasks 2-7) — student builds the VPC; the five subnets, with the three workload subnets in one zone and the two second-zone subnets the load balancer and the database subnet group each require; the internet and NAT gateways; two route tables, the data subnets left on the VPC default which carries no internet route; and the three security groups, with the database reachable only from the application tier', '[ICTCLD401 PC 1.2] \u00b7 [ICTCLD401 PC 1.7] \u00b7 [ICTCLD401 PC 2.2] \u00b7 [ICTCLD401 PE 1] \u00b7 [ICTCLD502 PC 1.3]'],
-    ['A2 Identity and access (tasks 1, 8-9) — student accesses the platform, creates the four IAM groups, enables MFA on an administrator, and creates the instance role so no credentials are stored on a server', '[ICTCLD401 PC 1.4] · [ICTCLD401 PC 1.5] · [ICTCLD401 PC 1.6] · [ICTCLD401 PC 2.1]'],
-    ['A3 Compute and load balancing (tasks 10-13) — student creates the launch template with the instance role and both volumes, the target group and internet-facing load balancer, and the Auto Scaling group attached to that target group with a scaling policy', '[ICTCLD401 PC 2.3] · [ICTCLD401 PC 3.1] · [ICTCLD502 PC 4.1] · [ICTCLD401 PE 2]'],
-    ['A4 Database (tasks 14-15) — student creates the subnet group spanning two zones and deploys the managed database: single-AZ, encrypted, not publicly accessible, and in the database security group', '[ICTCLD401 PC 2.4] · [ICTCLD401 PC 2.5] · [ICTCLD401 PE 2]'],
+    ['A1 Network foundation (tasks 2-7) — student builds the VPC; the five subnets, with the three workload subnets in one zone and the two second-zone subnets the load balancer and the database subnet group each require; the internet and NAT gateways; two route tables, the data subnets left on the VPC default which carries no internet route; and the three security groups, with the database reachable only from the application tier', '[ICTCLD401 PC 1.7] \u00b7 [ICTCLD401 PC 2.2] \u00b7 [ICTCLD401 PE 1] \u00b7 [ICTCLD502 PC 1.3]'],
+    ['A2 Identity and access (tasks 1, 8-9) — student accesses the platform; works through the group and user creation to the point of submission and captures the environment\u2019s refusal, with the permissions reasoning in the decision box; and reviews the supplied instance role, naming the services it lets the servers reach. The refusal is the evidence \u2014 do not expect created groups, an enabled MFA device, or a student-created role', '[ICTCLD401 PC 1.4] · [ICTCLD401 PC 1.5] · [ICTCLD401 PC 1.6] · [ICTCLD401 PC 2.1]'],
+    ['A3 Compute and load balancing (tasks 10-13) — student creates the launch template with the instance role and both volumes, the target group and internet-facing load balancer, and the Auto Scaling group attached to that target group with a scaling policy', '[ICTCLD401 PC 2.3] · [ICTCLD401 PC 2.4] · [ICTCLD401 PC 3.1] · [ICTCLD502 PC 4.1] · [ICTCLD401 PE 2]'],
+    ['A4 Database (tasks 14-15) — student creates the subnet group spanning two zones and deploys the managed database: single-AZ, encrypted, not publicly accessible, and in the database security group', '[ICTCLD401 PC 2.5] · [ICTCLD401 PE 2]'],
     ['A5 Monitoring (task 16) — student creates both baseline alarms and evidences their state', '[ICTCLD502 PC 4.3]'],
-    ['A6 Configuration decisions (tasks 10 and 15) — for each of the two decisions the run sheet leaves open, student names the option not chosen, states the choice made, and justifies it against the YAT LMS workload. Naming the gap between what the environment permits and what the workload needs is a satisfactory answer', '[ICTCLD401 PC 1.1] · [ICTCLD401 PC 1.3]'],
-    ['A7 Testing (T1-T5) — student connects to the application server, reaches the internet, the database and the load balancer from it, and demonstrates the Auto Scaling group scaling out and back in on its own. Each screenshot shows what its box asks for', '[ICTCLD401 PC 2.6] · [ICTCLD401 PC 3.2] · [ICTCLD401 PE 3] · [ICTCLD502 PC 4.2]'],
-    ['A8 Knowledge questions (Q1-Q6) — student answers all six with reference to their own build, not generically, in clear written English', '[ICTCLD401 KE 5] · [ICTCLD401 KE 6] · [ICTCLD401 KE 7] · [ICTCLD401 KE 8] · [ICTCLD401 KE 9] · [ICTCLD401 KE 10] · [ICTCLD401 FS Reading] · [ICTCLD401 FS Writing]'],
-    ['A9 Handover — student states where the completed run sheet was filed and which YAT policy required that location', '[ICTCLD401 PC 4.3]'],
+    ['A6 Shared responsibility (task 17) \u2014 student assigns responsibility for securing each component of the platform they built \u2014 facilities, operating system, database engine and host, network access rules, identity, and the data \u2014 naming the party and what that party actually does, and identifies which responsibilities the managed database moved and which it did not. A correct list with no statement of what each party does, or the data placed anywhere but with YAT, is not satisfactory', '[ICTCLD401 PC 1.2]'],
+    ['A7 Configuration decisions (tasks 10 and 15) — for each of the two decisions the run sheet leaves open, student names the option not chosen, states the choice made, and justifies it against the YAT LMS workload. Naming the gap between what the environment permits and what the workload needs is a satisfactory answer', '[ICTCLD401 PC 1.1] · [ICTCLD401 PC 1.3]'],
+    ['A8 Testing (T1-T5) — student connects to the application server, reaches the internet, the database and the load balancer from it, and demonstrates the Auto Scaling group scaling out and back in on its own. Each screenshot shows what its box asks for', '[ICTCLD401 PC 2.6] · [ICTCLD401 PC 3.2] · [ICTCLD401 PE 3] · [ICTCLD502 PC 4.2]'],
+    ['A9 Knowledge questions (Q1-Q6) — student answers all six with reference to their own build, not generically, in clear written English', '[ICTCLD401 KE 5] · [ICTCLD401 KE 6] · [ICTCLD401 KE 7] · [ICTCLD401 KE 8] · [ICTCLD401 KE 9] · [ICTCLD401 KE 10] · [ICTCLD401 FS Reading] · [ICTCLD401 FS Writing]'],
+    ['A10 Handover — student states where the completed run sheet was filed and which YAT policy required that location', '[ICTCLD401 PC 4.3]'],
 ]
 
 # ---- Shared 'Instructions to Student' prose (single-sourced; the student builder imports these) ----
@@ -139,9 +140,9 @@ ASSESSOR_BODY = [
     ('p', 'ICTCLD401 — Configure cloud services (AT2-evidenced items)'),
     ('tbl', [
         ['UoC item', 'Evidenced by criterion(ia)'],
-        ['[ICTCLD401 PC 1.1] Discuss and compare different cloud computing solutions, models and services', 'A6'],
-        ['[ICTCLD401 PC 1.2] Identify impact of shared security responsibility models', 'A1'],
-        ['[ICTCLD401 PC 1.3] Select best cloud computing solution and service', 'A6'],
+        ['[ICTCLD401 PC 1.1] Discuss and compare different cloud computing solutions, models and services', 'A7'],
+        ['[ICTCLD401 PC 1.2] Identify impact of shared security responsibility models', 'A6'],
+        ['[ICTCLD401 PC 1.3] Select best cloud computing solution and service', 'A7'],
         ['[ICTCLD401 PC 1.4] Access account on cloud platform', 'A2'],
         ['[ICTCLD401 PC 1.5] Identify user access protocols and policies', 'A2'],
         ['[ICTCLD401 PC 1.6] Configure access functions within cloud environment', 'A2'],
@@ -149,23 +150,23 @@ ASSESSOR_BODY = [
         ['[ICTCLD401 PC 2.1] Create users and groups', 'A2'],
         ['[ICTCLD401 PC 2.2] Create virtual multi-tier network', 'A1'],
         ['[ICTCLD401 PC 2.3] Create virtual machine', 'A3'],
-        ['[ICTCLD401 PC 2.4] Define, add and expand storage', 'A4'],
+        ['[ICTCLD401 PC 2.4] Define, add and expand storage', 'A3'],
         ['[ICTCLD401 PC 2.5] Deploy a managed database', 'A4'],
-        ['[ICTCLD401 PC 2.6] Test external network access', 'A7'],
+        ['[ICTCLD401 PC 2.6] Test external network access', 'A8'],
         ['[ICTCLD401 PC 3.1] Configure and apply autoscaling', 'A3'],
-        ['[ICTCLD401 PC 3.2] Test automatic scaling', 'A7'],
-        ['[ICTCLD401 PC 4.3] Save and store user documentation per organisational policies', 'A9'],
+        ['[ICTCLD401 PC 3.2] Test automatic scaling', 'A8'],
+        ['[ICTCLD401 PC 4.3] Save and store user documentation per organisational policies', 'A10'],
         ['[ICTCLD401 PE 1] Build at least one simple virtual network capable of supporting a workload', 'A1'],
         ['[ICTCLD401 PE 2] Configure compute, storage, database and autoscaling resources within virtual network', 'A3 · A4'],
-        ['[ICTCLD401 PE 3] Conduct simple tests to confirm access to resources', 'A7'],
-        ['[ICTCLD401 KE 5] VM/networking/scaling features (VM sizing, load balancing, autoscaling, monitoring, storage backups, virtual networks/traffic routing)', 'A8 (Q1)'],
-        ['[ICTCLD401 KE 6] Vertical vs horizontal scaling; VM vs physical; RDBMS/DW/NoSQL; self-hosted vs managed vs cloud-native DB; storage options (block/object/archive/network filesystems)', 'A8 (Q2)'],
-        ['[ICTCLD401 KE 7] User, business and vendor responsibilities according to shared security responsibility models', 'A8 (Q3)'],
-        ['[ICTCLD401 KE 8] User access protocols and policies according to organisation hierarchy and job function', 'A8 (Q4)'],
-        ['[ICTCLD401 KE 9] Security policies, protocols and mechanisms as they relate to cloud (network traffic limits + security responsibilities per work function/user access)', 'A8 (Q5)'],
-        ['[ICTCLD401 KE 10] Purpose of DNS for connecting remote servers when web browsing', 'A8 (Q6)'],
-        ['[ICTCLD401 FS Reading]', 'A8'],
-        ['[ICTCLD401 FS Writing]', 'A8'],
+        ['[ICTCLD401 PE 3] Conduct simple tests to confirm access to resources', 'A8'],
+        ['[ICTCLD401 KE 5] VM/networking/scaling features (VM sizing, load balancing, autoscaling, monitoring, storage backups, virtual networks/traffic routing)', 'A9 (Q1)'],
+        ['[ICTCLD401 KE 6] Vertical vs horizontal scaling; VM vs physical; RDBMS/DW/NoSQL; self-hosted vs managed vs cloud-native DB; storage options (block/object/archive/network filesystems)', 'A9 (Q2)'],
+        ['[ICTCLD401 KE 7] User, business and vendor responsibilities according to shared security responsibility models', 'A9 (Q3)'],
+        ['[ICTCLD401 KE 8] User access protocols and policies according to organisation hierarchy and job function', 'A9 (Q4)'],
+        ['[ICTCLD401 KE 9] Security policies, protocols and mechanisms as they relate to cloud (network traffic limits + security responsibilities per work function/user access)', 'A9 (Q5)'],
+        ['[ICTCLD401 KE 10] Purpose of DNS for connecting remote servers when web browsing', 'A9 (Q6)'],
+        ['[ICTCLD401 FS Reading]', 'A9'],
+        ['[ICTCLD401 FS Writing]', 'A9'],
         ['[ICTCLD401 AC 1] Cloud vendor service provider', 'C1 (pre-condition)'],
         ['[ICTCLD401 AC 2] Cloud managed database service', 'C1 (pre-condition)'],
         ['[ICTCLD401 AC 3] Internet and web browser', 'C1 (pre-condition)'],
@@ -177,7 +178,7 @@ ASSESSOR_BODY = [
         ['UoC item', 'Evidenced by criterion(ia)'],
         ['[ICTCLD502 PC 1.3] Identify level of shared security responsibility models according to business needs', 'A1'],
         ['[ICTCLD502 PC 4.1] Implement architecture design in cloud environment', 'A3'],
-        ['[ICTCLD502 PC 4.2] Demonstrate connectivity between resources at all tiers', 'A7'],
+        ['[ICTCLD502 PC 4.2] Demonstrate connectivity between resources at all tiers', 'A8'],
         ['[ICTCLD502 PC 4.3] Monitor and measure availability of resources', 'A5'],
         ['[ICTCLD502 FS Reading]', 'A1'],
         ['[ICTCLD502 AC 1] Cloud vendor service provider', 'C1 (pre-condition)'],

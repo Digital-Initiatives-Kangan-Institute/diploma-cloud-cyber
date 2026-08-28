@@ -219,7 +219,7 @@ def build(path):
             ["Annual student growth", "+15% per year", "YAT ICT Strategic Plan"],
             ["Current / target availability", "99.2% / 99.9%", "LMS server status; ICT Strategic Plan"],
             ["ICT FTE fully-loaded cost", "$115,000 / year (\u2248$63.19/hr)", "YAT LMS operational costing"],
-            ["Cost of downtime (teaching hours)", "$750 / hour", "ICT Manager consultation notes"],
+            ["Cost of downtime (teaching hours)", "$750 / hour", "YAT LMS operational costing"],
             ["Inflation applied to recurring", "3% per year from Year 2", "Own assumption \u2014 RBA target midpoint"],
             ["AWS region", "ap-southeast-2 (Sydney)", "AWS Pricing Calculator (data residency)"]],
            widths=[5.5, 4.5, 6.5])
@@ -453,8 +453,8 @@ def build(path):
              "§9.1 prioritised changes; §9.2 schedule with durations/dependencies/owners; §9.3 "
              "standards, targets and success metrics; §9.4 methods; §9.5 change-management alignment."],
             ["Evaluation and planning methods applied [ICTICT517 KE 2]",
-             "Five-year CBA (§6), avoided-downtime quantification (§6.4), sensitivity analysis (§6.6), "
-             "intangibles comparison (§7.1), and a risk register (§7.2)."],
+             "Five-year CBA (§6) built on stated, sourced assumptions (§6.1), avoided-downtime "
+             "quantification (§6.4), intangibles comparison (§7.1), and a risk register (§7.2)."],
             ["How competing products were evaluated [ICTICT517 KE 3]",
              "Option A vs Option B compared on cost (§6), strategic impact and difficulty (§5.4), "
              "intangibles (§7.1) and risk (§7.2)."],

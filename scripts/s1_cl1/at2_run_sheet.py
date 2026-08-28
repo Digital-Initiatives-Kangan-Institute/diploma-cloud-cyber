@@ -386,6 +386,55 @@ TASKS = [
          capture="the alarm list showing both alarms with their metrics, thresholds and current "
                  "state.",
          uoc=["ICTCLD502 PC 4.3"]),
+
+    dict(n=17, title="Assign the security responsibilities",
+         job="The platform is built. Work through it component by component and record who is "
+             "responsible for securing each part — AWS or YAT — and what securing it actually "
+             "involves. Answer for the environment you have just built, naming your own "
+             "resources; this is not a question about cloud computing in general.",
+         settings=[("The physical facilities",
+                    "the data centres, hardware and network the platform runs on"),
+                   ("The server operating system",
+                    "the instances your Auto Scaling group launches from the launch template"),
+                   ("The database engine and its host",
+                    "the managed database you deployed in task 15"),
+                   ("Network access rules",
+                    "the three security groups and the route tables you built in tasks 6 and 7"),
+                   ("Identity and permissions",
+                    "the group and user from task 8, and the instance role from task 9"),
+                   ("The data itself",
+                    "what the LMS stores in the database and on its volumes"),
+                   ("For each one",
+                    "name the responsible party, and say in one sentence what that party "
+                    "actually does to secure it")],
+         response=("Your assignment",
+                   "For each component above, name who secures it and what securing it involves. "
+                   "Then answer one more question: which of these responsibilities moved from YAT "
+                   "to AWS because the design uses a managed database rather than the database "
+                   "engine installed on a server — and which did not move?"),
+         points=["Physical facilities — AWS. Data centre access, hardware, power and cooling. YAT "
+                 "cannot affect it and is not accountable for it.",
+                 "Server operating system — YAT. Patching, hardening and configuration of the "
+                 "instances. AWS supplies the image; its state from first boot onwards is YAT's.",
+                 "Database engine and host — split, and the split is the point. AWS installs and "
+                 "patches the engine, maintains the host and runs the backup mechanism. YAT owns "
+                 "the schema, the data, and who is permitted to connect.",
+                 "Network access rules — YAT. The security groups and route tables are customer "
+                 "configuration. A rule that exposes the database is not something AWS will catch.",
+                 "Identity and permissions — YAT. Who exists, what they may do, and the role the "
+                 "servers assume.",
+                 "The data — YAT, always, under every service model. Responsibility for content "
+                 "never transfers.",
+                 "The impact question: choosing a managed database moved engine patching, host "
+                 "maintenance and backup execution to AWS. It did not move the data, the access "
+                 "rules, or who may connect — those stay with YAT whichever way the database is "
+                 "run. A student who says the managed service made the database 'AWS's "
+                 "responsibility' has missed the distinction this task exists to draw.",
+                 "A student who lists the split without saying what each party actually does, or "
+                 "who places the data anywhere but with YAT, has not evidenced this."],
+         evidence_note="No screenshot required. Your written assignment above is the evidence for "
+                       "this task.",
+         uoc=["ICTCLD401 PC 1.2"]),
 ]
 
 # ---------------------------------------------------------------- tests
@@ -884,6 +933,13 @@ def render_run_sheet(doc, h1, h2, mode="student", tasks=None, tests=None,
             _p(doc, "Your decision", bold=True, after=3)
             _p(doc, prompt, italic=True, size=9.5, colour=GREY, after=6)
             _response_slot(doc, model, mode)
+        # A written response that is not a two-way choice — the task's own label, and an
+        # assessor side rendered from key points rather than a single model answer.
+        if task.get("response"):
+            label, prompt = task["response"]
+            _p(doc, label, bold=True, after=3)
+            _p(doc, prompt, italic=True, size=9.5, colour=GREY, after=6)
+            _response_slot(doc, None, mode, points=task.get("points"))
         _p(doc, "Evidence", bold=True, after=3)
         if task.get("evidence_note"):
             _p(doc, task["evidence_note"], italic=True, size=9.5, colour=GREY, after=10)

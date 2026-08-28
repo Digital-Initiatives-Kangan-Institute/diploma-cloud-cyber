@@ -36,10 +36,12 @@ UOC = "6B6660"          # muted — the assessor-only traceability line
 CAPTURE = TERRACOTTA    # exemplar: what the screenshot should have shown
 MODEL = TEAL            # exemplar: the model written answer
 NOTES_BG = "EAF2F8"     # practice only: the student's own notes box
+IMAGE_CM = 16.0         # exemplar captures, sized to sit inside the 16.6 cm evidence box
 
 __all__ = [
-    "BODY_PT", "UOC", "CAPTURE", "MODEL", "GREY", "TEAL", "CREAM", "add_hyperlink",
+    "BODY_PT", "UOC", "CAPTURE", "MODEL", "GREY", "TEAL", "CREAM", "IMAGE_CM", "add_hyperlink",
     "p", "heading2", "settings_table", "design_table", "box", "screenshot_slot", "diagram_slot",
+    "image_box", "evidence_images", "place_evidence",
     "response_slot", "flag", "code", "note", "clicks", "assessor_note", "steps", "consider",
     "uoc_line", "standard_line", "resources_block", "notes_box",
 ]
@@ -76,21 +78,34 @@ def settings_table(doc, settings):
     doc.add_paragraph()
 
 
-def design_table(doc, columns, rows, mode, blank_rows=3, given=0):
+def design_table(doc, columns, rows, mode, blank_rows=3, given=0, exemplar=0):
     """A capture table the STUDENT fills in — the inverse of settings_table.
 
     `rows` are the model answers, shown teal in the assessor copy.
 
-    `given` is how many LEADING columns are pre-filled in the student copy too. It is the
+    `given` is how many LEADING COLUMNS are pre-filled in the student copy too. It is the
     scaffolding dial: pre-fill a column when knowing it is not the evidence (a student does
     not demonstrate PC 2.3 by knowing that a database has a recovery objective), and leave it
     blank when the column IS the finding the item asks for (naming the single points of
     failure is the whole of PC 2.2). Given cells render as ordinary body text, not as model
     answers — to the student they are part of the question.
 
+    `exemplar` is the same dial turned the other way: how many LEADING ROWS are shown filled
+    right across, as a worked example of the sort of answer the table wants. PRACTICE ONLY —
+    it shows the shape of an answer, so it must never be one of the answers the task is
+    actually asking for. Where a task has only one real answer, the exemplar is drawn from
+    the CURRENT environment instead (task 7 describes an existing subnet; task 12 restates
+    the alarm that already exists) — form without finding. Exemplar rows render teal italic
+    and are announced above the table, so they cannot be mistaken for the student's own work.
+
     `blank_rows` sets how much room an un-given table offers. Set it deliberately: three
     blank rows on a "list every single point of failure" table reads as "there are three".
+    Where an exemplar row was ADDED to an otherwise empty table, blank_rows carries a +1 so
+    the student keeps the working space they had.
     """
+    if exemplar and mode != "assessor":
+        p(doc, "The first row is filled in as an example — yours go underneath.",
+          size=9, italic=True, colour=GREY, after=3)
     n = max(blank_rows, len(rows)) if mode != "assessor" else len(rows)
     t = doc.add_table(rows=0, cols=len(columns))
     hdr = t.add_row().cells
@@ -98,20 +113,24 @@ def design_table(doc, columns, rows, mode, blank_rows=3, given=0):
         set_cell_borders(hdr[i]); shade_cell(hdr[i], CREAM)
         r = hdr[i].paragraphs[0].add_run(col); r.bold = True; r.font.size = Pt(9)
 
+    shown = 0 if mode == "assessor" else exemplar
     if mode == "assessor":
         body = rows
     else:
-        body = [[(row[i] if i < given else "") for i in range(len(columns))]
-                for row in rows[:n]]
+        body = [list(row) if j < shown
+                else [(row[i] if i < given else "") for i in range(len(columns))]
+                for j, row in enumerate(rows[:n])]
         body += [[""] * len(columns) for _ in range(n - len(body))]
 
-    for row in body:
+    for j, row in enumerate(body):
         cells = t.add_row().cells
         for i, val in enumerate(row):
             set_cell_borders(cells[i])
             r = cells[i].paragraphs[0].add_run(str(val)); r.font.size = Pt(9)
             if mode == "assessor":
                 r.font.color.rgb = RGBColor.from_string(MODEL)
+            elif j < shown:
+                r.font.color.rgb = RGBColor.from_string(MODEL); r.italic = True
     doc.add_paragraph()
 
 
@@ -130,12 +149,50 @@ def box(doc, lines):
     doc.add_paragraph()
 
 
-def screenshot_slot(doc, capture, mode):
+def image_box(doc, caption, image):
+    """A bordered drop-zone holding a real exemplar capture, under its description."""
+    t = doc.add_table(rows=1, cols=1)
+    cell = t.rows[0].cells[0]
+    set_cell_borders(cell); shade_cell(cell, CREAM); cell.width = Cm(16.6)
+    r = cell.paragraphs[0].add_run(caption)
+    r.font.size = Pt(9.5); r.italic = True
+    r.font.color.rgb = RGBColor.from_string(CAPTURE)
+    pic = cell.add_paragraph()
+    pic.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    pic.add_run().add_picture(str(image), width=Cm(IMAGE_CM))
+    doc.add_paragraph()
+
+
+def screenshot_slot(doc, capture, mode, image=None):
     if mode == "assessor":
-        box(doc, [(f"SCREENSHOT — {capture}", CAPTURE, False, True)])
+        if image is not None:
+            image_box(doc, f"SCREENSHOT — {capture}", image)
+        else:
+            box(doc, [(f"SCREENSHOT — {capture}", CAPTURE, False, True)])
     else:
         box(doc, [("[ PASTE YOUR SCREENSHOT HERE ]", None, True, False),
                   (capture, GREY, False, True)])
+
+
+def evidence_images(evidence_dir, key):
+    """The exemplar captures filed for one task or test, in order.
+
+    Convention: <key>.png for a single capture, <key>.<n>.png where the task needed several
+    (task 22 takes two screens to show the group across both zones). A task with more captures
+    on disk than evidence boxes in the run sheet is fine — the extras follow the last box.
+    """
+    if evidence_dir is None:
+        return []
+    return sorted(Path(evidence_dir).glob(f"{key}.*.png")) + \
+        sorted(Path(evidence_dir).glob(f"{key}.png"))
+
+
+def place_evidence(doc, captures, mode, images):
+    """Render each evidence box, pairing it with the capture filed for it where there is one."""
+    for i, cap in enumerate(captures):
+        screenshot_slot(doc, cap, mode, image=images[i] if i < len(images) else None)
+    for extra in images[len(captures):]:
+        image_box(doc, "SCREENSHOT — continued", extra)
 
 
 def diagram_slot(doc, what, mode):

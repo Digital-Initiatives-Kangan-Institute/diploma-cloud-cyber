@@ -28,6 +28,8 @@ AT2's build: only us-east-1a carries load, the ASG runs one instance in one subn
 database is deliberately single-AZ, and there is one NAT gateway. The load balancer already
 spans two zones — task 9 is what finds out whether the student checked.
 """
+from pathlib import Path  # noqa: E402
+
 import run_sheet_render as R  # noqa: E402  (shared primitives; AT2 keeps its own copies for now)
 
 SITE = "https://yat.timbaird.com"
@@ -48,8 +50,8 @@ SCENARIO = [
 ]
 
 RESOURCES = [
-    ("LMS Application Specification — the workload the availability targets are set against",
-     f"{SITE}/intranet/s1-cl1-at3/ict/lms-application-spec"),
+    ("LMS Application Specification (AWS-Hosted) — the workload the availability targets are set against",
+     f"{SITE}/intranet/s1-cl1-at3/ict/lms-application-spec-cloud"),
     ("LMS Cloud Migration Requirements — the availability and recovery targets you design against",
      f"{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/migration-requirements"),
     ("Records Management Policy — where a completed engagement document has to be filed",
@@ -131,11 +133,11 @@ DESIGN = [
          resources=[
              ("LMS Cloud Migration Requirements — the availability, recovery and service-level targets the board signed off on. The figures you need are here",
               f"{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/migration-requirements"),
-             ("LMS Application Specification — the workload those targets are set against: who uses it, how many at once, and when",
-              f"{SITE}/intranet/s1-cl1-at3/ict/lms-application-spec"),
+             ("LMS Application Specification (AWS-Hosted) — the workload those targets are set against: who uses it, how many at once, and when",
+              f"{SITE}/intranet/s1-cl1-at3/ict/lms-application-spec-cloud"),
          ],
          prompt="Before you design anything, establish what the design is held to. Read the LMS Cloud "
-                "Migration Requirements and the LMS Application Specification, and record the "
+                "Migration Requirements and the LMS Application Specification (AWS-Hosted), and record the "
                 "availability, recovery and service-level targets the HA design must achieve. Name the "
                 "document each figure came from.",
          uoc=["ICTCLD502 PC 1.1", "ICTCLD502 FS Reading"],
@@ -149,7 +151,7 @@ DESIGN = [
                  ["Recovery point objective (RPO)", "≤ 1 hour", "LMS Cloud Migration Requirements"],
                  ["Recovery time objective (RTO)", "≤ 4 hours", "LMS Cloud Migration Requirements"],
                  ["Peak concurrent users", "the figure in the application specification",
-                  "LMS Application Specification"]])),
+                  "LMS Application Specification (AWS-Hosted)"]])),
 
     dict(n=2, title="Review the current environment against those targets",
          resources=[
@@ -224,8 +226,8 @@ DESIGN = [
 
     dict(n=5, title="Components that have to scale vertically",
          resources=[
-             ("LMS Application Specification — the load each tier carries, which is what tells you whether growth means more of them or bigger ones",
-              f"{SITE}/intranet/s1-cl1-at3/ict/lms-application-spec"),
+             ("LMS Application Specification (AWS-Hosted) — the load each tier carries, which is what tells you whether growth means more of them or bigger ones",
+              f"{SITE}/intranet/s1-cl1-at3/ict/lms-application-spec-cloud"),
          ],
          prompt="Some components can only be made bigger, not more numerous. Identify which components "
                 "in this environment are in that position, and what happens to availability while they "
@@ -246,6 +248,8 @@ DESIGN = [
          resources=[
              ("LMS Migration Role Brief — who Sam Walker is and what they are accountable for. You are writing this summary for them",
               f"{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/role-brief"),
+             ("LMS Cloud Migration Requirements — the targets the gap you are summarising is measured against",
+              f"{SITE}/intranet/s1-cl1-at3/projects/lms-cloud-infrastructure/migration-requirements"),
          ],
          prompt="Write a short summary of what you found: the gap between the current environment and "
                 "the targets from task 1, and which components drive that gap. Sam Walker will read "
@@ -283,8 +287,8 @@ DESIGN = [
 
     dict(n=8, title="Design — the application tier",
          resources=[
-             ("LMS Application Specification — the concurrent-user load and the peak periods your capacity numbers have to carry",
-              f"{SITE}/intranet/s1-cl1-at3/ict/lms-application-spec"),
+             ("LMS Application Specification (AWS-Hosted) — the concurrent-user load and the peak periods your capacity numbers have to carry",
+              f"{SITE}/intranet/s1-cl1-at3/ict/lms-application-spec-cloud"),
          ],
          prompt="You now have somewhere for a second application instance to run. Design the Auto "
                 "Scaling group's configuration so the loss of one availability zone leaves the LMS "
@@ -878,7 +882,8 @@ def _element(doc, h2, el, mode, label="Task", notes=False):
     if el.get("table"):
         cols, rows = el["table"]
         R.design_table(doc, cols, rows, mode,
-                       blank_rows=el.get("blank_rows", 3), given=el.get("given", 0))
+                       blank_rows=el.get("blank_rows", 3), given=el.get("given", 0),
+                       exemplar=el.get("exemplar", 0))
     if el.get("points"):
         R.response_slot(doc, None, mode, points=el["points"])
     if el.get("diagram"):
@@ -909,14 +914,39 @@ def render_front_matter(doc, h1):
         R.p(doc, para, after=8)
 
 
+def report_evidence(evidence_dir, build=None, tests=None):
+    """What the exemplar folder covers, printed at build time so a gap is not silent."""
+    build = BUILD if build is None else build
+    tests = TESTS if tests is None else tests
+    keys = [f"task-{t['n']}" for t in build] + [f"test-{t['n'].lower()}" for t in tests]
+    found = {k: R.evidence_images(evidence_dir, k) for k in keys}
+    missing = [k for k, v in found.items() if not v]
+    placed = sum(len(v) for v in found.values())
+    print(f"Exemplar evidence: {placed} capture(s) placed across "
+          f"{len(keys) - len(missing)}/{len(keys)} tasks and tests.")
+    if missing:
+        print(f"  NO CAPTURE ON FILE for: {', '.join(missing)} — "
+              f"these render as the description alone.")
+    orphans = sorted(p.name for p in Path(evidence_dir).glob("*.png")
+                     if not any(p in v for v in found.values()))
+    if orphans:
+        print(f"  NOT PLACED (name matches no task or test): {', '.join(orphans)}")
+
+
 def render(doc, h1, h2, mode="student", design=None, build=None, tests=None,
            closeout=None, questions=None, reflections=None, current_arch=None,
-           notes=False):
+           network_diagram=None, notes=False, evidence_dir=None):
     """Render the whole workbook into `doc`. mode = student | assessor.
 
     The content lists default to AT3's own. The PRACTICE sheet passes its own — same
     renderer, same shapes, Ledgerline instead of the LMS — so the two can never drift
     structurally even though every value in them differs.
+
+    evidence_dir — a folder of exemplar captures from a worked run (see
+    `run_sheet_render.evidence_images` for the naming). When given AND mode is assessor, each
+    Part B evidence box carries the real screenshot under its description instead of the
+    description alone, so a regenerated assessor copy is worked rather than blank. Defaults to
+    None: the student and practice sheets render exactly as before and cannot pick these up.
     """
     DESIGN_ = DESIGN if design is None else design
     BUILD_ = BUILD if build is None else build
@@ -930,7 +960,7 @@ def render(doc, h1, h2, mode="student", design=None, build=None, tests=None,
     for para in CURRENT_ARCH_INTRO:
         R.p(doc, para, after=6)
     R.settings_table(doc, current_arch or CURRENT_ARCH)
-    label, url = NETWORK_DIAGRAM
+    label, url = network_diagram or NETWORK_DIAGRAM
     par = doc.add_paragraph()
     par.paragraph_format.space_after = R.Pt(4)
     par.add_run("\u2022  ").font.size = R.Pt(R.BODY_PT)
@@ -960,6 +990,9 @@ def render(doc, h1, h2, mode="student", design=None, build=None, tests=None,
             cols, rows = src["table"]
             R.p(doc, f"From your design — copy your answer to task {task['from_q']} into this "
                      f"table before you build.", bold=True, size=9.5, after=3)
+            # `exemplar` is deliberately NOT carried across. In Part A it shows the shape of an
+            # answer; here the instruction is to copy your own answer in, and a worked row
+            # sitting where that answer goes contradicts it.
             R.design_table(doc, cols, rows, mode,
                            blank_rows=src.get("blank_rows", 3),
                            given=src.get("given", 0))
@@ -976,7 +1009,8 @@ def render(doc, h1, h2, mode="student", design=None, build=None, tests=None,
         if task.get("assessor_note"):
             R.assessor_note(doc, task["assessor_note"], mode)
         R.p(doc, "Evidence", bold=True, after=3)
-        R.screenshot_slot(doc, task["capture"], mode)
+        R.place_evidence(doc, [task["capture"]], mode,
+                         R.evidence_images(evidence_dir, f"task-{task['n']}"))
         if notes:
             R.notes_box(doc)
         R.uoc_line(doc, task["uoc"], mode)
@@ -1005,7 +1039,8 @@ def render(doc, h1, h2, mode="student", design=None, build=None, tests=None,
         if test.get("assessor_note"):
             R.assessor_note(doc, test["assessor_note"], mode)
         R.p(doc, "Evidence", bold=True, after=3)
-        R.screenshot_slot(doc, test["capture"], mode)
+        R.place_evidence(doc, [test["capture"]], mode,
+                         R.evidence_images(evidence_dir, f"test-{test['n'].lower()}"))
         if notes:
             R.notes_box(doc)
         R.uoc_line(doc, test["uoc"], mode)

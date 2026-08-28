@@ -1,45 +1,50 @@
 # Claude notes — AT3 baseline lab pack
 
-Pack-specific notes only. The **generic pattern, AWS Academy constraints, validation harness
-and hard-won lessons** live in the canonical standard — `documentaion/lab-pack-standard.md`
-(this pack was its reference / live-proving implementation, so those findings are recorded
-there). Below is only what's specific to THIS baseline.
+Pack-specific notes only. The generic pattern, AWS Academy constraints, validation harness and
+hard-won lessons live in the umbrella's `docs/lab-pack-standard.md` — this pack was its reference
+implementation, so those findings are recorded there, not here.
+
+`baseline.yaml` is the source of truth for what this pack builds. Where this file and the template
+disagree, the template is right and this file is stale — fix it.
 
 ## What this baseline is
 
-The post-AT2 **single-AZ, non-HA** YAT LMS environment a student deploys at the start of AT3
-and then hardens to multi-AZ HA. It mirrors the AT2 supplied design end-state (ASG min 1 /
-desired 1 / max 2 single-AZ; ALB; Single-AZ RDS; S3; baseline alarms). Design split is **A**
-(ASG built in AT2 per ICTCLD401 Element 3; AT3 hardens to multi-AZ per ICTCLD502) — confirmed,
-not changing.
+The post-AT2 **single-AZ, non-HA** YAT LMS environment. A student deploys it at the start of AT3 and
+hardens it to multi-AZ. It reproduces the end state of the AT2 run sheet (`at2_run_sheet.py`), which
+is the definition it has to track.
 
-## Deviations from the original placeholder spec (`scenario/assessor-resources/at2-baseline-cloudformation.md`)
+What that means concretely:
 
-The paper spec couldn't anticipate deploy realities:
-1. **2nd public + 2nd data subnet added** — an internet-facing ALB and an RDS subnet group each
-   need ≥2 AZs; a literal single-subnet baseline won't deploy. The **compute (ASG) stays
-   single-AZ**, so it's still genuinely non-HA (that's what AT3 hardens).
-2. **Instance profile optional / none** — the baseline EC2 (serving a placeholder page) needs no
-   instance role, so it's an optional parameter (default blank). The Learner Lab does provide
-   `LabRole` if a later step ever needs one.
-3. **HTTP:80, not HTTPS** — ACM needs a domain; deferred.
-4. **VPC flow logs dropped** — CloudWatch flow logs need an IAM role (forbidden); could go to S3.
-5. **AMI via SSM parameter; instance/DB classes parameterised** (`t3.medium` / `db.t3.medium`).
+| | |
+|---|---|
+| Subnets | 5 — `public-web-a/b`, `private-app-a`, `private-data-a/b`. **No app subnet in the second zone** — creating it is AT3 task 7 |
+| Load balancer | Internet-facing, **HTTP:80**, spans both public subnets |
+| Compute | ASG min 1 / desired 1 / max 2, **single-AZ**. Windows Server; root `/dev/sda1` + data volume `xvdb` (the volume AT2 task 10 adds) |
+| Instance profile | `LabInstanceProfile` by default; blank is allowed and skips the association |
+| Database | RDS MySQL, `MultiAZ: false`, `BackupRetentionPeriod: 7`. Subnet group spans both data subnets because RDS requires two AZs |
+| Instance classes | `t3.micro` / `t3.small` and `db.t3.micro` / `db.t3.small` — the exact options AT2 decisions C1 and C2 offer |
+| Alarms | Exactly two: `yat-lms-unhealthy-hosts`, `yat-lms-db-storage-low` |
+| Not present | No S3, no bastion, no RDP ingress, no ACM certificate, no VPC flow logs |
 
-## Status & parked (for the AT3 revisit)
+The compute tier is what makes this genuinely non-HA. The ALB and the DB subnet group span two zones
+only because AWS refuses to create them otherwise — that is a platform floor, not a design choice, and
+it is why AT3 task 9's correct answer is "no change required" for the load balancer.
 
-- **Required lab = AWS Academy Learner Lab, `us-east-1`** (course-wide single product; see the
-  region-substitution standard). Design region is Sydney (`ap-southeast-2`); deploy is `us-east-1`.
-- ✅ **PROVEN live end-to-end in the Learner Lab `us-east-1` (2026-07-01):** the baseline reaches
-  CREATE_COMPLETE **and serves the placeholder page**. The Multi-AZ hardened end-state (RDS
-  `MultiAZ: true`, `db.t3.medium`, standby in a 2nd AZ; cross-AZ ASG) reached CREATE_COMPLETE with no
-  AZ/capacity refusal via a throwaway probe (2026-06-26). *(Originally proven in the Cloud Architecting
-  Sandbox — baseline 2026-06-07 `eae2e18`, Multi-AZ 2026-06-15 — before the single-product move; this
-  corrected an earlier wrong "Multi-AZ not supported" note, do not reinstate it.)*
-- ✅ **Placeholder health-check loop — resolved (transient).** The ~6-min ELB replace loop seen on the
-  2026-06-26 throwaway probe did **not** reproduce: the baseline (identical placeholder UserData) serves
-  clean end-to-end (2026-07-01). Treat the probe churn as an insufficient-boot-time artefact. (Only the
-  Multi-AZ hardened state hasn't been re-served since — an optional confirmation, not a blocker.)
-- **Parked — EC2 instance role:** the AT2 design gives the instance an "Application-Service" role
-  (RDS/S3/CloudWatch access); this baseline runs with none. The Learner Lab provides `LabRole` if a
-  later step needs one; keep it a clean optional parameter (off by default).
+## Constraints that are walls, not preferences
+
+- **The lab is AWS Academy Learner Lab, `us-east-1`.** Design region is Sydney (`ap-southeast-2`);
+  deploy is `us-east-1`, written as `[scenario: ap-southeast-2 (Sydney) | deploy: us-east-1]`.
+- **No IAM role creation.** This is why there are no VPC flow logs — CloudWatch flow logs need a role
+  the lab will not let you create.
+- **HTTP:80, not HTTPS.** ACM needs a domain. It is also deliberate: students must be able to see what
+  they built actually working.
+
+## Proven live — do not re-litigate
+
+- **Baseline reaches CREATE_COMPLETE and serves its page** in the Learner Lab `us-east-1`
+  (2026-07-01).
+- **The Multi-AZ hardened end state deploys** — RDS `MultiAZ: true` with a standby in a second AZ, and
+  a cross-AZ ASG, both reached CREATE_COMPLETE with no capacity refusal (2026-06-26 probe).
+  An earlier note claimed Multi-AZ was unsupported in the lab. **That was wrong. Do not reinstate it.**
+- **The ~6-minute ELB health-check replace loop does not reproduce.** Seen once on a throwaway probe,
+  clean end-to-end since. Treat it as insufficient boot time, not a defect.
