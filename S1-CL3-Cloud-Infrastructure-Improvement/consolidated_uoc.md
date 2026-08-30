@@ -58,7 +58,7 @@ Analyse the system (AT1) and set the team up (AT2) before designing changes.
 
 **Assessment:** an **individual** architecture analysis of the supplied baseline (Ledgerline's current single-AZ cloud infrastructure) — review, business-impact evaluation, the compliance assessment against the Indian Regulatory Requirements, options, and the security / reliability / scalability / cost goals + metrics. This is the analysis half of **AT1** (the individual Solution Design), so the holistic element-1 evidence (PC 1.1, PC 1.6) is valid per student; it feeds the design (G3, also AT1).
 
-- 1.1 Identify and review business's cloud architecture design [ICTCLD504 PC 1.1]
+- 1.1 Identify and review business’s cloud architecture design [ICTCLD504 PC 1.1]
 - 1.2 Evaluate cloud architecture and identify business impact of design decisions [ICTCLD504 PC 1.2]
 - 1.3 Identify design patterns and architectural options [ICTCLD504 PC 1.3]
 - 1.4 Determine and assess benefits and differences of cloud computing and architectural design against current business model and needs [ICTCLD504 PC 1.4]
@@ -80,9 +80,15 @@ Analyse the system (AT1) and set the team up (AT2) before designing changes.
 - 1.2 Use performance plans to establish expected outcomes, goals, and behaviours for individual team members in accordance with team objective and relevant policies [BSBXTW401 PC 1.2]
 - 1.3 Select appropriate strategies to ensure team members are accountable for their roles and responsibilities [BSBXTW401 PC 1.3]
 - 1.4 Plan for contingencies that could impact the team [BSBXTW401 PC 1.4]
-- organisational requirements relevant to workplace teams: workplace policies; codes of conduct; organisational reputation and culture [BSBXTW401 KE 1]
+- organisational requirements relevant to workplace teams: [BSBXTW401 KE 1]
+  - workplace policies
+  - codes of conduct
+  - organisational reputation and culture
 - legislative requirements relevant to the workplace [BSBXTW401 KE 2]
-- typical workplace contingencies that can impact teams: unplanned leave or absence of workers; re-allocation of work tasks; succession planning for important team roles [BSBXTW401 KE 9]
+- typical workplace contingencies that can impact teams: [BSBXTW401 KE 9]
+  - unplanned leave or absence of workers
+  - re-allocation of work tasks
+  - succession planning for important team roles
 
 ---
 
@@ -138,10 +144,10 @@ Deploy the approved improvements, prove them, and support the team through deliv
 - 3.2 Monitor and measure architecture against performance metrics and business goals [ICTCLD504 PC 3.2]
 - 3.3 Test and demonstrate security, reliability, scalability and cost optimisation of deployed resources [ICTCLD504 PC 3.3]
 - 3.4 Apply short-term refinements to deployed resources according to test results [ICTCLD504 PC 3.4]
-- deploy, test and measure at least one architecture design, against architecture principles, metrics and business goals [ICTCLD504 PE 2]
+- deploy, test and measure at least one architecture design, against architecture principles, metrics and business goals. [ICTCLD504 PE 2]
 - use cloud management consoles, software development kits or command line tools [ICTCLD504 PE 4]
 - testing and debugging techniques, including techniques to avoid single point failures [ICTCLD504 KE 7]
-- techniques, methods and industry standard metrics and business goals used to monitor performance of cloud resources [ICTCLD504 KE 10]
+- techniques, methods and industry standard metrics and business goals used to monitor performance of cloud resources. [ICTCLD504 KE 10]
 
 ## Group 6 — Support the team (BSBXTW401, element 3)
 
@@ -154,11 +160,15 @@ Deploy the approved improvements, prove them, and support the team through deliv
 - 3.3 Facilitate team to identify, brainstorm, report and resolve task related issues and inefficiencies [BSBXTW401 PC 3.3]
 - 3.4 Use problem solving skills to deal with any team, task or individual challenges [BSBXTW401 PC 3.4]
 - provide feedback and assistance to team members [BSBXTW401 PE 2]
-- manage conflicts and challenges according to organisational requirements [BSBXTW401 PE 5]
+- manage conflicts and challenges according to organisational requirements. [BSBXTW401 PE 5]
 - mentoring and coaching techniques to support team members [BSBXTW401 KE 4]
 - strategies for conflict resolution and negotiation [BSBXTW401 KE 5]
 - professional behaviours to role model as a leader [BSBXTW401 KE 8]
-- teamwork challenges relevant to performance evidence: difficulties performing tasks; conflicts with clients or team members; potential risks or safety hazards; unethical or inappropriate behaviour [BSBXTW401 KE 10]
+- teamwork challenges relevant to performance evidence: [BSBXTW401 KE 10]
+  - difficulties performing tasks
+  - conflicts with clients or team members
+  - potential risks or safety hazards
+  - unethical or inappropriate behaviour.
 
 ---
 
@@ -175,7 +185,7 @@ Close out the technical improvement and review team performance.
 - 4.1 Document as-deployed architecture and test results, and highlight changes and improvements from approved design [ICTCLD504 PC 4.1]
 - 4.2 Describe long-term improvement strategies and their benefits as applied to deployed resources [ICTCLD504 PC 4.2]
 - 4.3 Obtain final sign off from required personnel [ICTCLD504 PC 4.3]
-- create documentation of deployment and testing steps [ICTCLD504 PE 5]
+- create documentation of deployment and testing steps. [ICTCLD504 PE 5]
 
 ## Group 8 — Monitor team performance (BSBXTW401, element 4)
 
@@ -221,7 +231,7 @@ ICTCLD504:
 - integrated development environment (IDE) [ICTCLD504 AC 4]
 - specific requirements and industry standards, organisational procedures and legislative requirements, including business and functionality requirements, as required [ICTCLD504 AC 5]
 - internet and web browser [ICTCLD504 AC 6]
-- secure shell (SSH) or remote desktop protocol (RDP) client to connect to cloud-hosted instances [ICTCLD504 AC 7]
+- secure shell (SSH) or remote desktop protocol (RDP) client to connect to cloud-hosted instances. [ICTCLD504 AC 7]
 
 BSBXTW401:
 - A safe working or simulated environment [BSBXTW401 AC 1]
