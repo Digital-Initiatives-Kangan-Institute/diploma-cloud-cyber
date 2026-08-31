@@ -11,16 +11,12 @@ This guide walks you, step by step, through building the **starting environment*
 - Your AWS Academy login.
 - The files **`baseline.yaml`** and **`improved.yaml`** (download them from your AT3 assessment page).
 - A database password you choose (at least 8 characters) — **write it down**.
-- About **30 minutes** (the SQL Server database is the slow part to build).
+- About **20 minutes** (the database is the slow part to build).
 
 > **Note about reaching the system.** Ledgerline is an **internal** system — in real life staff reach
 > it over a private VPN, not the public internet. In the lab there is no VPN, so you will **not** open
 > the application in a browser. Instead you confirm everything is working from the **AWS console**
 > (stack status, healthy targets, database status). That is normal and expected for this system.
-
-> **Note about the database edition.** In the real system Ledgerline runs on **SQL Server Standard**. The
-> lab deploys **SQL Server Express** (free) in its place — the lab database is empty, so it behaves the same
-> for what you do here. This is a lab substitution only; it does not change the design you are implementing.
 
 ---
 
@@ -64,7 +60,8 @@ This guide walks you, step by step, through building the **starting environment*
 15. **App tier healthy?** Search **EC2** → **Target Groups** → click `ledgerline-...` → **Targets** tab.
     You should see the instance with status **healthy** (give it a few minutes after the stack finishes).
 16. **Database up?** Search **RDS** → **Databases** → `ledgerline-prod` shows status **Available**, and
-    (importantly) **Multi-AZ = No** — Ledgerline runs as a single instance.
+    (importantly) **Multi-AZ = No** — the baseline runs a single instance with no standby. That is the
+    starting state you are about to improve.
 
 If those three are good, your baseline is up.
 
@@ -84,10 +81,13 @@ You now apply the approved improvement **to the same stack**, so nothing is rebu
 22. **App tier now Multi-AZ?** EC2 → **Auto Scaling groups** → `ledgerline-app-prod` → **Instance management**.
     You should now see **two** instances, in **two different Availability Zones** (e.g. `us-east-1a`
     and `us-east-1b`). The application tier can now survive an AZ failure.
-23. **Database unchanged?** RDS → `ledgerline-prod` is still **Available** and **Multi-AZ = No**.
-    That is correct — the improvement does **not** touch the database. Ledgerline does not support a Multi-AZ
-    database; its reliability comes from the automated backups and point-in-time restore already in place at
-    the baseline, not from failover.
+23. **Database now Multi-AZ?** RDS → `ledgerline-prod` → **Configuration** tab. **Multi-AZ** now reads
+    **Yes**, with a standby in a second Availability Zone. AWS builds and syncs the standby in the
+    background, so the database may sit in **Modifying** for a while before it settles on **Available** —
+    that is normal, and the database stays reachable throughout. The database can now fail over
+    automatically instead of being restored from a backup.
+
+    The instance is **modified in place**, not rebuilt — same endpoint name, same data.
 
 ## Part 7 — Clean up (always do this at the end)
 

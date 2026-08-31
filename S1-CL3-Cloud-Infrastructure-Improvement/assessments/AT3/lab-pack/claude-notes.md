@@ -7,11 +7,13 @@ only what is specific to THIS pack. See also `assessments/assessment_plan.md` §
 > **Lab = AWS Academy Learner Lab, `us-east-1`** (course-wide single product; see the region-substitution
 > standard). Design regions stay real — Sydney `ap-southeast-2`, India `ap-south-1`, Melbourne DR
 > `ap-southeast-4` — but everything **deploys to `us-east-1`**, and **residency/DR are design-only** (not
-> deployed). The proving runs below were done in the Cloud Architecting Sandbox *before* the single-product
-> move. ✅ **Re-proven live in the Learner Lab `us-east-1` (2026-07-01):** baseline → improved
-> apply-as-update reached UPDATE_COMPLETE in-place (cross-AZ ASG, bucket lifecycle, PrivateAppBAssoc added;
-> RDS untouched). SQL Server **Express** deployed clean; `rds:ModifyDBInstance` is moot — the change-set
-> never modifies RDS.
+> deployed).
+>
+> ⚠️ **NOT currently proven live — the templates were materially rebuilt and need a fresh proving run.**
+> The pack now deploys **Amazon Linux 2023 + RDS for PostgreSQL** (was Windows Server 2016 + SQL Server
+> Express) and the improvement **converts the database to Multi-AZ**. Earlier runs (Sandbox 2026-06-21,
+> Learner Lab 2026-07-01) proved the *previous* templates and no longer certify these. Local validation is
+> green (cfn-lint clean, 14/14 pytest). See "Proving run" below for the one thing to watch.
 
 ## What this pack is
 
@@ -21,16 +23,23 @@ model:
 - **`baseline.yaml`** — the existing single-AZ state the student deploys first.
 - **`improved.yaml`** — the **approved improvement** applied as a CloudFormation **change-set / stack
   update** to the *same* stack (same logical IDs, so every change is in-place/additive — no replacement).
+  The database is **modified**, not rebuilt: `MultiAZ` is an in-place update property, so the instance and
+  its data survive the change-set.
   Doubles as the AT2 model answer and the AT3 assessor reference/fallback if a team's AT2 write is unusable.
 
 ## Design decisions specific to this pack
 
-1. **The database is single-AZ in BOTH templates — on purpose.** Ledgerline does not support a Multi-AZ
-   (mirrored) database (it is a legacy app, vendor-certified single-instance only — see the scenario's
-   *Cloud Migration Technical Finding*). So the improvement makes the **application tier** Multi-AZ (ASG
-   across two AZs) but the **RDS instance stays single-AZ**. DB reliability is recovery-based: wider
-   backup retention + point-in-time restore + a cross-Region DR copy. The pytest enforces `MultiAZ: false`
-   in both templates — this is the central invariant of the whole CL3 design, do not "fix" it to Multi-AZ.
+1. **The improvement takes BOTH tiers to Multi-AZ.** The baseline is single-AZ at compute and database;
+   `improved.yaml` spreads the ASG across two AZs and converts the RDS instance to a Multi-AZ deployment
+   with a synchronous standby and automatic failover. Backup, point-in-time restore and the cross-Region
+   DR copy stay behind it — failover covers AZ and instance failure, not data loss, corruption or a
+   Region-level event. The pytest enforces baseline `MultiAZ: false` / improved `MultiAZ: true`, and that
+   **MultiAZ is the only DB property that differs** — anything else would trigger a replacement and
+   destroy the data.
+
+   *History: this pack previously asserted the opposite, on the basis that Ledgerline could not run on a
+   Multi-AZ database. That restriction was lifted across the scenario (Ledgerline is the practice vehicle
+   for HA database work, and the restriction was giving students grounds to decline the practice).*
 
 2. **Internal ALB (faithful) → console-based verification.** Unlike CL1 AT3 (internet-facing ALB you could
    curl), Ledgerline is internal-only (VPN), so the ALB is `Scheme: internal` and is **not browser-reachable
@@ -38,15 +47,15 @@ model:
    ASG instance AZs. The README says so explicitly. This is a deliberate divergence from the CL1 pattern,
    driven by the scenario.
 
-3. **SQL Server edition is a parameter; default `sqlserver-ex` (Express, free).** SE (Standard,
-   license-included) is **not deployable in the lab** — `db.t3.medium` + `sqlserver-se` is rejected and the
-   lab caps RDS at `db.t3.medium` (SE needs a larger class; proven live in the Sandbox 2026-06-21), so both templates
-   default to Express. The DB is empty and is never made Multi-AZ, so the edition does not change what AT3
-   assesses (the no-Multi-AZ decision is an *application* constraint, not an edition one). **Decision
-   (2026-06-21): the in-world scenario stays on Standard; the lab deploys Express as a documented stand-in** —
-   the lab DB is empty, so Express's limits (10 GB/db, RAM/cores) never bite; same "the lab simulates X"
-   pattern as region simulation. The README discloses the substitution to students. No scenario rewrite (a
-   real engine change is huge — see the parked note below).
+3. **Engine is PostgreSQL, and both templates must agree.** The scenario's cloud Ledgerline runs on
+   **Amazon RDS for PostgreSQL** (Accounting System Infrastructure Specifications); the templates now match
+   it, on `db.t3.micro`. `Engine` is a **replacement** property — if the two templates ever disagree, the
+   change-set destroys and rebuilds the database instead of updating it. The pytest asserts both default to
+   `postgres`. No `LicenseModel` (that is a SQL Server property; setting it fails the create).
+
+   This also removes the old edition problem outright: SQL Server Standard would not deploy on the lab's
+   permitted instance classes, and Express does not support Multi-AZ at all. PostgreSQL does Multi-AZ on
+   `db.t3.micro`, so there is no substitution left to disclose to students.
 
 4. **Cross-Region DR backup copy is a documented CLI step, not in the template.** RDS automated-backup
    replication to a second Region (Melbourne, `ap-southeast-4`, to keep financial data in Australia) is set
@@ -58,46 +67,44 @@ model:
    ASG is kept single-AZ (one subnet) so the baseline is genuinely non-HA at the compute tier. `improved.yaml`
    adds the 2nd app-subnet route-table association and spreads the ASG across both app subnets.
 
-## Proving run — PROVEN live 2026-06-21 (Cloud Architecting Sandbox)
+## Proving run — REQUIRED, not yet done for these templates
 
-What was confirmed:
-- **Express baseline deploys clean** — `CREATE_COMPLETE` in **both `us-east-1` and `ap-southeast-2` (Sydney)**,
-  `sqlserver-ex` on `db.t3.medium`.
-- **Apply-as-update works with the DB untouched** — `UPDATE_COMPLETE`; the change-set modified only the ASG and
-  the attachments bucket (lifecycle) and added the 2nd app-subnet route association — **no `Database` change**
-  (see the `rds:ModifyDBInstance` finding below).
-- **App-tier Multi-AZ** — ASG settled at `Desired=2`, two instances across two AZs; the DB stayed single-AZ /
-  Multi-AZ No.
+The templates were rebuilt (Amazon Linux 2023 + PostgreSQL; database converted to Multi-AZ by the
+change-set). Nothing below has been demonstrated on the current pack. **Do the run before treating this
+pack as delivered** — the lab-pack standard makes one live run part of the definition of done.
 
-NOT run — config validated but no explicit live demo: the **failover** (terminate-an-instance) and **scale-out**
-demos, and a **PITR restore**. Standard ASG behaviour and the scaling policy is in place; PITR/restore perms are
-**unverified** (see the finding) and worth a future check.
+**The one thing to watch: can CloudFormation modify the RDS instance in the Learner Lab?**
 
-Findings (also recorded in `docs/lab-pack-standard.md`):
-- **SQL Server SE is NOT deployable in the sandbox.** `db.t3.medium` + `sqlserver-se` + `license-included` is
-  rejected ("RDS does not support creating a DB instance with the following combination...") — SE needs a larger
-  class than the sandbox permits. **Both templates default to `sqlserver-ex` (Express)**, which deploys fine.
-- **The lab role denies `rds:ModifyDBInstance`.** The `voclabs` role can **create** an RDS instance (the
-  baseline built) but **cannot modify** an existing one — the original `improved.yaml` raised
-  `BackupRetentionPeriod` 7->14 and hit `AccessDenied`. So the change-set must leave the DB **untouched** (it
-  now does). This blocks **any** in-lab DB modification (CFN *or* console), so the DB-tier DR improvements
-  (wider retention, cross-Region copy) are **design-level only, not lab-executable**; DB reliability is shown
-  via the baseline's automated backups + PITR (restore perms unverified).
-- **DECIDED (2026-06-21): keep the scenario on SQL Server Standard; Express is a lab-only stand-in.** A real
-  engine change (e.g. PostgreSQL) was scoped and rejected — it spans ~30+ files across the active CL3 **and the
-  completed CL1/CL2 clusters**, and worse, it **deletes the commercial-licensing cost-benefit element** (the
-  ~$27k/yr Ledgerline+SQL-Server licensing, license-included-vs-BYOL) that is the assessed differentiator from
-  the open-source LMS. So the scenario is unchanged; the lab substitutes Express and the README says so. The
-  only residual tidy: the soft `~13.5 vs ~22 GB` SQL-data figure (low priority). Tracked in MEMORY
-  `[[s1cl3-assessment]]`.
-- Watch SQL Server RDS **create time** (typically longer than MySQL); the README budgets ~15 min.
+This is the only step that could fail on permissions rather than configuration, and the evidence is
+genuinely mixed:
+
+- *Against:* on 2026-06-21, in the **Cloud Architecting Sandbox**, a change-set raising
+  `BackupRetentionPeriod` 7->14 hit `AccessDenied` on `rds:ModifyDBInstance`. That is where the old
+  "the DB must stay untouched" rule came from. It was never retested in the Learner Lab, because the
+  change-set was rewritten to avoid the DB entirely, which made the question moot rather than answered.
+- *For:* the **CL1 AT3 pack** has students convert a running RDS instance to Multi-AZ **in the Learner
+  Lab, via the console**, and its notes record it as proven live with an explicit instruction not to
+  reinstate the claim that Multi-AZ is unsupported there.
+
+So: create is certainly permitted; console modify is proven on CL1; **CFN modify in the Learner Lab is
+unproven**. Deploy `baseline.yaml`, apply `improved.yaml` as a stack update, and watch the `Database`
+resource in the change-set.
+
+**If it is denied,** the fallback is a straight swap of model, not a redesign: make `improved.yaml` a
+standalone stack that *creates* the improved state (Multi-AZ included) rather than updating the
+baseline, and change the README to deploy it directly. `CreateDBInstance` is not in question.
+
+Also still not demonstrated live on any version of this pack: the failure simulation
+(terminate-an-instance), the scale-out demo, and a PITR restore. Restore permissions remain unverified.
 
 ## Local validation (done)
 
 - **cfn-lint:** clean (exit 0) on both templates via the `.cfnlintrc.yaml` template list (W1011 suppressed
   and justified — NoEcho DB password supplied at deploy, not Secrets Manager, to avoid IAM in the lab).
-- **pytest:** 13/13. Asserts the no-DB-Multi-AZ invariant (both templates), single-AZ→2-AZ compute, SQL Server
-  engine, internal ALB, encrypted+empty DB, no IAM, optional instance profile, SSM AMI, locked buckets, and
-  **pure ASCII** (a non-ASCII char in an RDS description fails the live deploy and cfn-lint does not catch it).
+- **pytest:** 14/14. Asserts baseline single-AZ -> improved Multi-AZ, that `MultiAZ` is the ONLY database
+  property differing between the templates (anything else would force a replacement), `postgres` on both,
+  single-AZ->2-AZ compute, internal ALB, encrypted+empty DB, no IAM created, the lab instance profile, SSM
+  AMI, locked buckets, and **pure ASCII** (a non-ASCII char in an RDS description fails the live deploy and
+  cfn-lint does not catch it).
 - Run: `python -m venv .venv && .venv/bin/python -m pip install -r requirements.txt`, then
   `.venv/bin/cfn-lint` and `.venv/bin/python -m pytest -q`.

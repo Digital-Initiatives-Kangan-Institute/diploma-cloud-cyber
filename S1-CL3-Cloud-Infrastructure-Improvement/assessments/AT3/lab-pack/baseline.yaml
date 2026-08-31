@@ -7,11 +7,12 @@ Description: >-
   deploys to us-east-1 in the Learner Lab.
 
   Internal-only finance system (no public ingress): EC2 + Auto Scaling in ONE AZ behind an INTERNAL
-  ALB; RDS for SQL Server, SINGLE-AZ, empty and encrypted. A 2nd app subnet and 2nd data subnet exist
+  ALB; RDS for PostgreSQL, SINGLE-AZ, empty and encrypted. A 2nd app subnet and 2nd data subnet exist
   only because an internal ALB and an RDS subnet group each need >= 2 AZs; the ASG is single-AZ on
   purpose (the AT3 improvement spreads it across AZs). The DATABASE is single-instance because this is
   the single-AZ starting state; at the baseline, DB reliability is by backup and point-in-time restore.
-  Creates NO IAM; the Windows AMI resolves from an SSM public parameter.
+  Creates NO IAM - it attaches the lab's own LabInstanceProfile; the Amazon Linux 2023 AMI
+  resolves from an SSM public parameter.
 
 Parameters:
   EnvName:
@@ -20,31 +21,29 @@ Parameters:
     AllowedValues: [dev, prod]
     Description: Environment suffix used in resource names.
 
-  WindowsAmiId:
+  AmiId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
-    Default: /aws/service/ami-windows-latest/Windows_Server-2016-English-Full-Base
-    Description: Auto-resolves the latest Windows Server 2016 AMI (no hardcoded AMI to age).
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+    Description: Auto-resolves the latest Amazon Linux 2023 AMI (no hardcoded AMI to age).
 
   InstanceType:
     Type: String
-    Default: t3.medium
+    Default: t3.micro
     Description: Ledgerline application tier EC2 instance type (AWS Academy may restrict types).
 
   DBEngine:
     Type: String
-    Default: sqlserver-ex
-    AllowedValues: [sqlserver-se, sqlserver-ex, sqlserver-web]
+    Default: postgres
+    AllowedValues: [postgres]
     Description: >-
-      RDS SQL Server edition. Defaults to sqlserver-ex (Express, free): the AWS Academy lab does NOT
-      support Standard edition (sqlserver-se, license-included) on its permitted instance classes -
-      db.t3.medium + sqlserver-se is rejected (proven in the Sandbox 2026-06-21), and the lab caps RDS
-      at db.t3.medium. The database is empty and is never made Multi-AZ, so
-      the edition does not affect what AT3 assesses (the no-Multi-AZ decision is an application
-      constraint, not an edition one). sqlserver-se remains selectable where a larger class is allowed.
+      RDS engine. Ledgerline runs on Amazon RDS for PostgreSQL (see the Accounting System
+      Infrastructure Specifications). Must match the value used for the other template in this pack -
+      Engine is a replacement property, so a mismatch destroys and rebuilds the database instead of
+      updating it in place.
 
   DBInstanceClass:
     Type: String
-    Default: db.t3.medium
+    Default: db.t3.micro
     Description: RDS instance class (Academy may restrict; the baseline RDS is Single-AZ).
 
   DBMasterUsername:
@@ -61,16 +60,13 @@ Parameters:
 
   InstanceProfileName:
     Type: String
-    Default: ''
+    Default: LabInstanceProfile
     Description: >-
-      EC2 instance profile name. LEAVE BLANK (default) to launch with NO instance profile - the
-      baseline instances only serve a placeholder page, so they need no IAM, and this works in any
-      lab. Names vary by lab product; the Learner Lab provides LabRole if a later step needs one.
+      EC2 instance profile. The Learner Lab supplies LabInstanceProfile (wrapping LabRole); this pack
+      creates NO IAM of its own. The profile is what makes Systems Manager Session Manager work, which
+      is how the baseline is administered - there is no key pair and no inbound management port. Set
+      blank to skip the association if a lab product uses a different name.
 
-  AdminCidr:
-    Type: String
-    Default: 10.0.0.0/16
-    Description: CIDR allowed RDP to the app instance (default VPC-internal only).
 
 Conditions:
   HasInstanceProfile: !Not [!Equals [!Ref InstanceProfileName, '']]
@@ -231,21 +227,20 @@ Resources:
   AppSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: App tier - HTTP from the internal ALB, RDP from the admin CIDR
+      GroupDescription: App tier - HTTP from the internal ALB; administered via Session Manager
       VpcId: !Ref Vpc
       SecurityGroupIngress:
         - { IpProtocol: tcp, FromPort: 80, ToPort: 80, SourceSecurityGroupId: !Ref AlbSecurityGroup, Description: HTTP from ALB }
-        - { IpProtocol: tcp, FromPort: 3389, ToPort: 3389, CidrIp: !Ref AdminCidr, Description: RDP from admin }
       Tags:
         - { Key: Name, Value: !Sub 'sg-app-${EnvName}' }
 
   DbSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Database - SQL Server (1433) from the app tier only
+      GroupDescription: Database - PostgreSQL (5432) from the app tier only
       VpcId: !Ref Vpc
       SecurityGroupIngress:
-        - { IpProtocol: tcp, FromPort: 1433, ToPort: 1433, SourceSecurityGroupId: !Ref AppSecurityGroup, Description: SQL Server from app }
+        - { IpProtocol: tcp, FromPort: 5432, ToPort: 5432, SourceSecurityGroupId: !Ref AppSecurityGroup, Description: PostgreSQL from app }
       Tags:
         - { Key: Name, Value: !Sub 'sg-db-${EnvName}' }
 
@@ -255,7 +250,7 @@ Resources:
     Properties:
       LaunchTemplateName: !Sub 'ledgerline-app-${EnvName}'
       LaunchTemplateData:
-        ImageId: !Ref WindowsAmiId
+        ImageId: !Ref AmiId
         InstanceType: !Ref InstanceType
         IamInstanceProfile: !If
           - HasInstanceProfile
@@ -265,10 +260,10 @@ Resources:
           - !Ref AppSecurityGroup
         UserData:
           Fn::Base64: |
-            <powershell>
-            Install-WindowsFeature -Name Web-Server -IncludeManagementTools
-            Set-Content -Path "C:\inetpub\wwwroot\index.html" -Value "Ledgerline infrastructure ready - awaiting application deployment"
-            </powershell>
+            #!/bin/bash
+            dnf install -y httpd
+            systemctl enable --now httpd
+            echo "Ledgerline infrastructure ready - awaiting application deployment" > /var/www/html/index.html
         TagSpecifications:
           - ResourceType: instance
             Tags:
@@ -340,7 +335,7 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref AppTargetGroup
 
-  # ---------- Database (RDS for SQL Server, Single-AZ, empty, encrypted) ----------
+  # ---------- Database (RDS for PostgreSQL, Single-AZ, empty, encrypted) ----------
   DbSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
@@ -356,7 +351,6 @@ Resources:
     Properties:
       DBInstanceIdentifier: !Sub 'ledgerline-${EnvName}'
       Engine: !Ref DBEngine
-      LicenseModel: license-included
       DBInstanceClass: !Ref DBInstanceClass
       AllocatedStorage: '20'
       MultiAZ: false                  # single-AZ baseline - this is the starting state, not a limit
@@ -444,7 +438,7 @@ Outputs:
     Value: !GetAtt AppLoadBalancer.DNSName
 
   RdsEndpoint:
-    Description: RDS SQL Server endpoint address.
+    Description: RDS PostgreSQL endpoint address.
     Value: !GetAtt Database.Endpoint.Address
 
   AttachmentsBucketName:

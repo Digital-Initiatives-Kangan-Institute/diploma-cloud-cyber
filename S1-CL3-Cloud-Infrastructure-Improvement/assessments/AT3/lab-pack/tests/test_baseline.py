@@ -1,8 +1,8 @@
 """Structural tests of the AT3 Ledgerline lab-pack templates - run with NO AWS account.
 
 Asserts the invariants that make this a valid existing-state baseline + a valid improvement
-change-set, honouring the AWS Academy constraints and - critically - that the DATABASE is never
-Multi-AZ (Ledgerline does not support it; reliability is via backup/restore, not failover).
+change-set, honouring the AWS Academy constraints and - critically - that the improvement actually
+moves BOTH tiers to Multi-AZ: the baseline is single-AZ, the improved template is not.
 
 Templates are parsed with cfn-lint's decoder so the intrinsic tags (!Ref, !GetAtt, !Sub, !Select,
 !If, !GetAZs) load correctly.
@@ -36,31 +36,40 @@ def test_all_templates_decode():
         assert "Resources" in t and t["Resources"], f"{path.name} has no resources"
 
 
-# ---- the central invariant: the database is NEVER Multi-AZ ----
+# ---- the central invariant: the improvement converts the database to Multi-AZ ----
 
-def test_rds_is_single_az_in_both_templates():
-    # Ledgerline does not support a Multi-AZ database - it must stay single-instance in BOTH the
-    # baseline AND the improved (change-set) template. This is the whole point of the design.
+def test_baseline_rds_is_single_az():
+    # The baseline is the existing state the student improves FROM - a single instance, no standby.
+    for name, db in _of_type(_load(BASELINE), "AWS::RDS::DBInstance").items():
+        assert db["Properties"].get("MultiAZ") is False, \
+            f"baseline:{name} must be single-AZ - it is the starting state"
+
+
+def test_improved_rds_is_multi_az():
+    # The improvement converts it in place. MultiAZ is an update property, so the instance is
+    # modified, not replaced, and the data survives.
+    dbs = _of_type(_load(IMPROVED), "AWS::RDS::DBInstance")
+    assert dbs, "improved.yaml has no RDS instance"
+    for name, db in dbs.items():
+        assert db["Properties"].get("MultiAZ") is True, \
+            f"improved:{name} must be Multi-AZ - that is the database-tier improvement"
+
+
+def test_rds_engine_matches_across_templates():
+    # Engine is a REPLACEMENT property: if the two templates disagree, the change-set destroys and
+    # rebuilds the database instead of updating it. Both must be PostgreSQL, per the scenario.
+    defaults = set()
     for path in (BASELINE, IMPROVED):
-        for name, db in _of_type(_load(path), "AWS::RDS::DBInstance").items():
-            assert db["Properties"].get("MultiAZ") is False, \
-                f"{path.name}:{name} must NOT be Multi-AZ (Ledgerline constraint)"
-
-
-def test_rds_is_sql_server():
-    for path in (BASELINE, IMPROVED):
-        dbs = _of_type(_load(path), "AWS::RDS::DBInstance")
-        assert dbs, f"{path.name} has no RDS instance"
-        for name, db in dbs.items():
-            engine = db["Properties"]["Engine"]
-            # Engine is a !Ref to a parameter defaulting to a sqlserver-* edition; check the default.
-            t = _load(path)
-            default = t["Parameters"]["DBEngine"]["Default"]
-            assert default.startswith("sqlserver"), f"{path.name} DBEngine default must be SQL Server"
+        t = _load(path)
+        assert _of_type(t, "AWS::RDS::DBInstance"), f"{path.name} has no RDS instance"
+        default = t["Parameters"]["DBEngine"]["Default"]
+        assert default == "postgres", f"{path.name} DBEngine default must be postgres, got {default}"
+        defaults.add(default)
+    assert len(defaults) == 1, f"templates disagree on DBEngine: {defaults}"
 
 
 def test_rds_encrypted_and_empty():
-    # Encrypted at rest, and no DBName (SQL Server: the instance comes up with no user database).
+    # Encrypted at rest, and no DBName - the instance comes up with no user database.
     for path in (BASELINE, IMPROVED):
         for name, db in _of_type(_load(path), "AWS::RDS::DBInstance").items():
             assert db["Properties"].get("StorageEncrypted") is True, f"{path.name}:{name} must be encrypted"
@@ -85,18 +94,19 @@ def test_improved_compute_is_multi_az():
         assert len(zones) == 2, f"improved {name} must span TWO subnets (application-tier Multi-AZ)"
 
 
-def test_improved_does_not_modify_db():
-    # The AWS Academy lab role cannot rds:ModifyDBInstance, and the legacy DB tier is not restructured
-    # by the improvement, so the Database resource MUST be identical in baseline and improved (the
-    # change-set produces NO diff on the DB). DR improvements (wider retention, cross-Region copy) are
-    # out-of-band steps, not CFN changes.
+def test_improved_changes_only_multi_az_on_the_db():
+    # The change-set is applied to the SAME stack, so the Database must be MODIFIED in place, never
+    # replaced. The only property the improvement may change is MultiAZ (an in-place update property).
+    # Anything else differing - especially Engine, DBInstanceIdentifier or MasterUsername - would
+    # trigger a replacement and destroy the financial data.
     base_db = next(iter(_of_type(_load(BASELINE), "AWS::RDS::DBInstance").values()))
     imp_db = next(iter(_of_type(_load(IMPROVED), "AWS::RDS::DBInstance").values()))
-    assert imp_db["Properties"] == base_db["Properties"], \
-        "improved.yaml must NOT modify the Database (sandbox denies rds:ModifyDBInstance)"
-
-
-# ---- internal ALB (internal-only system, no public ingress) ----
+    differing = {k for k in set(base_db["Properties"]) | set(imp_db["Properties"])
+                 if base_db["Properties"].get(k) != imp_db["Properties"].get(k)}
+    assert differing == {"MultiAZ"}, \
+        f"improved.yaml may only change MultiAZ on the Database; also differs: {sorted(differing - {'MultiAZ'})}"
+    assert base_db["Properties"]["MultiAZ"] is False and imp_db["Properties"]["MultiAZ"] is True, \
+        "the improvement must take the database from single-AZ to Multi-AZ"
 
 def test_alb_is_internal():
     for path in (BASELINE, IMPROVED):
@@ -116,17 +126,19 @@ def test_no_iam_resources_created():
         assert not found, f"{path.name}: Academy forbids creating IAM; found {found}"
 
 
-def test_instance_profile_is_optional():
+def test_instance_profile_defaults_to_the_lab_profile():
+    # Session Manager is how the baseline is administered (no key pair, no inbound management port),
+    # and that needs the lab's own profile attached. The pack still creates no IAM of its own.
     for path in (BASELINE, IMPROVED):
         t = _load(path)
-        assert t["Parameters"]["InstanceProfileName"].get("Default", "") == "", \
-            f"{path.name}: instance profile must default to blank"
+        assert t["Parameters"]["InstanceProfileName"].get("Default") == "LabInstanceProfile", \
+            f"{path.name}: instance profile must default to LabInstanceProfile"
         assert "HasInstanceProfile" in t.get("Conditions", {}), f"{path.name}: expected HasInstanceProfile"
 
 
 def test_ami_resolved_via_ssm_parameter():
     for path in (BASELINE, IMPROVED):
-        ami = _load(path)["Parameters"]["WindowsAmiId"]
+        ami = _load(path)["Parameters"]["AmiId"]
         assert ami["Type"] == "AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>", \
             f"{path.name}: AMI must come from an SSM public parameter"
 

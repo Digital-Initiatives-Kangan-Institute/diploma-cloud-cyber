@@ -6,11 +6,11 @@ Description: >-
   resource is replaced.
 
   Changes: the application tier becomes Multi-AZ (the ASG spreads across two AZs behind the internal
-  ALB, min 2 / desired 2); an S3 lifecycle tiers older attachments for cost. The RDS instance is
-  deliberately LEFT UNCHANGED by this change-set - Ledgerline does not support a Multi-AZ database, and
-  the AWS Academy lab role cannot rds:ModifyDBInstance, so the DB tier's DR improvements (wider backup
-  retention + the cross-Region backup copy to Melbourne, ap-southeast-4) are out-of-band steps, not CFN
-  properties (see README).
+  ALB, min 2 / desired 2); the database becomes a Multi-AZ deployment with a synchronous standby in the
+  second AZ and automatic failover; an S3 lifecycle tiers older attachments for cost. MultiAZ is an
+  in-place update property, so the database instance is modified, never replaced, and the data is
+  retained. The cross-Region backup copy to Melbourne (ap-southeast-4) remains an out-of-band step (see
+  README).
 
 Parameters:
   EnvName:
@@ -19,28 +19,29 @@ Parameters:
     AllowedValues: [dev, prod]
     Description: Environment suffix used in resource names.
 
-  WindowsAmiId:
+  AmiId:
     Type: AWS::SSM::Parameter::Value<AWS::EC2::Image::Id>
-    Default: /aws/service/ami-windows-latest/Windows_Server-2016-English-Full-Base
-    Description: Auto-resolves the latest Windows Server 2016 AMI (no hardcoded AMI to age).
+    Default: /aws/service/ami-amazon-linux-latest/al2023-ami-kernel-default-x86_64
+    Description: Auto-resolves the latest Amazon Linux 2023 AMI (no hardcoded AMI to age).
 
   InstanceType:
     Type: String
-    Default: t3.medium
+    Default: t3.micro
     Description: Ledgerline application tier EC2 instance type (AWS Academy may restrict types).
 
   DBEngine:
     Type: String
-    Default: sqlserver-ex
-    AllowedValues: [sqlserver-se, sqlserver-ex, sqlserver-web]
+    Default: postgres
+    AllowedValues: [postgres]
     Description: >-
-      RDS SQL Server edition. Must match the value used for baseline.yaml so the change-set does not
-      replace the database. Defaults to sqlserver-ex (Express): the lab does not support
-      sqlserver-se on its permitted instance classes (see baseline.yaml).
+      RDS engine. Ledgerline runs on Amazon RDS for PostgreSQL (see the Accounting System
+      Infrastructure Specifications). Must match the value used for the other template in this pack -
+      Engine is a replacement property, so a mismatch destroys and rebuilds the database instead of
+      updating it in place.
 
   DBInstanceClass:
     Type: String
-    Default: db.t3.medium
+    Default: db.t3.micro
     Description: RDS instance class (must match baseline.yaml; the database stays Single-AZ).
 
   DBMasterUsername:
@@ -57,13 +58,13 @@ Parameters:
 
   InstanceProfileName:
     Type: String
-    Default: ''
-    Description: EC2 instance profile name. LEAVE BLANK (default) - no IAM is created in the lab.
+    Default: LabInstanceProfile
+    Description: >-
+      EC2 instance profile. The Learner Lab supplies LabInstanceProfile (wrapping LabRole); this pack
+      creates NO IAM of its own. The profile is what makes Systems Manager Session Manager work, which
+      is how the baseline is administered - there is no key pair and no inbound management port. Set
+      blank to skip the association if a lab product uses a different name.
 
-  AdminCidr:
-    Type: String
-    Default: 10.0.0.0/16
-    Description: CIDR allowed RDP to the app instances (default VPC-internal only).
 
 Conditions:
   HasInstanceProfile: !Not [!Equals [!Ref InstanceProfileName, '']]
@@ -231,21 +232,20 @@ Resources:
   AppSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: App tier - HTTP from the internal ALB, RDP from the admin CIDR
+      GroupDescription: App tier - HTTP from the internal ALB; administered via Session Manager
       VpcId: !Ref Vpc
       SecurityGroupIngress:
         - { IpProtocol: tcp, FromPort: 80, ToPort: 80, SourceSecurityGroupId: !Ref AlbSecurityGroup, Description: HTTP from ALB }
-        - { IpProtocol: tcp, FromPort: 3389, ToPort: 3389, CidrIp: !Ref AdminCidr, Description: RDP from admin }
       Tags:
         - { Key: Name, Value: !Sub 'sg-app-${EnvName}' }
 
   DbSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
-      GroupDescription: Database - SQL Server (1433) from the app tier only
+      GroupDescription: Database - PostgreSQL (5432) from the app tier only
       VpcId: !Ref Vpc
       SecurityGroupIngress:
-        - { IpProtocol: tcp, FromPort: 1433, ToPort: 1433, SourceSecurityGroupId: !Ref AppSecurityGroup, Description: SQL Server from app }
+        - { IpProtocol: tcp, FromPort: 5432, ToPort: 5432, SourceSecurityGroupId: !Ref AppSecurityGroup, Description: PostgreSQL from app }
       Tags:
         - { Key: Name, Value: !Sub 'sg-db-${EnvName}' }
 
@@ -255,7 +255,7 @@ Resources:
     Properties:
       LaunchTemplateName: !Sub 'ledgerline-app-${EnvName}'
       LaunchTemplateData:
-        ImageId: !Ref WindowsAmiId
+        ImageId: !Ref AmiId
         InstanceType: !Ref InstanceType
         IamInstanceProfile: !If
           - HasInstanceProfile
@@ -265,10 +265,10 @@ Resources:
           - !Ref AppSecurityGroup
         UserData:
           Fn::Base64: |
-            <powershell>
-            Install-WindowsFeature -Name Web-Server -IncludeManagementTools
-            Set-Content -Path "C:\inetpub\wwwroot\index.html" -Value "Ledgerline infrastructure ready - awaiting application deployment"
-            </powershell>
+            #!/bin/bash
+            dnf install -y httpd
+            systemctl enable --now httpd
+            echo "Ledgerline infrastructure ready - awaiting application deployment" > /var/www/html/index.html
         TagSpecifications:
           - ResourceType: instance
             Tags:
@@ -341,11 +341,11 @@ Resources:
         - Type: forward
           TargetGroupArn: !Ref AppTargetGroup
 
-  # ---------- Database (IMPROVED backups; STILL Single-AZ - no Multi-AZ for Ledgerline) ----------
+  # ---------- Database (IMPROVED: converted to a Multi-AZ deployment with a standby) ----------
   DbSubnetGroup:
     Type: AWS::RDS::DBSubnetGroup
     Properties:
-      DBSubnetGroupDescription: Ledgerline data subnets (spans 2 AZs - required even for Single-AZ)
+      DBSubnetGroupDescription: Ledgerline data subnets (spans 2 AZs - the standby lands in the second)
       SubnetIds:
         - !Ref PrivateDataA
         - !Ref PrivateDataB
@@ -357,10 +357,9 @@ Resources:
     Properties:
       DBInstanceIdentifier: !Sub 'ledgerline-${EnvName}'
       Engine: !Ref DBEngine
-      LicenseModel: license-included
       DBInstanceClass: !Ref DBInstanceClass
       AllocatedStorage: '20'
-      MultiAZ: false                  # UNCHANGED on purpose - Ledgerline does not support Multi-AZ
+      MultiAZ: true                   # IMPROVED - synchronous standby in the 2nd AZ, automatic failover
       StorageEncrypted: true
       MasterUsername: !Ref DBMasterUsername
       MasterUserPassword: !Ref DBMasterPassword
@@ -457,7 +456,7 @@ Outputs:
     Value: !GetAtt AppLoadBalancer.DNSName
 
   RdsEndpoint:
-    Description: RDS SQL Server endpoint address.
+    Description: RDS PostgreSQL endpoint address.
     Value: !GetAtt Database.Endpoint.Address
 
   AttachmentsBucketName:
