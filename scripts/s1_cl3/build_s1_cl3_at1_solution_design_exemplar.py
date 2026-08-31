@@ -125,7 +125,7 @@ def build(path, exemplar=True):
                  "Specifications, and the Operational Costing. Ledgerline is an internal, staff-only, business-hours "
                  "workload (~60 users, ~15-25 concurrent, peaks of ~45-55 at month-end and EOFY, effectively idle "
                  "overnight and at weekends), reached over the Site-to-Site VPN — not public-facing. The application "
-                 "runs on Windows Server with a Microsoft SQL Server database; financial records carry a 7-year "
+                 "runs on Amazon Linux with an Amazon RDS for PostgreSQL database; financial records carry a 7-year "
                  "retention obligation.")
     h3("2.2 Requirements the design must meet")
     add_data_table(doc, ["Ref", "Requirement", "Source"],
@@ -142,8 +142,8 @@ def build(path, exemplar=True):
     h1("3. Review of the Existing Architecture")
     ev("[ICTCLD504 PC 1.2] evaluate the architecture and identify business impact of design decisions")
     add_body_paragraph(doc, "The baseline is a single-AZ deployment in ap-southeast-2 (Sydney): an EC2 application tier "
-                 "(Windows Server, Auto Scaling group min 1 / max 2) in one Availability Zone behind an internal "
-                 "Application Load Balancer; an Amazon RDS for SQL Server database (single-AZ); document attachments on "
+                 "(Amazon Linux, Auto Scaling group min 1 / max 2) in one Availability Zone behind an internal "
+                 "Application Load Balancer; an Amazon RDS for PostgreSQL database (single-AZ); document attachments on "
                  "Amazon S3; gp3 EBS volumes; reached over the Site-to-Site VPN. It is functional but was provisioned "
                  "for the migration, with high-availability hardening explicitly deferred.")
     h3("3.1 Single points of failure")
@@ -183,7 +183,7 @@ def build(path, exemplar=True):
                  "network and convert the database to a Multi-AZ deployment with an automatic-failover standby (with "
                  "backup, point-in-time restore and cross-Region DR behind it), harden security, realise the idle-profile and storage cost "
                  "savings, confirm elastic headroom, and add the light India residency slice for regulatory logs and "
-                 "financial records. The application, its SQL Server stack and its data are preserved (IR-4); every change "
+                 "financial records. The application, its PostgreSQL stack and its data are preserved (IR-4); every change "
                  "is proportionate and cost-justified (IR-2, IR-6).")
 
     # 4 Architecture Design (504 el 2 — design)
@@ -227,13 +227,13 @@ def build(path, exemplar=True):
                ["Cost", "Scheduled stop outside business hours (the system is idle overnight and at weekends — the largest single saving), right-sized instances, gp3 volumes"]],
               widths=[2.4, 13.2])
 
-    h3("4.6 Component 3 — Database (RDS for SQL Server)")
+    h3("4.6 Component 3 — Database (RDS for PostgreSQL)")
     ev("[ICTCLD504 PC 2.2] improve database resources · [ICTCLD504 PC 2.3] improve for the four concerns")
     add_data_table(doc, ["Concern", "Improvement"],
               [["Security", "Encryption in transit (TLS); credentials in Secrets Manager with rotation; security group restricting access to the app tier; not publicly accessible (encryption at rest is already enabled in the baseline)"],
                ["Reliability", "Converted to a Multi-AZ deployment — a synchronously replicated standby in the second Availability Zone with automatic failover under two minutes, removing the database as a single point of failure. The application reaches the database by endpoint name, so failover needs no reconfiguration. Behind it: automated backups with point-in-time recovery, frequent transaction-log backups (RPO <= 1 hour), an automated cross-Region backup copy to a second Australian Region (Melbourne, ap-southeast-4) for disaster recovery — keeping financial data in Australia — and a tested restore runbook"],
                ["Scalability", "Right-sized instance class; storage autoscaling enabled; a read replica noted as headroom for month-end reporting (not provisioned by default — proportionate)"],
-               ["Cost", "Right-sized to measured load; a Savings Plan / Reserved Instance for the steady baseline; SQL Server licensing model reviewed (License Included vs BYOL) and made explicit; backup retention tuned (long-term financial-records retention handled by export to S3, not live RDS)"]],
+               ["Cost", "Right-sized to measured load; a Savings Plan / Reserved Instance for the steady baseline; no proprietary database licence to optimise — the managed PostgreSQL engine is a per-hour platform cost, unlike the per-core licensing the on-premises deployment carried; backup retention tuned (long-term financial-records retention handled by export to S3, not live RDS)"]],
               widths=[2.4, 13.2])
 
     add_body_paragraph(doc, "Reliability decision — cost versus benefit (IR-2, IR-6). Converting the database to Multi-AZ "
