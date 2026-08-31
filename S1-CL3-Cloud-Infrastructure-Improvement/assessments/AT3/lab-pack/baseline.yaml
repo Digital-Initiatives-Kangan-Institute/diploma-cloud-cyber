@@ -9,8 +9,8 @@ Description: >-
   Internal-only finance system (no public ingress): EC2 + Auto Scaling in ONE AZ behind an INTERNAL
   ALB; RDS for SQL Server, SINGLE-AZ, empty and encrypted. A 2nd app subnet and 2nd data subnet exist
   only because an internal ALB and an RDS subnet group each need >= 2 AZs; the ASG is single-AZ on
-  purpose (the AT3 improvement spreads it across AZs). The DATABASE stays single-instance - Ledgerline
-  does not support a Multi-AZ database, so DB reliability is by backup/restore, never Multi-AZ failover.
+  purpose (the AT3 improvement spreads it across AZs). The DATABASE is single-instance because this is
+  the single-AZ starting state; at the baseline, DB reliability is by backup and point-in-time restore.
   Creates NO IAM; the Windows AMI resolves from an SSM public parameter.
 
 Parameters:
@@ -359,7 +359,7 @@ Resources:
       LicenseModel: license-included
       DBInstanceClass: !Ref DBInstanceClass
       AllocatedStorage: '20'
-      MultiAZ: false                  # Ledgerline does not support Multi-AZ; stays single-instance
+      MultiAZ: false                  # single-AZ baseline - this is the starting state, not a limit
       StorageEncrypted: true
       MasterUsername: !Ref DBMasterUsername
       MasterUserPassword: !Ref DBMasterPassword

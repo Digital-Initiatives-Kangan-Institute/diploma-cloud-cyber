@@ -11,8 +11,8 @@ The design is a proportionate improvement of the single-AZ Ledgerline (Accountin
 ICTCLD504 el 1 (analyse) + el 2 (design). Four components (network / compute / database / storage),
 each improved across all four optimisation concerns (security, reliability, scalability, cost), plus a
 light India residency slice (CERT-In logs + Companies-Act books-of-account only). Provisioned as
-parameterised CloudFormation. HA = Multi-AZ application tier; the database stays single-instance with
-backup/restore + cross-Region DR (Ledgerline does not support a Multi-AZ database). Scalability = elastic-capacity-on-demand (demonstrable),
+parameterised CloudFormation. HA = Multi-AZ across the application and database tiers, with
+backup/restore + cross-Region DR behind it. Scalability = elastic-capacity-on-demand (demonstrable),
 not a forecast of load growth. Cost-versus-benefit justification rides here (no separate business case).
 
 The CloudFormation *write* is the AT2 team work and is NOT assessed against 504 (it is ICTCLD505,
@@ -150,10 +150,9 @@ def build(path, exemplar=True):
     ev("[ICTCLD504 PC 1.2] identify business impact")
     add_bullet_list(doc, [
         "The application tier runs in a single Availability Zone — an AZ or instance failure takes the system down.",
-        "The database is a single instance with no standby. Ledgerline cannot run on a Multi-AZ (mirrored) database — it is "
-        "vendor-certified single-instance only (see the Cloud Migration Technical Finding) — so automatic database failover "
-        "is not available; an AZ or instance failure means an outage and a restore-from-backup. This residual single point "
-        "of failure is mitigated, not eliminated, by the reliability improvements below.",
+        "The database is a single instance with no standby, so an AZ or instance failure means an outage and a "
+        "restore-from-backup. Ledgerline runs on a managed Multi-AZ database, so this single point of failure can be "
+        "removed outright by the reliability improvements below.",
         "Network and data subnets exist in one AZ only, so nothing downstream can be made resilient until the network "
         "spans two AZs.",
     ])
@@ -162,7 +161,7 @@ def build(path, exemplar=True):
               [["Security", "Internal-only (VPN), encrypted at rest, security groups in place; patching/role posture not hardened",
                 "Tighten least-privilege, managed patching, secrets and TLS (encryption at rest is already in the baseline)"],
                ["Reliability", "Single-AZ compute and single-instance database; 99.5% business-hours target",
-                "Make the application tier Multi-AZ (survive AZ/instance failure automatically); the database cannot be Multi-AZ (Ledgerline constraint), so strengthen backup, point-in-time restore and cross-Region DR instead"],
+                "Make the application tier Multi-AZ and convert the database to a Multi-AZ deployment with an automatic-failover standby, so both tiers survive an AZ/instance failure automatically; keep backup, point-in-time restore and cross-Region DR behind them"],
                ["Scalability", "ASG target-tracking exists; subnets/endpoints not sized for elastic growth",
                 "Confirm elastic-on-demand headroom across the tiers (not extra capacity for load not expected)"],
                ["Cost", "Instances run 24/7 though the system is idle overnight; storage untiered; SQL licensing not reviewed",
@@ -174,15 +173,15 @@ def build(path, exemplar=True):
     ev("[ICTCLD504 PC 1.6] set business goals for security, reliability, performance and cost · [ICTCLD504 PC 2.1] confirm performance metrics")
     add_data_table(doc, ["Concern", "Goal", "Metric"],
               [["Security", "Least-privilege, secrets-managed, managed-patch posture (baseline already encrypted at rest)", "0 plaintext secrets; managed-patch compliance reported; least-privilege roles/SGs in place"],
-               ["Reliability", "App tier survives an AZ/instance failure automatically; database recovers within the business-day RTO from backup (Multi-AZ database not available — Ledgerline constraint)", "App tier: auto-recovery < 15 min on AZ/instance failure. Database: RPO <= 1 hour (frequent log backups); RTO within the agreed business day via point-in-time restore / cross-Region copy"],
+               ["Reliability", "Application tier and database both survive an AZ/instance failure automatically; backup, point-in-time restore and cross-Region DR cover data loss, corruption and Region-level events", "App tier: auto-recovery < 15 min on AZ/instance failure. Database: automatic failover under two minutes; RPO <= 1 hour (frequent log backups); cross-Region restore within the agreed business day"],
                ["Scalability", "Elastic on demand for the month-end/EOFY peak", "Demonstrated scale-out under a controlled load test; no manual capacity change"],
                ["Cost", "Cut spend on the idle profile without losing service", "Compute hours reduced outside business hours; storage cost/GB reduced via tiering"],
                ["Compliance", "India log + books residency met", "CERT-In logs retained 180 days in ap-south-1; books-of-account retrievable in India"]],
               widths=[2.4, 6.2, 7.4])
     h3("3.4 Review findings summary")
     add_body_paragraph(doc, "Reviewed against IR-1 to IR-7, the improvement is: make the application tier Multi-AZ on a two-AZ "
-                 "network (the database stays single-instance — Ledgerline does not support Multi-AZ — with strengthened "
-                 "backup, point-in-time restore and cross-Region DR), harden security, realise the idle-profile and storage cost "
+                 "network and convert the database to a Multi-AZ deployment with an automatic-failover standby (with "
+                 "backup, point-in-time restore and cross-Region DR behind it), harden security, realise the idle-profile and storage cost "
                  "savings, confirm elastic headroom, and add the light India residency slice for regulatory logs and "
                  "financial records. The application, its SQL Server stack and its data are preserved (IR-4); every change "
                  "is proportionate and cost-justified (IR-2, IR-6).")
@@ -232,21 +231,20 @@ def build(path, exemplar=True):
     ev("[ICTCLD504 PC 2.2] improve database resources · [ICTCLD504 PC 2.3] improve for the four concerns")
     add_data_table(doc, ["Concern", "Improvement"],
               [["Security", "Encryption in transit (TLS); credentials in Secrets Manager with rotation; security group restricting access to the app tier; not publicly accessible (encryption at rest is already enabled in the baseline)"],
-               ["Reliability", "Single instance retained — Ledgerline does not support a Multi-AZ (mirrored) database (see the Cloud Migration Technical Finding), so automatic failover is not an option. Reliability is delivered instead by automated backups with point-in-time recovery, frequent transaction-log backups (RPO <= 1 hour), an automated cross-Region backup copy to a second Australian Region (Melbourne, ap-southeast-4) for disaster recovery — keeping financial data in Australia — and a tested restore runbook that recovers within the business-day RTO"],
+               ["Reliability", "Converted to a Multi-AZ deployment — a synchronously replicated standby in the second Availability Zone with automatic failover under two minutes, removing the database as a single point of failure. The application reaches the database by endpoint name, so failover needs no reconfiguration. Behind it: automated backups with point-in-time recovery, frequent transaction-log backups (RPO <= 1 hour), an automated cross-Region backup copy to a second Australian Region (Melbourne, ap-southeast-4) for disaster recovery — keeping financial data in Australia — and a tested restore runbook"],
                ["Scalability", "Right-sized instance class; storage autoscaling enabled; a read replica noted as headroom for month-end reporting (not provisioned by default — proportionate)"],
                ["Cost", "Right-sized to measured load; a Savings Plan / Reserved Instance for the steady baseline; SQL Server licensing model reviewed (License Included vs BYOL) and made explicit; backup retention tuned (long-term financial-records retention handled by export to S3, not live RDS)"]],
               widths=[2.4, 13.2])
 
-    add_body_paragraph(doc, "Reliability decision — cost versus benefit (IR-2, IR-6). The only way to give the database "
-                 "automatic high availability would be to replace Ledgerline with an accounting product that supports a "
-                 "Multi-AZ database — a new software licence, a full data-migration project, staff retraining and change "
-                 "management, and the associated delivery and business risk. Weighed against the actual need — an internal, "
-                 "business-hours finance system with outsourced payroll, an estimated $400/hour business-hours cost of "
-                 "downtime, and an accepted business-day RTO — that programme is disproportionate and is not recommended. "
-                 "The proportionate choice is to keep Ledgerline on a single-instance database and meet reliability through "
-                 "robust automated backups, point-in-time restore and cross-Region DR, accepting a short, bounded "
-                 "restore-time gap on the rare AZ/instance failure. The application tier is made Multi-AZ regardless, "
-                 "because that is low-cost and fully supported.")
+    add_body_paragraph(doc, "Reliability decision — cost versus benefit (IR-2, IR-6). Converting the database to Multi-AZ "
+                 "roughly doubles its instance and storage cost, because a standby of the same class runs alongside the "
+                 "primary. Weighed against the actual need — an internal, business-hours finance system with outsourced "
+                 "payroll, an estimated $400/hour business-hours cost of downtime, and a two-hour recovery-time objective "
+                 "that a restore-only recovery does not reliably meet — the standby is proportionate and is recommended: "
+                 "it takes database recovery from hours to under two minutes, with no application change and no manual "
+                 "intervention. Backup, point-in-time restore and the cross-Region DR copy are retained behind it, because "
+                 "failover addresses AZ and instance failure but not data loss, corruption or a Region-level event. The "
+                 "application tier is made Multi-AZ on the same reasoning, at lower cost again.")
 
     h3("4.7 Component 4 — Storage (S3 + EBS) and the India residency slice")
     ev("[ICTCLD504 PC 2.2] improve storage resources · [ICTCLD504 PC 2.3] improve for the four concerns")
@@ -275,18 +273,19 @@ def build(path, exemplar=True):
                  "consistently (IR-5).")
     h3("4.10 Goals and metrics — designed state")
     ev("[ICTCLD504 PC 1.5] confirm design decisions · [ICTCLD504 PC 2.3] improve for the four concerns")
-    add_body_paragraph(doc, "Each goal in §3.3 is met by the design above: reliability by a Multi-AZ application tier on a "
-                 "two-AZ network (auto-failover) plus strengthened database backup, point-in-time restore and cross-Region "
-                 "DR (the database cannot be Multi-AZ — Ledgerline constraint); scalability by the retained ASG target-tracking plus "
+    add_body_paragraph(doc, "Each goal in §3.3 is met by the design above: reliability by a Multi-AZ application tier and a "
+                 "Multi-AZ database with an automatic-failover standby on a two-AZ network, backed by database backup, "
+                 "point-in-time restore and cross-Region DR; scalability by the retained ASG target-tracking plus "
                  "elastic storage and endpoint headroom (demonstrable on demand, not over-provisioned); cost by the "
                  "business-hours schedule, storage tiering, right-sizing and the licensing review; security by the "
                  "hardening, encryption and least-privilege posture; compliance by the India residency slice.")
     h3("4.11 Single points of failure removed")
-    add_body_paragraph(doc, "The single-AZ compute SPOF (§3.1) is removed: the application tier runs across two AZs behind "
-                 "the internal ALB on a network that now spans both AZs. The database remains a single instance — Ledgerline "
-                 "does not support Multi-AZ — so its outage risk is not eliminated but is mitigated to a short, bounded "
-                 "restore-time gap by automated backups, point-in-time restore and a cross-Region DR copy; accepting that "
-                 "residual risk is the proportionate, cost-justified decision (§4.6).")
+    add_body_paragraph(doc, "Both single points of failure identified in §3.1 are removed. The application tier runs across "
+                 "two AZs behind the internal ALB on a network that now spans both AZs. The database runs as a Multi-AZ "
+                 "deployment with a synchronous standby in the second AZ and automatic failover, so an AZ or instance "
+                 "failure no longer takes the system down. Automated backups, point-in-time restore and the cross-Region "
+                 "DR copy remain in place to cover what failover does not: data loss, corruption and Region-level events "
+                 "(§4.6).")
 
     # 5 Implementation Sequencing
     h1("5. Implementation Sequencing")
@@ -304,7 +303,7 @@ def build(path, exemplar=True):
     h1("6. Verification Plan")
     add_body_paragraph(doc, "How the design is shown to meet the goals (§3.3); the evidence is produced at deployment.")
     add_bullet_list(doc, [
-        "Reliability — terminate an app instance and confirm the ASG replaces it across AZs with no outage (application-tier auto-recovery); for the database, perform a point-in-time restore and a cross-Region (Melbourne) DR restore and confirm recovery within the business-day RTO with RPO <= 1 hour and no data loss. The database is single-instance — no Multi-AZ failover to test — per the Ledgerline constraint.",
+        "Reliability — terminate an app instance and confirm the ASG replaces it across AZs with no outage (application-tier auto-recovery); force a database failover and confirm the standby is promoted automatically, the application reconnects by endpoint name without reconfiguration, and service resumes inside two minutes; and perform a point-in-time restore and a cross-Region (Melbourne) DR restore, confirming recovery with RPO <= 1 hour and no data loss.",
         "Scalability — a controlled load test ramps to the month-end peak; confirm the ASG scales out and back and storage/endpoints absorb growth, with no manual capacity change.",
         "Security — confirm encryption at rest/in transit, least-privilege roles/SGs, patch compliance, and no plaintext secrets.",
         "Cost — confirm the business-hours schedule stops/starts compute and the storage lifecycle transitions older objects; report the operating-cost delta.",
@@ -371,23 +370,22 @@ def build(path, exemplar=True):
               "Q2. Explain how your design avoids single points of failure and how you would test that it does.",
               "The baseline's single points of failure are the single-AZ application tier and the single-instance database. "
               "The design removes the application-tier SPOF by spanning the network across two AZs and running the "
-              "application Auto Scaling group across both AZs behind the internal load balancer. The database, however, "
-              "cannot be made Multi-AZ — Ledgerline is vendor-certified only on a single, non-mirrored instance (see the "
-              "Cloud Migration Technical Finding) — so that SPOF cannot be removed by failover; it is instead mitigated to "
-              "a short, bounded restore-time gap by automated backups, point-in-time recovery, frequent transaction-log "
-              "backups and a cross-Region DR copy. Testing: terminate an application instance and confirm the ASG replaces "
-              "it with no outage; remove an AZ's capacity and confirm the application stays available from the other AZ; "
-              "and perform a point-in-time restore and a cross-Region DR restore, confirming recovery within the "
-              "business-day RTO with no data loss. Accepting the residual database SPOF is a proportionate, cost-justified "
-              "decision for a business-hours finance system — replacing Ledgerline to obtain database failover would be "
-              "disproportionate.")
+              "application Auto Scaling group across both AZs behind the internal load balancer. The database SPOF is "
+              "removed the same way: the instance is converted to a Multi-AZ deployment with a synchronously replicated "
+              "standby in the second AZ and automatic failover, which the application follows by endpoint name without "
+              "reconfiguration. Backups, point-in-time recovery, frequent transaction-log backups and a cross-Region DR "
+              "copy remain behind it, because failover does not protect against data loss, corruption or a Region-level "
+              "event. Testing: terminate an application instance and confirm the ASG replaces it with no outage; remove an "
+              "AZ's capacity and confirm the application stays available from the other AZ; force a database failover and "
+              "confirm the standby is promoted and service resumes inside two minutes; and perform a point-in-time restore "
+              "and a cross-Region DR restore, confirming recovery with no data loss.")
 
         ke_qa("[ICTCLD504 KE 9] — features of cloud services, including techniques to improve security, reliability, scalability and cost",
               "Q3. For each of the four optimisation concerns, name a cloud feature your design uses and the improvement it delivers.",
               "Security — KMS encryption, Secrets Manager and least-privilege IAM roles remove plaintext secrets and "
               "tighten access. Reliability — a cross-AZ Auto Scaling group survives an AZ or instance failure "
-              "automatically; the database cannot be Multi-AZ (Ledgerline constraint), so it is protected by automated "
-              "backups, point-in-time recovery and a cross-Region DR copy. Scalability — ASG target-tracking and elastic gp3/S3 storage add capacity on "
+              "automatically, and a Multi-AZ database promotes its standby automatically, with backups, point-in-time "
+              "recovery and a cross-Region DR copy behind it. Scalability — ASG target-tracking and elastic gp3/S3 storage add capacity on "
               "demand without manual change or over-provisioning. Cost — a business-hours start/stop schedule on the "
               "idle-overnight compute and S3 lifecycle tiering on the growing document store cut spend without reducing "
               "service.")
@@ -410,7 +408,7 @@ def build(path, exemplar=True):
 if __name__ == "__main__":
     # __file__-anchored (NOT cwd-relative) so output can't land in a phantom tree.
     content_root = Path(__file__).resolve().parents[2]          # diploma-cloud-cyber-content
-    website = content_root.parent / "diploma-cloud-cyber-website"  # sibling under the umbrella
+    website = content_root.parent / "diploma-cloud-cyber-website-s1"  # sibling under the umbrella
     # Exemplar (assessor marking reference) stays in the content repo's AT1 folder.
     exemplar_out = content_root / "S1-CL3-Cloud-Infrastructure-Improvement" / "assessments" / "AT1" / "AT1-exemplar-solution-design.docx"
     # Approved design (in-world, distributed at AT2) lives in the website documents folder; print to PDF there.
