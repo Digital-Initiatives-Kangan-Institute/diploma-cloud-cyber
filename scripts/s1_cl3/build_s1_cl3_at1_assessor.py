@@ -4,7 +4,7 @@
 AT1 = Cloud Infrastructure Improvement: Design. ICTCLD504 elements 1–2: analyse the Ledgerline
 cloud baseline, design a proportionate improvement, present it and obtain sign-off to proceed.
 
-ONE DEFINITION, TWO INSTRUMENTS — content in at1_run_sheet.py, rendered worked for the assessor
+ONE DEFINITION, TWO INSTRUMENTS — content in s1_cl3_at1_run_sheet.py, rendered worked for the assessor
 and blank for the student. The marking guide's traceability lines and the reverse map are
 derived from the workbook's own tags (helpers.workbook_instrument), and the Kangan wiring is the
 shared `assemble`.
@@ -28,7 +28,7 @@ sys.path.insert(0, str(next(d / "scripts" for d in Path(__file__).resolve().pare
 from helpers.workbook_instrument import (assemble, benchmark_sections,  # noqa: E402
                                          collect_elements, marking_guide, reverse_map_body,
                                          unevidenced_items)
-import at1_run_sheet as content  # noqa: E402
+import s1_cl3_at1_run_sheet as content  # noqa: E402
 
 DETAILS = {
     "qualification": "ICT50220 Diploma of Information Technology",

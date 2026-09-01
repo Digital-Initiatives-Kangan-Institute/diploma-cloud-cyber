@@ -28,7 +28,7 @@ sys.path.insert(0, str(next(d / "scripts" for d in Path(__file__).resolve().pare
 from helpers.workbook_instrument import (assemble, benchmark_sections,  # noqa: E402
                                          collect_elements, marking_guide, reverse_map_body,
                                          unevidenced_items)
-import at2_run_sheet as content  # noqa: E402
+import s1_cl3_at2_run_sheet as content  # noqa: E402
 
 DETAILS = {
     "qualification": "ICT50220 Diploma of Information Technology",

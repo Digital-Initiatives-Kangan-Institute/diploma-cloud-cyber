@@ -38,7 +38,10 @@ CLUSTERS = {
         pkg="s1_cl2", cluster_dir="S1-CL2-Cloud-Disaster-Recovery", n_ats=2,
         assessors=["build_s1_cl2_at1_assessor", "build_s1_cl2_at2_assessor"],
         build_mod="build_s1_cl2_mapping_docs",
-        fs_source="map_only", ac_source="map_only",
+        # FS comes from the benchmarks, which tag foundation skills on the tasks that exercise
+        # them, and falls back to FS_MAP only where they don't. AC stays map-only: the
+        # benchmarks don't tag assessment conditions — those are instrument Conditions (C1…Cn).
+        fs_source="benchmark_then_map", ac_source="map_only",
     ),
     "cl3": dict(
         pkg="s1_cl3", cluster_dir="S1-CL3-Cloud-Infrastructure-Improvement", n_ats=3,

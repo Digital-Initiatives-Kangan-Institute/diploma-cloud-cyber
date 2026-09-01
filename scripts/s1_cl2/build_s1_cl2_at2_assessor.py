@@ -5,7 +5,7 @@ AT2 = Cloud Microservice & IaC Implementation — the build phase of the Website
 engagement. ICTCLD503 elements 3–4 (deploy and configure the microservice, monitoring, sign-off)
 + ICTCLD505 in full (infrastructure as code).
 
-ONE DEFINITION, TWO INSTRUMENTS — content in at2_run_sheet.py, rendered worked here and blank in
+ONE DEFINITION, TWO INSTRUMENTS — content in s1_cl2_at2_run_sheet.py, rendered worked here and blank in
 build_s1_cl2_at2_student.py. The marking guide's traceability lines and the reverse map are
 derived from the workbook's own tags by helpers.workbook_instrument.
 
@@ -35,7 +35,7 @@ from helpers.instrument_layout import render_benchmark  # noqa: E402
 from helpers.workbook_instrument import (benchmark_sections, build_reverse_map,  # noqa: E402
                                          collect_elements, load_uoc_text, marking_guide,
                                          unevidenced_items)
-import at2_run_sheet as content  # noqa: E402
+import s1_cl2_at2_run_sheet as content  # noqa: E402
 
 CHECK = "☐ Yes  ☐ No"
 

@@ -48,9 +48,9 @@ from helpers.instrument_layout import render_benchmark  # noqa: E402
 from helpers.workbook_instrument import (benchmark_sections, build_reverse_map,  # noqa: E402
                                          collect_elements, load_uoc_text, marking_guide,
                                          unevidenced_items)
-import at1_part_a_run_sheet as part_a  # noqa: E402
-import at1_part_b_run_sheet as part_b  # noqa: E402
-import at1_part_c_run_sheet as part_c  # noqa: E402
+import s1_cl2_at1_part_a_run_sheet as part_a  # noqa: E402
+import s1_cl2_at1_part_b_run_sheet as part_b  # noqa: E402
+import s1_cl2_at1_part_c_run_sheet as part_c  # noqa: E402
 
 CHECK = "☐ Yes  ☐ No"
 

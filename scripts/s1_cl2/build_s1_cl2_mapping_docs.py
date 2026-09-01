@@ -9,9 +9,8 @@
    • To (re)generate:   python scripts/mapping/generate_mapping_doc.py --build cl2
    • To add a NEW cluster: add a CLUSTERS entry in the engine — do NOT copy this script's shape.
    • Contract + pipeline: docs/mapping-document-standard.md
-   Idiosyncrasy kept for the validator: _split_codes() (CL2 criteria are one flat list per item,
-   split A/B/C->AT1, D->AT2). The engine instead inverts each AT's benchmark under its own column;
-   both yield the same result (proven by `--check cl2`). Prefer the engine's per-AT model for new work.
+   invert_benchmarks() returns the inversion already split by AT, the same shape the CL3 module
+   uses and the shape the engine and the mapping-doc validator both consume.
 ================================================================================
 
 Build the S1-CL2 per-UoC Assessment Mapping docx files (ICTCLD501/503/505).
@@ -258,16 +257,29 @@ def _parse_tags(s):
                 yield (cur_unit, section, item)
 
 
+AT_BENCHMARKS = [("AT1", a1), ("AT2", a2)]
+
+
 def invert_benchmarks():
-    """Return {(unit, section, item): [criteria...]} across AT1 + AT2."""
+    """Return {(unit, section, item): {'AT1': [criteria...], 'AT2': [...]}}.
+
+    Split by AT at the source, from which assessor's benchmark a criterion came out of. This
+    used to return one flat list per item and leave the split to `_split_codes()`, which
+    inferred the AT from the criterion code's first letter (A/B/C meant AT1, D meant AT2). That
+    made a criterion code carry hidden meaning: renaming AT2's criteria silently emptied its
+    column in every mapping document, and the mapping-doc validator reported the documents as
+    wrong when they were right. The AT is knowable here, so it is recorded rather than encoded.
+
+    Same shape as the CL3 module's, which is the model to follow for new clusters.
+    """
     out = {}
-    for bench in (a1.BENCHMARK, a2.BENCHMARK):
-        for _part_title, rows in bench:
+    for at, mod in AT_BENCHMARKS:
+        for _part_title, rows in mod.BENCHMARK:
             for cid, uoc in rows:
                 for tag in _parse_tags(uoc):
-                    out.setdefault(tag, [])
-                    if cid not in out[tag]:
-                        out[tag].append(cid)
+                    d = out.setdefault(tag, {"AT1": [], "AT2": []})
+                    if cid not in d[at]:
+                        d[at].append(cid)
     return out
 
 
@@ -284,7 +296,9 @@ def dump(unit_key):
           f"PE={len(items['pes'])} KE={len(items['kes'])} AC={len(items['acs'])}")
 
     def codes_for(section, item):
-        return ", ".join(inv.get((code, section, item), [])) or "-- (unmapped)"
+        by_at = inv.get((code, section, item), {})
+        both = [f"{at}:{', '.join(c)}" for at in ("AT1", "AT2") if (c := by_at.get(at))]
+        return "  ".join(both) or "-- (unmapped)"
 
     print("\n-- PCs --")
     for num, txt, _elem in items["pcs"]:
@@ -306,16 +320,8 @@ def dump(unit_key):
 # ----------------------------------------------------------------------------
 # docx generation — delegated to the shared engine (scripts/mapping/generate_mapping_doc.py).
 # This module supplies the data (UNITS, FS_MAP, AC_MAP, titles) + the inversion the engine and the
-# validator read; _split_codes below (still used by the validator) splits the flat criterion list
-# into AT columns. The docx-building mechanics are the engine's, one code path for all clusters.
+# validator read. The docx-building mechanics are the engine's, one code path for all clusters.
 # ----------------------------------------------------------------------------
-
-
-def _split_codes(crits):
-    """Split a criterion-code list into (AT1, AT2) strings. A/B/C -> AT1, D -> AT2."""
-    at1 = [c for c in crits if c[:1] in ("A", "B", "C")]
-    at2 = [c for c in crits if c[:1] == "D"]
-    return ", ".join(at1), ", ".join(at2)
 
 
 def build_unit(unit_key):
