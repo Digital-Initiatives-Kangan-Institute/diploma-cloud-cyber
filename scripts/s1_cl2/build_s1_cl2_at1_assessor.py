@@ -1,48 +1,60 @@
 #!/usr/bin/env python3
 """Build the S1-CL2 AT1 ASSESSOR instrument (.docx) by populating the Kangan template.
 
-This is an institutional compliance document, NOT a YAT-branded artefact: it loads the
-official Kangan 'Project Assessment - Assessor' template and fills it in, preserving the
-Kangan structure and styles exactly (Details, Teacher/Assessor instructions, Marking Guide,
-Instructions to Student, Benchmark). It mirrors the shape of the approved CL1 AT1 assessor
-instrument.
+An institutional compliance document, not a YAT-branded artefact: it loads the official Kangan
+'Project Assessment - Assessor' template and fills it in, then renders the workbook worked.
 
-AT1 = Cloud Expansion: Design & DR Plan — three parts:
-  Part A  Solution Design  (ICTCLD503 design: web-scale + microservice)
-  Part B  DR Plan          (ICTCLD501)
-  Part C  Presentation     (ICTCLD501 element 5 — the approval gate; verbal KE Q&A)
+AT1 = Cloud Expansion: Design & DR Plan — three parts, one continuous worksheet:
+  Part A  Design      (ICTCLD503 elements 1–2 — web-scale + microservice)
+  Part B  DR Plan     (ICTCLD501 elements 1–4)
+  Part C  Approval    (ICTCLD501 element 5 — the design-approval gate)
 
-Vehicle (per scenario-flow): CL2 ASSESSES on the YAT website. The website is a public,
-unauthenticated site (anonymous visitors), which is why the web-scale design carries edge
-delivery, WAF / bot / DDoS protection and SEO — the deliberate contrast with the LMS practice
-vehicle (an authenticated cohort).
+ONE DEFINITION, TWO INSTRUMENTS. The content lives in at1_part_{a,b,c}_run_sheet.py and is
+rendered worked here and blank in build_s1_cl2_at1_student.py. Nothing about the task text
+exists twice.
 
-Knowledge evidence: each report carries a written Knowledge Evidence appendix (the mandatory
-location — A12 for the Solution Design's 503 KE; B15 for the DR Plan's 501 KE, including the
-detection/alerting KE 6), with the same KE re-covered verbally at the Part C Q&A (C5). The
-worked model answers live in the YAT-branded exemplars (build_at1_*_exemplar); this document
-carries the task instructions and the marking guide with bidirectional UoC traceability.
+THE MARKING APPARATUS IS DERIVED. The criteria below declare which tasks each one groups; the
+UoC-traceability line on each criterion and the whole reverse-map table are computed from the
+workbook's own `uoc` tags by helpers.workbook_instrument. Adding a tag to a task carries it into
+the marking guide and the reverse map automatically, and a criterion that groups untagged tasks
+raises at build time rather than shipping as a free-floating criterion.
 
-Usage:  python scripts/build_at1_assessor.py [output.docx]
+WHY PART A AND PART C CARRY NO SEPARATE TEMPLATE. ICTCLD503's assessment conditions name no
+document format, so `[ICTCLD503 PC 1.7]` / `[PC 2.4]` "document and justify" are met by the
+worksheet, and `[ICTCLD501 PC 5.1]` requires a VERBAL walkthrough, not a deck. Part B is the
+exception: `[ICTCLD501 AC 3]` names "reporting standards for documenting and communicating
+disaster recovery plan", so the DR Plan is assembled into the YAT template at task 37 and both
+the worksheet and the plan are submitted.
+
+Usage:  python scripts/s1_cl2/build_s1_cl2_at1_assessor.py [output.docx]
 Default: S1-CL2-Cloud-Disaster-Recovery/assessments/AT1/AT1-Design-DR-Plan-Assessor.docx
 """
 import sys
 from pathlib import Path
 
 from docx import Document  # noqa: E402
-from docx.oxml.ns import qn  # noqa: E402
 
-TEMPLATE = str(Path(__file__).resolve().parents[2] / "kangan-templates" / "Project Assessment - Assessor.docx")
+TEMPLATE = str(Path(__file__).resolve().parents[2] / "kangan-templates" /
+               "Project Assessment - Assessor.docx")
+CLUSTER = (Path(__file__).resolve().parents[2] / "S1-CL2-Cloud-Disaster-Recovery")
 
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # noqa: E402
+sys.path.insert(0, str(next(d / "scripts" for d in Path(__file__).resolve().parents
+                            if (d / "scripts" / "helpers" / "__init__.py").exists())))  # noqa: E402
+from helpers.docx_tables import (clear_table_rows, find_instruction_row,  # noqa: E402
+                                 set_cell_content)
+from helpers.instrument_layout import render_benchmark  # noqa: E402
+from helpers.workbook_instrument import (benchmark_sections, build_reverse_map,  # noqa: E402
+                                         collect_elements, load_uoc_text, marking_guide,
+                                         unevidenced_items)
+import at1_part_a_run_sheet as part_a  # noqa: E402
+import at1_part_b_run_sheet as part_b  # noqa: E402
+import at1_part_c_run_sheet as part_c  # noqa: E402
 
-# ---------- cell / table helpers (preserve template styles) ----------
+CHECK = "☐ Yes  ☐ No"
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # content-repo scripts/ (brand + registry)  # noqa: E402
-sys.path.insert(0, str(next(d / "scripts" for d in Path(__file__).resolve().parents if (d / "scripts" / "helpers" / "__init__.py").exists())))  # umbrella scripts/ (engine)  # noqa: E402
-from helpers.docx_tables import add_criterion_row, add_section_row, clear_table_rows, find_instruction_row, set_cell_content  # noqa: E402
-
-
-# ---------- content ----------
+# ---------------------------------------------------------------- Kangan front matter
 
 DETAILS = {
     "qualification": "ICT50220 Diploma of Information Technology",
@@ -50,354 +62,387 @@ DETAILS = {
         "ICTCLD501 Develop cloud disaster recovery plans",
         "ICTCLD503 Implement web-scale cloud infrastructure",
     ],
-    "task_title": "AT1 – Cloud Expansion: Design & DR Plan",
+    "task_title": "AT1 — Cloud Expansion: Design & DR Plan",
     "task_number": "1 of 2",
 }
 
-OVERVIEW = (
-    "Students are assessed on the cloud design and disaster-recovery planning for the YAT website global "
-    "expansion. Working as an MP Tech Solutions (MTS) consultant, the student produces a Solution Design "
-    "(Part A) and a Disaster Recovery Plan (Part B) for the expanded public website, then presents both to "
-    "YAT ICT management for approval (Part C). This is the design-and-planning phase of the engagement; the "
-    "approved design and plan are implemented in AT2."
-)
+TIME_ALLOWED = [
+    "Part A — Design: 6 hours",
+    "Part B — Disaster Recovery Plan: 6 hours, plus the time to assemble the plan document",
+    "Part C — Presentation and approval: a 20-minute session, scheduled with the assessor",
+    "One continuous worksheet. Time is indicative — a student who needs longer continues in the "
+    "next session rather than submitting incomplete work.",
+]
+
+OVERVIEW = [
+    "Students are assessed on designing the cloud architecture for the YAT website's global "
+    "expansion, planning its disaster recovery, and obtaining approval to proceed to "
+    "implementation. AT1 is the first of two assessment tasks in the S1-CL2 Cloud Disaster "
+    "Recovery cluster.",
+    "The assessment is one guided workbook in three parts, submitted as a single document. Part A "
+    "leads the student task by task through the web-scale design and the audit-log microservice. "
+    "Part B does the same for the disaster recovery analysis and plan, and closes by assembling "
+    "that work into the YAT Disaster Recovery Plan template. Part C is a live session in which the "
+    "student walks the role-played YAT ICT Manager through both, responds to feedback, lodges the "
+    "plan and obtains sign-off.",
+    "WHAT IS BEING MARKED. Every settings table and worked answer in this document contains values "
+    "we chose so that there is a concrete task to perform — the units' wording is deliberately "
+    "general. Each element therefore carries two assessor-only lines: 'Evidences', naming the UoC "
+    "items, and 'Satisfactory when', naming what has to be true for those items to be met. Mark "
+    "the second. A student whose design differs from ours but who meets the stated standard is "
+    "Satisfactory; a student who matches ours but misses the standard is not.",
+    "WHAT IS SUBMITTED. The completed workbook, and the completed YAT Disaster Recovery Plan "
+    "assembled at task 37. The DR Plan is the artefact marked for [ICTCLD501 PC 4.3]; the "
+    "workbook is the evidence that the thinking behind it is the student's own. Where the two "
+    "differ materially, ask the student about it before marking.",
+    "The design in Part A is the student's own and is NOT corrected before Part B. A disaster "
+    "recovery plan is written for a designed system, so Part B plans recovery for whatever the "
+    "student designed — including its weaknesses. Correcting the design first would make Part B a "
+    "plan for the assessor's architecture rather than the student's.",
+    "This is an open-book assessment. Students may use the YAT intranet, AWS documentation, course "
+    "materials and external research (which must be cited). They may not use another student.",
+    "Reasonable adjustment may include extending the time for either written part, providing "
+    "one-on-one verbal explanation of the supplied environment, allowing the Part C session to be "
+    "held by video conference, or splitting the work across more sittings.",
+    "Teacher/assessor support level: the assessor may clarify what a task is asking, the scenario "
+    "context and the supplied environment, but must not identify design options for the student, "
+    "supply recovery objectives, or confirm whether a design decision is correct.",
+    "The assessment will not proceed if for any reason it is not safe to do so. You must advise "
+    "the student of the reason for suspending the assessment, and what safety action should be "
+    "taken. Advise the student of revised arrangements when it is safe to do so.",
+    "There is a zero tolerance for plagiarism, cheating and collusion. Students will be expected "
+    "to make a declaration that all work is their own prior to submission. Refer to the Training "
+    "and Assessment Policy for further information.",
+]
+
+# The student copy takes the overview and resources that are addressed to the STUDENT. The
+# assessor-facing paragraphs — how to mark, support level, reasonable adjustment — and the
+# assessor-supplied resource list are omitted, along with any UoC tag. Gate 9 fails the build
+# otherwise, which is the check working.
+STUDENT_OVERVIEW = [
+    OVERVIEW[0], OVERVIEW[1],
+    "WHAT YOU SUBMIT. The completed workbook, and the completed YAT Disaster Recovery Plan you "
+    "assemble at task 37. The plan is the document your recovery planning is marked on; the "
+    "workbook is the evidence that the thinking behind it is yours. Keep the two consistent.",
+    "Your Part A design is your own and is not corrected before you start Part B. You plan "
+    "recovery for the system you designed, whatever you designed.",
+    OVERVIEW[5],
+    OVERVIEW[8], OVERVIEW[9],
+]
+
+STUDENT_RESOURCES = [
+    "Access to the YAT scenario site / intranet — supplying the engagement requirements, the "
+    "residency requirements, the infrastructure and application specifications, the deprecated "
+    "on-premises DR Plan, the YAT policies and the industry-standards reference. Every document "
+    "you need is linked from the task it belongs to",
+    "The YAT Disaster Recovery Plan template, from the intranet's Templates section — you need it "
+    "at task 37",
+    "Your assessor will role-play Sam Walker, YAT ICT Manager, for the Part C session",
+    "Computer with web browser",
+    "Word-processing software (e.g. Microsoft Word or equivalent)",
+]
 
 TASKS = [
-    "In this project the student takes on the role of an MTS consultant engaged by YAT College to design "
-    "the changes that prepare the public website for its India-campus expansion and to plan its disaster "
-    "recovery. The project has three parts:",
-    "• Part A — Solution Design: a written design covering the web-scale architecture (serving a "
-    "global, anonymous public audience) and an audit-log microservice. Produced in the YAT Solution "
-    "Design template.",
-    "• Part B — Disaster Recovery Plan: a written DR plan for the designed website — risk and "
-    "impact analysis, recovery objectives (RTO/RPO), recovery strategy, the recovery runbook, and "
-    "validation. Produced in the YAT Disaster Recovery Plan template.",
-    "• Part C — Presentation: the student presents the Solution Design and DR Plan to YAT ICT "
-    "management (role-played by the assessor) for approval, responds to questions, and obtains sign-off.",
+    "YAT College has entered an offshore partnership in India, and its public website is now the "
+    "enrolment front door for that campus. The website already runs on AWS in Sydney, hardened to "
+    "Multi-AZ high availability. It was never built for an audience on the other side of the "
+    "Indian Ocean, and the India operation brings log-residency obligations the current "
+    "environment cannot meet.",
+    "The task has three parts that combine into a single submission:",
+    "Part A — Design. Nineteen tasks leading the student through the scaling needs the design must "
+    "meet, a review of the current architecture against them, the residency obligation as a design "
+    "input, the services required, the design of each layer, the global-delivery and caching "
+    "decisions, the checks that the design scales and that availability and security are "
+    "maintained, an architecture diagram, and a written justification. Tasks 15–19 do the same for "
+    "the audit-log microservice: its data transactions, its supporting services, its architecture, "
+    "its interface contract, and a written justification.",
+    "Part B — Disaster Recovery Plan. Eighteen tasks covering the recovery requirements, the "
+    "existing arrangements, vendor provisions, recovery objectives per component, the data being "
+    "protected, at least three major risk events, plan exclusions, recovery options and the "
+    "recommended strategy, vendor protections and prioritisation, insurance, the non-technical "
+    "recovery components, detection and alerting, the recovery steps with timings, the arithmetic "
+    "showing the plan meets its objectives, and the standards the plan reflects. Task 18 assembles "
+    "all of it into the YAT Disaster Recovery Plan template.",
+    "Part C — Presentation and approval. The student walks the role-played YAT ICT Manager through "
+    "both documents, answers questions, responds to feedback, lodges the plan per YAT's Records "
+    "Management Policy, and obtains sign-off to proceed to implementation. The first two tasks of "
+    "Part C are the student's own preparation and are not marked.",
+    "MTS scope: cloud infrastructure only. The website content, the CMS and the application stack "
+    "are out of scope, as is legal interpretation of the India obligations — the student designs "
+    "to the compliance area's determination.",
 ]
 
 RESOURCES = [
-    "Teacher/assessor supplied resources / Access to:",
-    "• The YAT scenario site / intranet — the Website Global Expansion project (engagement brief, "
-    "requirements, ICT manager consultation notes, data residency & sovereignty requirements), the ICT "
-    "documents (website specification, HA-hardened solution design baseline), and the deprecated on-prem DR plan.",
-    "• The YAT Solution Design template and YAT Disaster Recovery Plan template (intranet Templates section).",
-    "• AWS Academy Learner Lab — the authorised lab environment (referenced for the design; the build "
-    "itself is AT2).",
-    "• The YAT Document Archive — examples of previous MTS solution designs and DR plans.",
+    "Teacher/assessor supplied resources",
+    "Access to the YAT scenario site / intranet — supplying the Website Global Expansion "
+    "requirements, the Data Residency & Sovereignty Requirements, the Website Infrastructure "
+    "Specifications, the Website Specification, the deprecated on-premises DR Plan, the YAT "
+    "policies and the industry-standards reference. Those documents are linked from the "
+    "Instructions to Student below",
+    "The YAT Disaster Recovery Plan template, available from the intranet's Templates section — "
+    "required for Part B task 18",
+    "A person to role-play Sam Walker, YAT ICT Manager, for the Part C presentation, feedback and "
+    "sign-off — normally the assessor",
+    "The worked workbook later in this document — model answers, per-element UoC mapping, and the "
+    "standard each element is marked against",
+    "Student supplied resources",
+    "Computer with web browser",
+    "Word-processing software (e.g. Microsoft Word or equivalent)",
 ]
 
-CRITERIA_STATEMENT = (
-    "To receive a Satisfactory outcome for this assessment task, the student must complete every criterion in "
-    "the marking guide below to a satisfactory standard. All three parts (A, B and C) must be satisfactory. "
-    "Where a criterion is not yet satisfactory, the student is given feedback and a further attempt per the "
-    "Second attempt provisions."
-)
+CRITERIA = [
+    "To receive a Satisfactory outcome for this assessment the student must:",
+    "Achieve Satisfactory on every criterion in the Marking Guide below",
+    "Submit the completed workbook (.docx) with every task and question answered",
+    "Submit the completed YAT Disaster Recovery Plan assembled at task 37",
+    "Attend the Part C session and obtain sign-off",
+]
 
 CONDITIONS = [
-    "C1 — The YAT scenario site / intranet is accessible to the student throughout the assessment.",
-    "C2 — The student has access to the YAT Solution Design and Disaster Recovery Plan templates.",
-    "C3 — AWS Academy Learner Lab access is available for the student to reference cloud services in the design.",
-    "C4 — For Part C, the assessor role-plays YAT ICT management (Sam Walker, ICT Manager) and conducts "
-    "the approval meeting, capturing feedback and sign-off.",
-    "C5 — The presentation may be delivered in person on campus or via video conference (confirm with the "
-    "assessor).",
+    "These are conditions the assessor verifies as present before marking begins. They are not "
+    "student-performance criteria — they are the conditions under which the assessment can validly "
+    "be conducted.",
+    "C1 The YAT scenario site / intranet is accessible to the student throughout the assessment — "
+    "supplying the engagement requirements, the residency determination, the infrastructure and "
+    "application specifications, the organisational policies and the industry-standards reference",
+    "C2 Cloud platform reference access is available for the student to research services and "
+    "their capabilities — a cloud vendor service provider, its managed database and serverless "
+    "documentation, an internet connection and a web browser. Part A and Part B are design and "
+    "planning tasks: nothing is deployed, so no lab session is required",
+    "C3 The YAT Disaster Recovery Plan template has been made available to the student before "
+    "Part B task 18",
+    "C4 A person is available to role-play Sam Walker, YAT ICT Manager, for the Part C "
+    "presentation, feedback and sign-off",
 ]
 
-# Marking guide: (criterion text) per part. UoC traceability is carried in the Benchmark.
-PART_A = [
-    "A1 — Purpose and scope: states the two design changes (scale for a global, anonymous public audience; "
-    "add the audit-log microservice) and what is in and out of scope.",
-    "A2 — Design inputs and requirements: identifies the source documents and the requirements the design "
-    "must meet, including data residency as an input constraint.",
-    "A3 — Review of the existing architecture: reviews the current website baseline against the requirements "
-    "and identifies the gaps the design closes.",
-    "A4 — Web-scale design — scaling by layer: designs architecture changes using cloud services that "
-    "scale network, compute and storage as utilisation increases.",
-    "A5 — Web-scale design — global delivery: designs the changes needed to serve a global, anonymous "
-    "public audience (edge delivery and discoverability).",
-    "A6 — Web-scale design — availability and security: confirms availability and security are "
-    "maintained through the changes, including protection of the public attack surface (web exploits, bots, "
-    "DDoS), and reviews the design against the requirements.",
-    "A7 — Web-scale component choices: justifies the component choices across SQL/NoSQL, monolith/"
-    "microservice, virtual/container/serverless compute, and CDN/in-memory store.",
-    "A8 — Microservice — services and data transactions: identifies the microservice(s) and the data "
-    "transaction(s) each handles, per business needs.",
-    "A9 — Microservice — supporting cloud services: determines the cloud services that support the "
-    "microservice architecture.",
-    "A10 — Microservice — architecture: designs the microservice architecture (cohesion/coupling, "
-    "persistent storage, API/messaging/queuing), with the interface/integration contract.",
-    "A11 — Architecture documented and justified: the web-scale and microservice design changes are "
-    "documented and justified.",
-    "A12 — Knowledge Evidence appendix: written contextual responses linking the student's design choices "
-    "to the underlying web-scale concepts (components, infrastructure, web-scaling principles).",
-    "A13 — Document quality: the Solution Design uses the YAT template, plain professional English, and is "
-    "complete and internally consistent.",
+# ---------------------------------------------------------------- the marking guide
+# Each criterion declares the workbook tasks it groups. The UoC line and the reverse map are
+# derived from those tasks' own tags — see helpers/workbook_instrument.py.
+
+CRITERIA_MAP = [
+    dict(code="A1", tasks=["1-3"],
+         text="Scaling needs, current-state review and the residency input (tasks 1–3) — "
+              "the student establishes what the design is held to from the supplied documents, "
+              "reviews the current architecture against those needs rather than against general "
+              "good practice, and reads the residency determination correctly, separating what "
+              "must be held in India from what may remain in Australia"),
+    dict(code="A2", tasks=["4"],
+         text="Services identified (task 4) — the services named address the gaps the "
+              "review found, each with a stated purpose"),
+    dict(code="A3", tasks=["5-7"],
+         text="Layer-by-layer design (tasks 5–7) — the student designs the network entry "
+              "point, the compute tier and the data tier as CHANGES to a working system, keeping "
+              "what already meets the need and saying so"),
+    dict(code="A4", tasks=["8-9"],
+         text="Global delivery and caching (tasks 8–9) — the student distinguishes what is "
+              "cached from what must reach the origin, sets a policy per content type, addresses "
+              "search discoverability, and chooses between edge and in-memory caching with reasons"),
+    dict(code="A5", tasks=["10-12"],
+         text="Design checks and review (tasks 10–12) — the student checks the design "
+              "scales as utilisation increases and identifies where it stops, checks availability "
+              "and security are maintained including the new dependencies introduced, and reviews "
+              "the whole design back against the needs from task 1"),
+    dict(code="A6", tasks=["13"],
+         text="Web-scale architecture (task 13) — a diagram showing a multi-tier web "
+              "application whose networking, compute and storage all scale, consistent with the "
+              "design tables"),
+    dict(code="A7", tasks=["14"],
+         text="Web-scale justification (task 14) — a written justification tying each "
+              "significant choice to a recorded requirement and naming the alternatives rejected"),
+    dict(code="A8", tasks=["15-16"],
+         text="Microservice identified and its services chosen (tasks 15–16) — the student "
+              "identifies the access-event transaction and where it comes to rest, and selects "
+              "services for receiving, decoupling, processing and storing, explaining the queue"),
+    dict(code="A9", tasks=["17-18"],
+         text="Microservice architecture and contract (tasks 17–18) — a diagram showing a "
+              "decoupled flow across the region boundary, and an integration contract complete "
+              "enough to build either side from, including duplicate handling"),
+    dict(code="A10", tasks=["19"],
+         text="Microservice justification (task 19) — a written justification of the "
+              "separation, the components and the residency decisions, including an honest account "
+              "of what an outage of the service would cost"),
+    dict(code="A11", tasks=["Q1", "Q2", "Q3", "Q4"],
+         text="Design knowledge (questions 1–4) — the student explains the four component "
+              "choices, cohesion and coupling, the web-scaling principles applied, and how the "
+              "design keeps the residency option open, all with reference to their own design"),
+    dict(code="A12", tasks=["20-22"],
+         text="Recovery requirements and current position (tasks 20–22) — the student "
+              "identifies the recovery requirements with the business need behind each, determines "
+              "what recovery arrangements already exist and what they do not cover, and identifies "
+              "the vendor's commitments and where YAT's responsibility begins"),
+    dict(code="A13", tasks=["23-27"],
+         text="Impact analysis (tasks 23–27) — recovery objectives per component, the data "
+              "being protected with its volume and sensitivity, at least three major risk events "
+              "rated by a stated method, justified plan exclusions, and the analysis recorded "
+              "according to YAT's policies"),
+    dict(code="A14", tasks=["28-32"],
+         text="Recovery strategy (tasks 28–32) — a genuine range of recovery options with "
+              "realistic recovery times and costs, a recommendation aligned to the business "
+              "requirement rather than to maximum protection, vendor protections mapped against "
+              "the risks and prioritised, a reasoned position on insurance, and the non-technical "
+              "components the plan needs to work"),
+    dict(code="A15", tasks=["33-35"],
+         text="The plan itself (tasks 33–35) — detection that does not depend on the failed "
+              "region, sequenced recovery steps with owners and timings, and the arithmetic "
+              "showing the plan achieves the objectives set in task 4"),
+    dict(code="A16", tasks=["36"],
+         text="Standards applied (task 36) — the information-security and continuity "
+              "standards named and located in the student's own plan"),
+    dict(code="A17", tasks=["37"],
+         text="The Disaster Recovery Plan (task 37) — the completed plan document, "
+              "containing at least three major risk events, assembled to the YAT reporting "
+              "standard the template sets. THIS CRITERION IS MARKED ON THE SUBMITTED PLAN, not on "
+              "the worksheet"),
+    dict(code="A18", tasks=["Q5", "Q6", "Q7"],
+         text="Recovery knowledge (questions 5–7) — the student explains what is "
+              "distinctive about a public cloud-hosted website's risk environment, the method "
+              "behind their risk ratings, and the recovery techniques available and why theirs "
+              "fits"),
+    dict(code="A19", tasks=["40"],
+         text="Verbal walkthrough (task 40, observed) — the student conducts a verbal "
+              "walkthrough of the design and the plan with the required person, explaining their "
+              "own reasoning in appropriate industry language and answering questions on it"),
+    dict(code="A20", tasks=["41"],
+         text="Feedback sought and responded to (task 41) — the student actively sought "
+              "feedback and responded to each item with a decision and a reason; a reasoned "
+              "disagreement is a satisfactory response"),
+    dict(code="A21", tasks=["42"],
+         text="Lodgement (task 42) — the approved plan is lodged according to YAT's Records "
+              "Management Policy, with location, classification and retrievability recorded"),
+    dict(code="A22", tasks=["43"],
+         text="Sign-off obtained (task 43) — sign-off recorded with a decision, a name and a "
+              "date; approval with conditions is a satisfactory outcome where the conditions are "
+              "recorded"),
 ]
 
-PART_B = [
-    "B1 — Plan requirements and context: identifies the DR plan requirements according to business needs.",
-    "B2 — Current recovery position: determines the existing organisational recovery arrangements and the "
-    "vendor (cloud provider) DR provisions and SLAs.",
-    "B3 — Recovery objectives: determines RTO and RPO according to business needs and explains them.",
-    "B4 — Data managed: estimates the amount and security level of data managed.",
-    "B5 — Risk assessment: assesses at least three major risk events with likelihood, impact and severity, "
-    "and evaluates the severity of impact and disruption.",
-    "B6 — Plan exclusions: assesses potential risks and plan exclusions according to business requirements.",
-    "B7 — Impact-analysis outcomes: documents the outcomes of the impact analysis per organisational "
-    "policies and procedures.",
-    "B8 — Recovery strategy: develops a range of DR solutions and recommends one that meets the RTO/RPO, "
-    "with rationale.",
-    "B9 — Vendor protections and prioritisation: determines vendor protections and prioritises the risks.",
-    "B10 — Insurance: assesses external insurance protection and its suitability.",
-    "B11 — Other recovery components: identifies the other DR plan components, aligned to relevant "
-    "continuity standards.",
-    "B12 — The recovery plan: aligns recovery to the prioritised risks and outlines the steps, timelines, "
-    "service providers and detection/alerting.",
-    "B13 — Meeting the objectives: shows how the plan reaches the RTO and RPO targets (covering at least "
-    "three major risk events).",
-    "B14 — Plan documented: the DR plan is documented according to business needs and requirements.",
-    "B15 — Knowledge Evidence appendix: written contextual responses linking the plan to DR concepts "
-    "(risk environment, data-analysis method, DR techniques, ISO standards, RTO/RPO, and the monitoring/"
-    "alerting used for disaster detection).",
-]
+# Assessment conditions are verified before marking rather than evidenced by a criterion.
+AC_CONDITIONS = {
+    "ICTCLD501 AC 1": "C1", "ICTCLD501 AC 2": "C1", "ICTCLD501 AC 3": "C3",
+    "ICTCLD503 AC 1": "C2", "ICTCLD503 AC 2": "C2", "ICTCLD503 AC 3": "C2",
+    "ICTCLD503 AC 5": "C1", "ICTCLD503 AC 6": "C2", "ICTCLD503 AC 7": "C1",
+    "ICTCLD503 AC 8": "C2", "ICTCLD503 AC 9": "C1",
+}
 
-PART_C = [
-    "C1 — Verbal walkthrough: conducts a verbal walkthrough of the Solution Design and DR Plan with the "
-    "required personnel.",
-    "C2 — Feedback: seeks and responds to feedback during the presentation.",
-    "C3 — Lodgement: lodges the DR plan according to organisational and legislative protocol.",
-    "C4 — Sign-off: obtains final sign-off from the required personnel.",
-    "C5 — Knowledge Evidence Q&A: answers the assessor's contextual questions on the student's own design "
-    "and plan choices (the verbal knowledge-evidence location, re-covering the A12 / B15 appendices).",
-    "C6 — Oral communication: uses listening and questioning techniques and industry language appropriate "
-    "to the audience.",
-]
+# What the assessment plan says AT1 must evidence — checked at build time.
+EXPECTED = (
+    [f"ICTCLD501 PC {n}" for n in
+     "1.1 1.2 1.3 2.1 2.2 2.3 2.4 2.5 3.1 3.2 3.3 3.4 4.1 4.2 4.3 5.1 5.2 5.3 5.4".split()]
+    + [f"ICTCLD501 PE {n}" for n in "1 2 3".split()]
+    + [f"ICTCLD501 KE {n}" for n in "1 2 3 4 5 6".split()]
+    + [f"ICTCLD501 FS {s}" for s in
+       ["Oral communication", "Planning and organising", "Problem solving", "Reading",
+        "Self-management"]]
+    + [f"ICTCLD503 PC {n}" for n in "1.1 1.2 1.3 1.4 1.5 1.6 1.7 2.1 2.2 2.3 2.4".split()]
+    + [f"ICTCLD503 PE {n}" for n in "1 2 5".split()]
+    + [f"ICTCLD503 KE {n}" for n in "3 4 6".split()]
+    + [f"ICTCLD503 FS {s}" for s in
+       ["Problem solving", "Reading", "Self-management", "Writing"]]
+)
 
-# Benchmark: per-criterion UoC evidenced (bidirectional traceability). KE is allocated to the
-# written KE appendices (A12 / B15); the body criteria carry the PC / PE / FS they demonstrate.
-BENCHMARK = [
-    ("Part A — Solution Design (ICTCLD503 design)", [
-        ("A1", "[ICTCLD503 PC 1.1] determine and confirm cloud web-scaling needs."),
-        ("A2", "[ICTCLD503 PC 1.1] confirm needs against business needs; data residency carried as an input."),
-        ("A3", "[ICTCLD503 PC 1.2] review architecture for the web application according to business needs."),
-        ("A4", "[ICTCLD503 PC 1.3] identify cloud services to scale; [PC 1.4] design changes scale network, "
-               "compute and storage; [PE 1] design at least one scaling architecture."),
-        ("A5", "[ICTCLD503 PC 1.5] determine architecture changes to scale for a global user base."),
-        ("A6", "[ICTCLD503 PC 1.6] check availability and security maintained and review the design as required; "
-               "[PE 5] apply web-scaling principles and technologies."),
-        ("A7", "[ICTCLD503 PC 1.7] supported by the documented justification of the web-scale component choices."),
-        ("A8", "[ICTCLD503 PC 2.1] identify microservices and data transactions; [PE 2] design at least one "
-               "microservice architecture."),
-        ("A9", "[ICTCLD503 PC 2.2] determine cloud services to support the microservice architecture."),
-        ("A10", "[ICTCLD503 PC 2.3] design microservice architecture using cloud services."),
-        ("A11", "[ICTCLD503 PC 1.7] document and justify architecture changes; [PC 2.4] document and justify "
-                "microservice design; [FS Writing]."),
-        ("A12", "[ICTCLD503 KE 3] web-scale components (SQL/NoSQL, monolith/microservice, compute models, "
-                "CDN/in-memory); [KE 4] web-scale infrastructure (cohesive/coupled, managed datastore, "
-                "API/messaging/queuing); [KE 6] web-scaling principles and technologies — evidenced as written "
-                "contextual responses against the student's own design."),
-        ("A13", "[ICTCLD503 FS Writing] complex documentation in the required format and language."),
-    ]),
-    ("Part B — DR Plan (ICTCLD501, elements 1–4)", [
-        ("B1", "[ICTCLD501 PC 1.1] identify DR plan requirements according to business needs."),
-        ("B2", "[ICTCLD501 PC 1.2] determine existing organisational recovery plans; [PC 1.3] identify vendor "
-               "DR plan and SLAs."),
-        ("B3", "[ICTCLD501 PC 2.1] determine RTO and RPO according to business needs."),
-        ("B4", "[ICTCLD501 PC 2.3] estimate amount and security level of data managed."),
-        ("B5", "[ICTCLD501 PC 2.4] evaluate severity of impact and disruption; [PE 2] determine likelihood and "
-               "impact of risk events."),
-        ("B6", "[ICTCLD501 PC 2.2] assess potential risks and plan exclusions according to business requirements."),
-        ("B7", "[ICTCLD501 PC 2.5] document outcomes of impact analysis per organisational policies and procedures."),
-        ("B8", "[ICTCLD501 PC 3.1] develop a range of DR solutions."),
-        ("B9", "[ICTCLD501 PC 3.2] determine vendor protections and prioritise risks."),
-        ("B10", "[ICTCLD501 PC 3.3] assess external insurance protection levels and suitability."),
-        ("B11", "[ICTCLD501 PC 3.4] identify other DR solution components."),
-        ("B12", "[ICTCLD501 PC 4.1] align DR risk potential to business requirements; [PC 4.2] outline steps, "
-                "timelines, key features and service providers."),
-        ("B13", "[ICTCLD501 PE 1] develop and evaluate a DR plan covering at least three major risk events; "
-                "[PE 3] document how the plan reaches RTO/RPO targets."),
-        ("B14", "[ICTCLD501 PC 4.3] document the DR plan according to business needs and requirements."),
-        ("B15", "[ICTCLD501 KE 1] risk environments; [KE 2] data-analysis methodologies; [KE 3] DR techniques for "
-                "cloud; [KE 4] ISO 27001/27002/27031 standards; [KE 5] RTO/RPO standards and techniques; [KE 6] "
-                "techniques/methods to monitor and create alerts (disaster detection) — evidenced as written "
-                "contextual responses against the student's own plan."),
-    ]),
-    ("Part C — Presentation (ICTCLD501 element 5)", [
-        ("C1", "[ICTCLD501 PC 5.1] conduct verbal walkthrough of the DR plan with required personnel."),
-        ("C2", "[ICTCLD501 PC 5.2] seek and respond to feedback as required."),
-        ("C3", "[ICTCLD501 PC 5.3] lodge the DR plan according to organisation and legislative protocol."),
-        ("C4", "[ICTCLD501 PC 5.4] obtain final sign-off from required personnel."),
-        ("C5", "Verbal re-coverage of [ICTCLD501 KE 1–6] and [ICTCLD503 KE 3, 4, 6] — the assessor probes the "
-               "student's own design and plan choices (the written KE is the primary evidence in the A12 / B15 "
-               "appendices; this is the verbal confirmation)."),
-        ("C6", "[ICTCLD501 FS Oral communication] listening/questioning and industry language for the audience."),
-    ]),
-    ("Foundation Skills (co-evidenced — not separately assessed)", [
-        ("FS1", "[ICTCLD501 FS Reading] · [ICTCLD501 FS Self-management] · [ICTCLD501 FS Problem solving] · "
-                "[ICTCLD501 FS Planning and organising] — naturally evidenced through the DR requirements, "
-                "impact analysis and recovery-strategy work and its troubleshooting; the marking guide notes "
-                "where each is demonstrated rather than assessing it as a separate criterion."),
-        ("FS2", "[ICTCLD503 FS Reading] · [ICTCLD503 FS Self-management] · [ICTCLD503 FS Problem solving] — "
-                "naturally evidenced through the Solution Design work and its troubleshooting; noted, not "
-                "assessed separately."),
-    ]),
-]
+STYLE = {"h1": "Heading 1", "h2": "Heading 2", "p": "Normal"}
 
-STUDENT_INTRO = [
-    ("The engagement and your role", "Heading 2"),
-    ("YAT College is a Registered Training Organisation (RTO) based at 175 Cremorne Street, Cremorne VIC. "
-     "Following a new partnership with a training institution in India, YAT is expanding its public website — "
-     "its global enrolment front-door — to serve prospective students in both countries.", "Assessor text"),
-    ("You are an MP Tech Solutions (MTS) consultant reporting to Pat Lin (MTS Senior Consultant). Pat liaises "
-     "with Sam Walker, the YAT ICT Manager (Dana Mercer, Marketing & Admissions Manager, is the website "
-     "business owner). In AT1 you design the changes the expansion needs and plan the website's disaster "
-     "recovery, then present both to YAT ICT management for approval. The approved design and plan are "
-     "implemented in AT2.", "Assessor text"),
-]
 
-STUDENT_PART_A = [
-    ("Part A — Solution Design", "Heading 2"),
-    ("Using the YAT Solution Design template (download from the intranet's Templates section), produce a "
-     "solution design for the website global expansion covering two strands:", "Assessor text"),
-    ("• Web-scale design — the architecture changes that let the website serve a global, anonymous public "
-     "audience while scaling network, compute and storage, maintaining availability and security, and "
-     "protecting the public attack surface.", "Assessor text"),
-    ("• Microservice design — a serverless audit-log microservice that records India-cohort access "
-     "events, including the interface/webhook contract.", "Assessor text"),
-    ("Treat the data residency requirements as an input that shapes your design — do not write a separate "
-     "compliance plan.", "Assessor text"),
-    ("Knowledge Evidence appendix (required). At the end of your Solution Design, add a Knowledge Evidence "
-     "appendix and answer the following questions in your own words, about your own design (the assessor "
-     "will also ask you about these in the Part C Q&A):", "Assessor text"),
-    ("• Your design makes four component choices — SQL vs NoSQL, monolith vs microservice, the compute model, "
-     "and CDN vs in-memory caching. Explain the function and trade-off of each, and why you chose as you did "
-     "for this website.", "Assessor text"),
-    ("• Your audit-log microservice is described as highly cohesive and loosely coupled, using a managed "
-     "datastore and API / messaging / queuing services. Explain what those properties mean and how your "
-     "design exhibits them.", "Assessor text"),
-    ("• Which web-scaling principles and technologies does your design apply, and how does each address the "
-     "website's global, anonymous, read-heavy load?", "Assessor text"),
-    ("Resources for Part A — on the YAT intranet: the Website Global Expansion project (engagement brief, "
-     "requirements, ICT manager consultation notes, data residency & sovereignty requirements), the website "
-     "specification and the HA-hardened solution design baseline, and the YAT Solution Design template.", "Assessor text"),
-    ("Part A is submitted as the populated Solution Design (.docx) with the Knowledge Evidence appendix "
-     "completed.", "Assessor text"),
-]
+def _elements():
+    # Task numbering is continuous across all three parts (1–43, questions Q1–Q7), so the
+    # marking guide can name tasks the way the student sees them and the traceability validator
+    # can resolve "task 27" to exactly one element.
+    return collect_elements(part_a.DESIGN, (part_a.QUESTIONS, "Q"),
+                            part_b.PLAN, (part_b.QUESTIONS, "Q"),
+                            part_c.APPROVAL)
 
-STUDENT_PART_B = [
-    ("Part B — Disaster Recovery Plan", "Heading 2"),
-    ("Using the YAT Disaster Recovery Plan template (download from the intranet's Templates section), produce a "
-     "disaster recovery plan for the website designed in Part A. Disaster recovery answers ‘what do we do if "
-     "the website goes down’ — keep it focused on recovery, not on the design or the regulatory "
-     "requirements.", "Assessor text"),
-    ("Your plan must cover: the plan requirements and current recovery position; an impact analysis with your "
-     "recovery objectives (RTO/RPO), the data managed, and at least three major risk events; a recovery "
-     "strategy with options evaluated and one recommended; and the recovery runbook with steps, timelines and "
-     "service providers.", "Assessor text"),
-    ("Knowledge Evidence appendix (required). At the end of your DR Plan, add a Knowledge Evidence appendix "
-     "and answer the following questions in your own words, about your own plan:", "Assessor text"),
-    ("• What is distinctive about the risk environment of a public-facing, cloud-hosted website, and why do "
-     "your three major risk events capture it?", "Assessor text"),
-    ("• What method did you use to identify and rate the risks, and why is it appropriate here?", "Assessor text"),
-    ("• Explain the cloud disaster-recovery techniques available, and why your recommended strategy fits this "
-     "website's objectives better than the alternatives.", "Assessor text"),
-    ("• Which information-security and business-continuity standards informed your plan, and how does the plan "
-     "reflect them?", "Assessor text"),
-    ("• Explain RTO and RPO in your own words, the values you set, and the techniques you used to meet each.", "Assessor text"),
-    ("• How would a region-level disaster be detected to trigger this plan, and what monitoring and alerting "
-     "would you put in place so the on-call team is notified in time to meet the RTO?", "Assessor text"),
-    ("A deprecated on-premises DR plan is on the intranet — it was superseded by the move to the cloud and "
-     "needs replacing. Use it for context only; your plan is a new cloud DR plan.", "Assessor text"),
-    ("Part B is submitted as the populated Disaster Recovery Plan (.docx) with the Knowledge Evidence appendix "
-     "completed.", "Assessor text"),
-]
 
-STUDENT_PART_C = [
-    ("Part C — Presentation for approval", "Heading 2"),
-    ("Present your Solution Design and Disaster Recovery Plan to YAT ICT management (role-played by your "
-     "assessor as Sam Walker, YAT ICT Manager) and seek approval to proceed to implementation.", "Assessor text"),
-    ("The presentation event:", "Assessor text"),
-    ("• Duration: 10–15 minutes presenting + 5 minutes of questions, feedback and sign-off.", "Assessor text"),
-    ("• Format: in person on campus or via video conference (confirm with your assessor).", "Assessor text"),
-    ("• Submit the completed Solution Design and DR Plan at least 48 hours in advance.", "Assessor text"),
-    ("During the event you will: walk the manager through your design and DR plan; answer questions during "
-     "Q&A (the assessor probes both your design and your underlying knowledge); capture feedback; lodge the "
-     "plan; and obtain sign-off.", "Assessor text"),
-    ("Part C is submitted as the presentation deck (.pptx) plus the completed feedback and sign-off records.", "Assessor text"),
-]
+# The mapping engine reads this: the same per-criterion tag lists the marking guide
+# uses, inverted per unit to produce the Assessment Mapping documents.
+BENCHMARK = benchmark_sections(CRITERIA_MAP, _elements(), "AT1 — Cloud Expansion: Design & DR Plan")
 
-TIPS = [
-    ("Tips for success", "Heading 2"),
-    ("Keep the three concerns separate. The design (web-scale + microservice) goes in the Solution Design; "
-     "recovery goes in the DR Plan; data residency is an input both respect — it is not its own document.", "Assessor text"),
-    ("Remember it is a public site. The website serves anonymous visitors from the open internet, so the "
-     "web-scale design has to address public exposure (caching at the edge, WAF, bots, DDoS) and "
-     "discoverability — not just latency.", "Assessor text"),
-    ("Design before you plan recovery. You cannot plan recovery for a system you have not designed — do "
-     "Part A first, then Part B for that design.", "Assessor text"),
-    ("Make it the simplest thing that meets the requirements. Justify your choices against the requirements; "
-     "avoid over-engineering (no unnecessary replication or standby).", "Assessor text"),
-    ("Prepare for the Q&A. The assessor will probe both your design and your underlying knowledge — be "
-     "ready to explain why you chose each component.", "Assessor text"),
-    ("Sign-off is part of the assessment. You cannot achieve Satisfactory on Part C without obtaining the "
-     "manager's sign-off at the presentation.", "Assessor text"),
-]
+
+def _assessor_body(elements):
+    uoc = load_uoc_text(CLUSTER / "consolidated_uoc.md")
+    body = [
+        ("h1", "Marking Benchmark — UoC traceability (reverse map)"),
+        ("p", "This table closes the loop on bidirectional traceability: every UoC requirement "
+              "AT1 claims to evidence is named below with the marking criterion that evidences "
+              "it. Each workbook element also carries its own 'Evidences' line, where the work is "
+              "actually done. Both this table and the criteria lines are generated from those "
+              "element tags, so they cannot drift from the workbook."),
+        ("p", "ICTCLD501 — Develop cloud disaster recovery plans"),
+        ("tbl", build_reverse_map(CRITERIA_MAP, elements, uoc, "ICTCLD501", AC_CONDITIONS)),
+        ("p", "ICTCLD503 — Implement web-scale cloud infrastructure (AT1-evidenced items; "
+              "elements 3–4 are evidenced in AT2)"),
+        ("tbl", build_reverse_map(CRITERIA_MAP, elements, uoc, "ICTCLD503", AC_CONDITIONS)),
+    ]
+    return body
+
+
+def render_table(doc, rows):
+    t = doc.add_table(rows=len(rows), cols=len(rows[0]))
+    try:
+        t.style = "Table Grid"
+    except KeyError:
+        pass
+    for r, cells in enumerate(rows):
+        for c, val in enumerate(cells):
+            set_cell_content(t.rows[r].cells[c], val)
+    doc.add_paragraph()
+
+
+def delete_body_paragraph(doc, text):
+    for p in doc.paragraphs:
+        if p.text.strip() == text:
+            p._element.getparent().remove(p._element)
+            return
 
 
 def build(path):
+    elements = _elements()
+    gaps = unevidenced_items(CRITERIA_MAP, elements, None, EXPECTED)
+    if gaps:
+        raise SystemExit("No criterion evidences: " + ", ".join(gaps))
+
     doc = Document(TEMPLATE)
 
-    # ---- Table 0: Details ----
     t_details = doc.tables[0]
     set_cell_content(t_details.rows[1].cells[1], DETAILS["qualification"])
     set_cell_content(t_details.rows[2].cells[1], DETAILS["units"])
     set_cell_content(t_details.rows[3].cells[1], DETAILS["task_title"])
     set_cell_content(t_details.rows[4].cells[1], DETAILS["task_number"])
 
-    # ---- Table 1: Teacher/Assessor instructions ----
     t_instr = doc.tables[1]
     set_cell_content(find_instruction_row(t_instr, "Assessment overview"), OVERVIEW)
     set_cell_content(find_instruction_row(t_instr, "Task"), TASKS)
+    set_cell_content(find_instruction_row(t_instr, "Time allowed"), TIME_ALLOWED)
+    set_cell_content(find_instruction_row(t_instr, "Location"), "")
     set_cell_content(find_instruction_row(t_instr, "Resources required"), RESOURCES)
-    set_cell_content(find_instruction_row(t_instr, "Assessment criteria"), CRITERIA_STATEMENT)
-    # add a Conditions row at the end (as CL1 did), matching the table style
+    set_cell_content(find_instruction_row(t_instr, "Assessment criteria"), CRITERIA)
     cond_row = t_instr.add_row()
     set_cell_content(cond_row.cells[0], "Assessment Conditions & Setup Requirements")
     for r in cond_row.cells[0].paragraphs[0].runs:
         r.bold = True
     set_cell_content(cond_row.cells[1], CONDITIONS)
 
-    # ---- Table 2: Marking Guide ----
     t_mark = doc.tables[2]
-    clear_table_rows(t_mark, 2)  # keep 'Assessment criteria' + 'Criteria | Satisfactory?' header rows
-    add_section_row(t_mark, "Part A — Solution Design")
-    for c in PART_A:
-        add_criterion_row(t_mark, c)
-    add_section_row(t_mark, "Part B — Disaster Recovery Plan")
-    for c in PART_B:
-        add_criterion_row(t_mark, c)
-    add_section_row(t_mark, "Part C — Presentation")
-    for c in PART_C:
-        add_criterion_row(t_mark, c)
+    clear_table_rows(t_mark, 2)
+    for lines in marking_guide(CRITERIA_MAP, elements):
+        row = t_mark.add_row()
+        set_cell_content(row.cells[0], lines)
+        set_cell_content(row.cells[1], CHECK)
 
-    # ---- Instructions to Student ----
-    doc.add_paragraph("Instructions to Student", style="Heading 1")
-    for text, style in (STUDENT_INTRO + STUDENT_PART_A + STUDENT_PART_B + STUDENT_PART_C + TIPS):
-        doc.add_paragraph(text, style=style)
+    delete_body_paragraph(doc, "Add or delete rows as required")
+    delete_body_paragraph(doc, "If questioning or observation is incorporated into this assessment "
+                               "task, you can incorporate a Practical Observation Checklist.")
 
-    # ---- Benchmark (UoC traceability) ----
-    doc.add_paragraph("Marking Benchmark — UoC traceability", style="Heading 1")
-    doc.add_paragraph(
-        "For each criterion, the unit-of-competency items it evidences. Every PC, PE, KE and FS item allocated "
-        "to AT1 in the cluster assessment plan is covered below.", style="Assessor text")
-    for part_title, rows in BENCHMARK:
-        doc.add_paragraph(part_title, style="Heading 2")
-        for cid, uoc in rows:
-            p = doc.add_paragraph(style="Assessor text")
-            run = p.add_run(f"{cid}  —  ")
-            run.bold = True
-            p.add_run(uoc)
+    def h1(t):
+        return doc.add_paragraph(t, style="Heading 1")
+
+    def h2(t):
+        return part_a.R.heading2(doc, t)
+
+    part_a.render_front_matter(doc, h1)
+    part_a.render(doc, h1, h2, mode="assessor")
+    part_b.render(doc, h1, h2, mode="assessor")
+    part_c.render(doc, h1, h2, mode="assessor")
+
+    render_benchmark(doc, _assessor_body(elements), render_table, STYLE)
 
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     doc.save(path)
@@ -405,6 +450,5 @@ def build(path):
 
 
 if __name__ == "__main__":
-    default = "S1-CL2-Cloud-Disaster-Recovery/assessments/AT1/AT1-Design-DR-Plan-Assessor.docx"
-    out = sys.argv[1] if len(sys.argv) > 1 else default
-    build(out)
+    default = str(CLUSTER / "assessments" / "AT1" / "AT1-Design-DR-Plan-Assessor.docx")
+    build(sys.argv[1] if len(sys.argv) > 1 else default)

@@ -19,11 +19,14 @@
 > - **Three ATs:** **AT1 (individual) Design** (`504 el 1–2`) · **AT2 (group) Team Implementation**
 >   (`401 el 1–4`, the divided write) · **AT3 (individual) Implement** (`504 el 3–4`).
 > - **No business case** (neither UoC requires one; the 504 approval gate is the AT1 design presentation;
->   cost-benefit rides inside the Solution Design).
-> - **Reliability = application-tier Multi-AZ + DB backup/restore + cross-Region DR; the database is NOT
->   Multi-AZ** (Ledgerline is vendor-certified single-instance — the discovered Multi-AZ DB limitation,
->   TF-03). Scalability = elastic-capacity-on-demand (demonstrable, not forecast). Parameterised
->   CloudFormation; a light India residency slice (CERT-In + Companies-Act).
+>   the cost-benefit justification is a task in the AT1 workbook).
+> - **The improvement is open — there is no target architecture.** The Improvement Requirements are
+>   outcomes (stable, reliable, fit for purpose, compliant), and IR-2 asks for improvements proportionate
+>   to an internal, business-hours finance system. Database high availability is available to the design
+>   if the student judges it warranted; leaving the database single-instance with a tested restore is
+>   equally defensible if argued on cost against the recovery need. What is marked is the reasoning, not
+>   which answer they reach. Scalability = elastic-capacity-on-demand (demonstrable, not forecast).
+>   Parameterised CloudFormation; a light India residency slice (CERT-In + Companies-Act).
 
 ---
 
@@ -70,37 +73,52 @@ the register in §6.
 
 | AT | Working title | Mode | Format | Unit focus |
 |----|---|---|---|---|
-| **AT1** | Design | **Individual** | **A** Solution Design (analyse + design the whole improvement) · **B** presentation + sign-off | **ICTCLD504** el 1–2 |
-| **AT2** | Team Implementation | **Group** | **A** project/team plan + component allocation · **B** the divided CloudFormation write + integration + team sign-off | **BSBXTW401** el 1–4 |
-| **AT3** | Implement | **Individual** | Deploy the combined template + demonstrate/test/refine/document the **whole system** + final sign-off | **ICTCLD504** el 3–4 |
+| **AT1** | Design | **Individual** | **Project Assessment** workbook — **A** analyse + design the whole improvement · **B** presentation + sign-off | **ICTCLD504** el 1–2 |
+| **AT2** | Team Implementation | **Group** | **Project Assessment** workbook, one per student — planning meeting · own component · observed led meeting · reflections · team review | **BSBXTW401** el 1–4 |
+| **AT3** | Implement | **Individual** | **Project Assessment** workbook — deploy the approved improvement + demonstrate all four concerns + refine + document + final sign-off | **ICTCLD504** el 3–4 |
 
 ### AT1 — Design
-- **Mode / Format / Unit focus:** Individual; Part A Solution Design (analyse the baseline + design the
-  whole improvement across all four concerns, incl. the compliance assessment + cost-benefit) + Part B
-  observed presentation and sign-off; ICTCLD504 el 1–2.
+- **Mode / Format / Unit focus:** Individual; a guided workbook — Part A analyses the baseline and designs
+  the whole improvement across all four concerns, including the compliance assessment and a cost-benefit
+  justification per improvement (15 tasks); Part B is the observed presentation and sign-off (3 tasks, the
+  first unmarked preparation). 3 knowledge questions. ICTCLD504 el 1–2.
 - **UoC coverage:** [ICTCLD504 PC 1.1–1.6, 2.1–2.5] · [ICTCLD504 PE 1, 3] · [ICTCLD504 KE 1–6, 8, 9] · [ICTCLD504 FS Oral communication] · [ICTCLD504 FS Reading] · [ICTCLD504 FS Writing] · [ICTCLD504 AC 5]
-- **Scenario requirements:** SR-CL3-03 · SR-CL3-04 · SR-CL3-05 · SR-CL3-06 · SR-CL3-09 · SR-CL3-10
+- **Scenario requirements:** SR-CL3-03 · SR-CL3-04 · SR-CL3-05 · SR-CL3-06 · SR-CL3-10
 
 ### AT2 — Team Implementation
-- **Mode / Format / Unit focus:** Group; Part A team plan + allocate one IaC component per member; Part B
-  the team writes the agreed design's CloudFormation (divided by component, integrated) across
-  individually-led meetings + a team sign-off gate; BSBXTW401 el 1–4. *(The write is 401's vehicle — not
-  504-assessed.)*
+- **Mode / Format / Unit focus:** Group work, individual assessment — each student completes their own
+  workbook. Part A is a planning-meeting agenda worked through with the team (6 tasks); Part B records the
+  student's own component and their part in integration; Part C is one team meeting they lead with the
+  assessor observing; Part D is three written reflections (a conflict, a coaching instance, a team issue);
+  Part E is the performance review, feedback, development actions and a leadership reflection. 17 tasks and
+  3 knowledge questions. BSBXTW401 el 1–4. *(The CloudFormation write is 401's vehicle — not 504-assessed,
+  and its technical quality is not marked here.)*
+
+  **The observed meeting is not the sole evidence.** BSBXTW401 ties coaching, issue resolution and conflict
+  management to no meeting, and its assessment conditions require only a safe working or simulated
+  environment. Those criteria are carried by the Part D reflections; the observation confirms the student
+  can communicate objectives, allocate with instruction and draw the team in.
 - **UoC coverage:** [BSBXTW401 PC 1.1–1.4, 2.1–2.4, 3.1–3.4, 4.1–4.4] · [BSBXTW401 PE 1–5] · [BSBXTW401 KE 1–10] · [BSBXTW401 FS Get the work done] · [BSBXTW401 FS Interact with others] · [BSBXTW401 FS Navigate the world of work]
 - **Scenario requirements:** SR-CL3-01 · SR-CL3-07 · SR-CL3-08
 
 ### AT3 — Implement
-- **Mode / Format / Unit focus:** Individual; deploy the combined (agreed, validated) template, monitor/test
-  /demonstrate all four concerns on the deployed whole system, refine, document the as-deployed result + a
-  long-term strategy, obtain final sign-off; ICTCLD504 el 3–4. *(An assessor reference combined template is
-  the fallback so a team integration failure can't block this individual evidence.)*
+- **Mode / Format / Unit focus:** Individual; a guided workbook — deploy the baseline, record the scope the
+  student's own AT1 sign-off approved, apply the improvement as an update, measure against their own AT1
+  metrics, then demonstrate reliability, security, scalability and cost optimisation one task each, apply
+  refinements traced to test results, document the as-deployed result and a long-term strategy, obtain final
+  sign-off and tear down. 13 tasks and 2 knowledge questions. ICTCLD504 el 3–4. *(An assessor reference
+  combined template is the fallback so a team integration failure can't block this individual evidence.)*
 - **UoC coverage:** [ICTCLD504 PC 3.1–3.4, 4.1–4.3] · [ICTCLD504 PE 2, 4, 5] · [ICTCLD504 KE 7, 10] · [ICTCLD504 FS Problem solving] · [ICTCLD504 FS Self-management] · [ICTCLD504 FS Writing]
-- **Scenario requirements:** SR-CL3-01 · SR-CL3-02 · SR-CL3-06 · SR-CL3-07 · SR-CL3-09
+- **Scenario requirements:** SR-CL3-01 · SR-CL3-02 · SR-CL3-06 · SR-CL3-07
 
-**Template basis:** AT1 reuses the CL2 **Solution Design** type; AT3 reuses the CL2 **Deployment Report**
-type. New = the AT2 project/team-plan + CloudFormation-write deliverable spec, the led-meeting observation
-checklist, and the reflection prompt. No business case; no separate "Architecture Analysis" type (the
-analysis is the Solution Design's review section).
+**Template basis:** all three instruments are built on the institutional **Project Assessment** template
+(assessor + student), with a guided workbook rendered inside it — see `docs/assessment-workbook-format.md`.
+**No YAT deliverable template is used.** ICTCLD504's and BSBXTW401's assessment conditions are environment
+conditions and name no document format, so `[ICTCLD504 PC 2.4]` "document and present" and
+`[ICTCLD504 PC 4.1]` "document as-deployed architecture" are met by the workbook itself, and no exemplar is
+required. The AT2 led-meeting observation record is a table inside the workbook, completed and signed by the
+assessor in the room. No business case; no separate "Architecture Analysis" type (the analysis is the
+workbook's review tasks).
 
 ---
 
@@ -111,12 +129,12 @@ sign-off) is structurally CL1 AT3 + CL2, re-pointed at Ledgerline with a team-le
 write.
 
 - **Reused / proven:** CL1 AT3's improve-an-existing-baseline shape + the lab-pack standard
-  (`docs/lab-pack-standard.md`); CL2's Solution Design (AT1) + Deployment Report (AT3) generators, the
-  Kangan Project Assessment instrument generators, the scenario world, and the validators. Students learned
-  IaC in CL2 (505), so the AT2 write reuses an existing skill (not re-assessed).
-- **New (CL3-specific):** the AT1 Solution Design exemplar (the agreed "to be" design); the AT2 instruments
-  (team-plan + write spec, observation checklist, reflection); the AT3 as-deployed Deployment Report
-  exemplar + the deployable improved lab-pack + assessor reference fallback.
+  (`docs/lab-pack-standard.md`); the shared workbook engine and the Kangan Project Assessment instrument
+  assembly; the scenario world; and the validators. Students learned IaC in CL2 (505), so the AT2 write
+  reuses an existing skill (not re-assessed).
+- **New (CL3-specific):** the AT2 workbook — the only group assessment in the semester, and the only one
+  carrying an assessor observation record; and the deployable improved lab-pack + assessor reference
+  fallback for AT3.
 - **Author-fresh (accepted):** no standalone ICTCLD504 / BSBXTW401 source assessments located — CL3 is
   greenfield by design (step-3 audit not applicable).
 
@@ -157,22 +175,19 @@ the **AC link** names the UoC Assessment Condition each environmental requiremen
 | **SR-CL3-06** | A required-personnel stakeholder who role-plays the design review + sign-off (AT1 Part B) and the final sign-off (AT3) | AT1, AT3 | — |
 | **SR-CL3-07** | The agreed "to be" improvement Solution Design provided to the team (AT2 build input) + an assessor reference combined template (AT3 fallback) | AT2, AT3 | — |
 | **SR-CL3-08** | A student team of four (the MTS improvement team) for the group write | AT2 | [BSBXTW401 AC 1] |
-| **SR-CL3-09** | YAT Solution Design + Deployment Report templates (intranet Templates section) | AT1, AT3 | — |
 | **SR-CL3-10** | The website (an object-storage-dependent system) for the contextual `[ICTCLD504 KE 6]` contrast question + the CL3 practice vehicle | AT1 | — |
 
 ---
 
 ## 7. Worklist
 
-- **AT1** — Solution Design exemplar (the agreed "to be" design; also the provided AT2 input) + the AT1
-  Student/Assessor instruments (Part A deliverable + Part B presentation/sign-off; marking guide with
-  bidirectional UoC traceability + FS-Oral observation).
-- **AT2** — the project/team-plan + CloudFormation-write deliverable spec (write divided by component +
-  integration + team sign-off), the led-meeting observation checklist + reflection prompt; the
-  Student/Assessor instruments (group).
-- **AT3** — the as-deployed Deployment Report exemplar; the deployable improved lab-pack (combined template +
-  assessor reference fallback; **proven live 2026-06-21**, apply-as-update change-set, SQL Server Express
-  stand-in, RDS create-only); the Student/Assessor instruments (individual).
+- **AT1** — the Design workbook (Part A analyse + design, Part B presentation and sign-off) rendered as the
+  Student/Assessor instrument pair, with a derived marking guide and bidirectional UoC traceability.
+- **AT2** — the Team Implementation workbook, one per student, including the assessor observation record;
+  rendered as the Student/Assessor pair.
+- **AT3** — the Implement workbook; the deployable improved lab-pack (combined template + assessor reference
+  fallback; **proven live**, apply-as-update change-set, RDS create-only); rendered as the Student/Assessor
+  pair.
 - **Cluster** — this plan; `mappings/` per-unit Assessment Mapping docs (built); `consolidated_uoc.md`
   realignment to the write-is-the-seam model (the prose still describes the superseded owned-dimension /
   business-case model).

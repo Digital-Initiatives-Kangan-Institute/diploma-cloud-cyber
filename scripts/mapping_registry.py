@@ -42,7 +42,8 @@ CLUSTERS = {
     ),
     "cl3": dict(
         pkg="s1_cl3", cluster_dir="S1-CL3-Cloud-Infrastructure-Improvement", n_ats=3,
-        assessors=["build_s1_cl3_at1_assessor", "build_s1_cl3_at2_assessor", "build_s1_cl3_at3_assessor"],
+        assessors=["build_s1_cl3_at1_assessor", "build_s1_cl3_at2_assessor",
+                   "build_s1_cl3_at3_assessor"],
         build_mod="build_s1_cl3_mapping_docs",
         fs_source="benchmark_then_map", ac_source="benchmark_then_map",
     ),

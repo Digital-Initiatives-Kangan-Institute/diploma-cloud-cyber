@@ -1,323 +1,284 @@
 #!/usr/bin/env python3
-"""Build the S1-CL3 AT1 ASSESSOR instrument (.docx) by populating the Kangan template.
+"""Build the S1-CL3 AT1 instruments (.docx) — assessor and student — from the Kangan template.
 
-Institutional compliance document (NOT a YAT-branded artefact): loads the official Kangan
-'Project Assessment - Assessor' template and fills it in, preserving the Kangan structure and
-styles exactly (Details, Teacher/Assessor instructions, Marking Guide, Instructions to Student,
-Benchmark). Mirrors the approved CL1/CL2 AT1 assessor instruments.
+AT1 = Cloud Infrastructure Improvement: Design. ICTCLD504 elements 1–2: analyse the Ledgerline
+cloud baseline, design a proportionate improvement, present it and obtain sign-off to proceed.
 
-AT1 = Design (individual) — ICTCLD504 elements 1 (analyse) + 2 (design), two parts:
-  Part A  Solution Design  — analyse the single-AZ Ledgerline baseline and design the whole
-          improvement (four components: network / compute / database / storage; across all four
-          optimisation concerns: security, reliability, scalability, cost; incl. the India
-          residency slice), documented and justified.
-  Part B  Design presentation — present the proposed architecture for review and obtain sign-off
-          to proceed.
+ONE DEFINITION, TWO INSTRUMENTS — content in at1_run_sheet.py, rendered worked for the assessor
+and blank for the student. The marking guide's traceability lines and the reverse map are
+derived from the workbook's own tags (helpers.workbook_instrument), and the Kangan wiring is the
+shared `assemble`.
 
-The worked model answer lives in the YAT-branded exemplar (build_s1_cl3_at1_solution_design_exemplar).
-This document carries the task instructions and the marking guide with bidirectional UoC traceability.
-The CloudFormation write and the deployment are AT2 / AT3; AT1 is the design.
+NO SOLUTION DESIGN TEMPLATE. ICTCLD504's assessment conditions (AC 1–8) are environment and
+input conditions and name no document format, so `[ICTCLD504 PC 2.4]` "document and present" is
+met by the worksheet (documenting) plus Part B (presenting).
 
-Usage:  python scripts/s1_cl3/build_s1_cl3_at1_assessor.py [output.docx]
-Default: S1-CL3-Cloud-Infrastructure-Improvement/assessments/AT1/AT1-Design-Assessor.docx
+Usage:  python scripts/s1_cl3/build_s1_cl3_at1_assessor.py [assessor|student] [output.docx]
 """
 import sys
 from pathlib import Path
 
-from docx import Document  # noqa: E402
+TEMPLATES = Path(__file__).resolve().parents[2] / "kangan-templates"
+CLUSTER = Path(__file__).resolve().parents[2] / "S1-CL3-Cloud-Infrastructure-Improvement"
 
-TEMPLATE = str(Path(__file__).resolve().parents[2] / "kangan-templates" / "Project Assessment - Assessor.docx")
-
-
-# ---------- cell / table helpers (preserve template styles) ----------
-
-sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # content-repo scripts/ (brand + registry)  # noqa: E402
-sys.path.insert(0, str(next(d / "scripts" for d in Path(__file__).resolve().parents if (d / "scripts" / "helpers" / "__init__.py").exists())))  # umbrella scripts/ (engine)  # noqa: E402
-from helpers.docx_tables import add_criterion_row, add_section_row, clear_table_rows, find_instruction_row, set_cell_content  # noqa: E402
-
-
-# ---------- content ----------
+sys.path.insert(0, str(Path(__file__).resolve().parent))  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))  # noqa: E402
+sys.path.insert(0, str(next(d / "scripts" for d in Path(__file__).resolve().parents
+                            if (d / "scripts" / "helpers" / "__init__.py").exists())))  # noqa: E402
+from helpers.workbook_instrument import (assemble, benchmark_sections,  # noqa: E402
+                                         collect_elements, marking_guide, reverse_map_body,
+                                         unevidenced_items)
+import at1_run_sheet as content  # noqa: E402
 
 DETAILS = {
     "qualification": "ICT50220 Diploma of Information Technology",
-    "units": [
-        "ICTCLD504 Improve cloud-based infrastructure",
-    ],
-    "task_title": "AT1 – Design",
+    "units": ["ICTCLD504 Improve cloud infrastructure"],
+    "task_title": "AT1 — Cloud Infrastructure Improvement: Design",
     "task_number": "1 of 3",
 }
 
-OVERVIEW = (
-    "Students are assessed individually on designing the cloud-infrastructure improvement for the "
-    "YAT Ledgerline (Accounting) system. Working as an MP Tech Solutions (MTS) consultant, each "
-    "student analyses the current single-Availability-Zone baseline and designs an improvement "
-    "across all four optimisation concerns — security, reliability, scalability and cost — including "
-    "the infrastructure changes needed to meet the applicable Indian regulatory requirements, then "
-    "presents the proposed architecture for review and obtains sign-off to proceed. The deliverables "
-    "are a Solution Design (Part A) and a design presentation (Part B). The improvement is to the "
-    "cloud infrastructure only; the application and its data are out of scope. AT1 is completed "
-    "individually."
-)
+TIME_ALLOWED = [
+    "Part A — Analysis and design: 6 hours",
+    "Part B — Presentation and approval: a 20-minute session, scheduled with the assessor",
+    "Time is indicative. A student who needs longer continues in the next session rather than "
+    "submitting incomplete work.",
+]
+
+OVERVIEW = [
+    "Students are assessed on analysing the cloud infrastructure of YAT's Ledgerline accounting "
+    "system, designing a proportionate improvement to it, and obtaining sign-off to proceed to "
+    "deployment. AT1 is the first of three assessment tasks in the S1-CL3 Cloud Infrastructure "
+    "Improvement cluster.",
+    "The assessment is one guided workbook of fifteen design tasks, three approval tasks and "
+    "three knowledge questions, submitted as a single document. Part A leads the student through "
+    "reviewing the current architecture, evaluating its business impact, assessing compliance "
+    "against the Indian regulatory requirements, identifying architectural options, setting "
+    "measurable business goals and metrics, designing the improvement across the four concerns, "
+    "justifying each on cost versus benefit, and drawing the result. Part B is a live session in "
+    "which the student presents the proposal and obtains sign-off.",
+    "THE IMPROVEMENT IS OPEN — THIS IS THE POINT OF THE CLUSTER. There is no target architecture "
+    "and no planted set of faults. The Improvement Requirements are outcomes, and IR-2 asks for "
+    "sound engineering proportionate to an internal, business-hours finance system, explicitly "
+    "not gold-plating. A student who proposes every improvement available has not done better "
+    "than one who proposes four and justifies each — they have done worse. Mark the reasoning, "
+    "not the ambition.",
+    "WHAT IS BEING MARKED. Every table and worked answer contains values we chose so there is a "
+    "concrete task. Each element carries two assessor-only lines: 'Evidences', naming the UoC "
+    "items, and 'Satisfactory when', naming what has to be true for them to be met. Mark the "
+    "second. Because the improvement is open, most standards here are about whether the student's "
+    "reasoning holds, not whether they reached our answer — converting the database to a standby "
+    "is defensible on a recovery goal, and so is leaving it single-instance with a tested restore "
+    "if the cost is argued.",
+    "This is an open-book assessment. Students may use the YAT intranet, AWS documentation, "
+    "course materials and external research (which must be cited). They may not use another "
+    "student.",
+    "Reasonable adjustment may include extending the design time, providing one-on-one verbal "
+    "explanation of the supplied environment, allowing the Part B session by video conference, or "
+    "splitting the work across more sittings.",
+    "Teacher/assessor support level: the assessor may clarify what a task is asking and explain "
+    "the supplied records, but must not identify improvements for the student, set their goals or "
+    "metrics, or confirm whether a design decision is correct.",
+    "The assessment will not proceed if for any reason it is not safe to do so. You must advise "
+    "the student of the reason for suspending the assessment, and what safety action should be "
+    "taken. Advise the student of revised arrangements when it is safe to do so.",
+    "There is a zero tolerance for plagiarism, cheating and collusion. Students will be expected "
+    "to make a declaration that all work is their own prior to submission. Refer to the Training "
+    "and Assessment Policy for further information.",
+]
+
+STUDENT_OVERVIEW = [
+    OVERVIEW[0], OVERVIEW[1],
+    "THE IMPROVEMENT IS OPEN. There is no right answer waiting to be found. The Improvement "
+    "Requirements are outcomes, not solutions, and IR-2 asks for improvements proportionate to an "
+    "internal, business-hours finance system. Proposing everything available is not a better "
+    "answer than proposing four you can justify — it is a worse one.",
+    "WHAT YOU SUBMIT. The completed workbook, with every task and question answered and the "
+    "approval records from Part B filled in.",
+    OVERVIEW[4], OVERVIEW[7], OVERVIEW[8],
+]
 
 TASKS = [
-    "In this project the student takes on the role of an MTS consultant engaged by YAT College to "
-    "improve the cloud infrastructure of its Ledgerline (Accounting) system, following YAT's "
-    "India-campus partnership. AT1 is completed individually and has two parts:",
-    "• Part A — Solution Design: analyse the current single-AZ baseline and design the improvement "
-    "across the four components (network, compute, database, storage) and all four optimisation "
-    "concerns (security, reliability, scalability, cost), including the infrastructure changes that "
-    "meet the Indian regulatory requirements. Documented and justified in the YAT Solution Design "
-    "template, with a Knowledge Evidence appendix.",
-    "• Part B — Design presentation: present the proposed architecture to the required personnel for "
-    "review, respond to questions, and obtain sign-off to proceed to deployment.",
-    "The team-based implementation planning is AT2 and the deployment is AT3; AT1 is the individual "
-    "design and its approval.",
+    "YAT College's offshore partnership in India has put a spotlight on the systems supporting "
+    "it. Ledgerline — the finance and office-administration system — was migrated to AWS in an "
+    "earlier engagement and has run there since, but it was migrated as-is: the whole workload "
+    "sits in one availability zone and nothing has been revisited since cutover.",
+    "MTS is engaged to confirm Ledgerline is stable, reliable, fit for purpose and compliant with "
+    "the Indian regulatory requirements that now apply, and to improve it where it is not. What "
+    "that improvement consists of is the student's analysis to make.",
+    "Part A — Analysis and design. Fifteen tasks: review the architecture and the decisions it "
+    "represents, evaluate the business impact of those decisions, assess compliance against the "
+    "Indian Regulatory Requirements, identify the design patterns and options available, assess "
+    "their benefits against how this business actually runs, set measurable business goals across "
+    "security, reliability, performance and cost, confirm the direction including what is NOT "
+    "being proposed, confirm the metrics, design the improvements to compute, storage, database, "
+    "network, security, reliability, scalability, cost and monitoring, justify each on cost "
+    "versus benefit, draw the result, and write the justification.",
+    "Part B — Review and approval. The student presents the proposal to the role-played YAT ICT "
+    "Manager, answers questions, and obtains sign-off recording exactly which improvements are "
+    "approved — that approved list is AT3's scope. The first task of Part B is the student's own "
+    "preparation and is not marked.",
+    "MTS scope: cloud infrastructure only. The Ledgerline application and its financial data are "
+    "out of scope (IR-4), as is legal interpretation of the India obligations — the student "
+    "designs to the compliance area's determination.",
 ]
 
 RESOURCES = [
-    "Teacher/assessor supplied resources / Access to:",
-    "• The YAT scenario site / intranet — the Ledgerline Cloud Infrastructure Improvement project "
-    "(Engagement Role Brief, Improvement Requirements, ICT Manager Consultation Notes, Indian "
-    "Regulatory Requirements) and the current-state ICT records (the Accounting System Cloud "
-    "Architecture Baseline Design, Infrastructure Specifications, Application Specification, "
-    "Operational Costing) — the baseline the student analyses and improves.",
-    "• The YAT Solution Design template (intranet Templates section).",
-    "• A room and schedule for the Part B design presentation.",
+    "Teacher/assessor supplied resources",
+    "Access to the YAT scenario site / intranet — supplying the Improvement Requirements, the "
+    "Indian Regulatory Requirements, the Accounting System Infrastructure Specifications, "
+    "Application Specification and Operational Costing, the baseline design, the network diagram, "
+    "the reference architectures and the YAT policies. Those documents are linked from the "
+    "Instructions to Student below",
+    "A person to role-play Sam Walker, YAT ICT Manager, for the Part B presentation and sign-off "
+    "— normally the assessor",
+    "The worked workbook later in this document — model answers, per-element UoC mapping, and the "
+    "standard each element is marked against",
+    "Student supplied resources",
+    "Computer with web browser",
+    "Word-processing software (e.g. Microsoft Word or equivalent)",
 ]
 
-CRITERIA_STATEMENT = (
-    "To receive a Satisfactory outcome for this assessment task, the student must complete every "
-    "criterion in the marking guide below to a satisfactory standard. Where a criterion is not yet "
-    "satisfactory, the student is given feedback and a further attempt per the Second attempt "
-    "provisions."
-)
+STUDENT_RESOURCES = [
+    "Access to the YAT scenario site / intranet — every document you need is linked from the task "
+    "it belongs to",
+    "Your assessor will role-play Sam Walker, YAT ICT Manager, for the Part B session",
+    "Computer with web browser",
+    "Word-processing software (e.g. Microsoft Word or equivalent)",
+]
+
+CRITERIA = [
+    "To receive a Satisfactory outcome for this assessment the student must:",
+    "Achieve Satisfactory on every criterion in the Marking Guide below",
+    "Submit the completed workbook (.docx) with every task and question answered",
+    "Attend the Part B session and obtain sign-off",
+]
 
 CONDITIONS = [
-    "C1 — The YAT scenario site / intranet (the Ledgerline Cloud Infrastructure Improvement project "
-    "and the current-state ICT records) is accessible to the student throughout the assessment.",
-    "C2 — The student has access to the YAT Solution Design template.",
-    "C3 — AT1 is completed individually; each student authors their own Solution Design and delivers "
-    "their own presentation.",
-    "C4 — The Part B presentation is scheduled and observed by the assessor, who records the "
-    "presentation observation and the sign-off decision.",
+    "These are conditions the assessor verifies as present before marking begins. They are not "
+    "student-performance criteria — they are the conditions under which the assessment can "
+    "validly be conducted.",
+    "C1 The YAT scenario site / intranet is accessible to the student throughout the assessment — "
+    "supplying the improvement requirements, the regulatory determination, the infrastructure, "
+    "application and costing records, the baseline design and the organisational policies",
+    "C2 Cloud platform reference access is available for the student to research services and "
+    "their capabilities — a cloud vendor service provider, its managed database documentation, an "
+    "internet connection and a web browser. AT1 is analysis and design: nothing is deployed, so "
+    "no lab session is required",
+    "C3 A person is available to role-play Sam Walker, YAT ICT Manager, for the Part B "
+    "presentation and sign-off",
 ]
 
-# Marking guide — Part A (Solution Design) and Part B (presentation). UoC traceability is in the Benchmark.
-PART_A = [
-    "D1 — Architecture review: reviews and evaluates the current single-AZ Ledgerline infrastructure "
-    "and identifies the business impact of its design (single points of failure, the idle-profile "
-    "cost, scalability headroom, the compliance position).",
-    "D2 — Options and confirmed decisions: identifies architectural options and patterns, assesses "
-    "their benefits and differences against the current business needs, and confirms the design "
-    "decisions — including recognising that a Multi-AZ database is not available for Ledgerline (the "
-    "discovered Multi-AZ limitation) and ruling it out with a cost-versus-benefit justification.",
-    "D3 — Goals and metrics: sets measurable security, reliability, scalability and cost goals and "
-    "confirms the performance metrics the design is measured against.",
-    "D4 — Improvement design: improves compute, storage, database and network across all four "
-    "optimisation concerns into one integrated architecture (application-tier Multi-AZ plus database "
-    "backup/restore and cross-Region DR for reliability — the database itself cannot be Multi-AZ, a "
-    "Ledgerline constraint; elastic-on-demand scalability; in-place security hardening; proportionate "
-    "cost optimisation).",
-    "D5 — Regulatory compliance: assesses the infrastructure against the Indian Regulatory "
-    "Requirements and includes the infrastructure changes that close the gaps (the light India "
-    "residency slice — CERT-In logs and books-of-account retrievability).",
-    "D6 — Documented and justified: the architecture is documented and justified in the Solution "
-    "Design, each improvement carrying a proportionate cost-versus-benefit rationale (sound "
-    "engineering, not gold-plating).",
-    "D7 — Knowledge Evidence appendix: written contextual responses (object storage; avoiding single "
-    "points of failure and testing for them; cloud features for each optimisation concern) about the "
-    "student's own design.",
+CRITERIA_MAP = [
+    dict(code="D1", tasks=["1", "2"],
+         text="Architecture reviewed and its business impact evaluated (tasks 1–2) — the student "
+              "identifies every tier from the supplied records and the deliberate decision each "
+              "represents, then states the business consequence of each in terms proportionate to "
+              "an internal, business-hours system rather than as generic risk"),
+    dict(code="D2", tasks=["3"],
+         text="Compliance assessed (task 3) — the student assesses the infrastructure against the "
+              "supplied regulatory determination, identifies the gaps that actually apply, and "
+              "proposes infrastructure changes rather than advising on the law"),
+    dict(code="D3", tasks=["4", "5"],
+         text="Options identified and assessed (tasks 4–5) — a genuine range of design patterns "
+              "with what each addresses, then assessed against how this business actually runs, "
+              "including that an idle-overnight system changes the value of always-on redundancy"),
+    dict(code="D4", tasks=["6", "7"],
+         text="Business goals set and direction confirmed (tasks 6–7) — a measurable goal in each "
+              "of the four areas, defensible for this system, and a committed proposal set with "
+              "its exclusions stated and justified"),
+    dict(code="D5", tasks=["8"],
+         text="Performance metrics confirmed (task 8) — each metric names a real measurable "
+              "source and a target value, and pairs with a goal, so AT3 can demonstrate against "
+              "them"),
+    dict(code="D6", tasks=["9", "10", "11", "12"],
+         text="The improvement designed (tasks 9–12) — compute, storage, database and network "
+              "addressed with decisions and reasons including explicit no-change decisions; "
+              "security designed in layers, recognising what is already strong; reliability and "
+              "scalability designed with the failure behaviour stated; and cost and monitoring "
+              "designed together"),
+    dict(code="D7", tasks=["13"],
+         text="Cost-benefit justification (task 13) — every proposed improvement carries a cost "
+              "direction and a benefit, and the total is set against the cost goal"),
+    dict(code="D8", tasks=["14"],
+         text="Improved architecture drawn (task 14) — a diagram consistent with the design "
+              "tables, with both zones and the changed components identifiable"),
+    dict(code="D9", tasks=["15"],
+         text="Design documented and justified (task 15) — a written justification tying each "
+              "improvement to a business goal, naming rejected alternatives, and arguing the "
+              "database decision explicitly"),
+    dict(code="D10", tasks=["17"],
+         text="Proposal presented for review (task 17, observed) — the student presents their own "
+              "proposal to the required person and can explain and defend the reasoning behind it "
+              "in appropriate industry language"),
+    dict(code="D11", tasks=["18"],
+         text="Sign-off to proceed obtained (task 18) — sign-off recorded with a decision, a name "
+              "and a date, and the approved scope unambiguous, since it is AT3's input"),
+    dict(code="D12", tasks=["Q1", "Q2", "Q3"],
+         text="Knowledge (questions 1–3) — industry standards and standard products in the "
+              "student's own design, where object storage is and is not the right answer, and "
+              "what cloud adoption changed for Ledgerline"),
 ]
 
-PART_B = [
-    "ASSESSOR FOCUS — common error to probe. The database tier CANNOT be made Multi-AZ: Ledgerline is "
-    "vendor-certified single-instance only (the Multi-AZ database limitation discovered during the cloud "
-    "migration — see the current-state ICT records and the Cloud Migration Technical Finding). A candidate "
-    "who proposes a Multi-AZ or mirrored database has missed this constraint — probe it directly in "
-    "questioning: did they find the discovered-limitation record, and did they weigh the only real route to "
-    "database failover (replacing the accounting product — new licence, full data migration, staff retraining "
-    "and change management, and the delivery risk) against accepting backup/restore plus cross-Region DR? "
-    "Proposing a Multi-AZ database without recognising the constraint and making that cost-versus-benefit case "
-    "is inadequate research and analysis — reflect it in D1, D2 and D4. NOTE: application-tier Multi-AZ (an "
-    "Auto Scaling group across AZs behind the internal ALB) is correct and expected — do not penalise it; "
-    "only the database is constrained.",
-    "D8 — Design presentation: presents the proposed architecture for review to the required "
-    "personnel using appropriate industry language, and responds to questions to confirm the design.",
-    "D9 — Sign-off: obtains sign-off to proceed to deployment from the required personnel.",
-]
+AC_CONDITIONS = {
+    "ICTCLD504 AC 1": "C2", "ICTCLD504 AC 2": "C2", "ICTCLD504 AC 3": "C2",
+    "ICTCLD504 AC 4": "C2", "ICTCLD504 AC 6": "C2", "ICTCLD504 AC 7": "C2",
+}
 
-QUALITY = [
-    "D10 — Document quality: the Solution Design uses the YAT Solution Design template, plain "
-    "professional English, and is complete and internally consistent.",
-]
-
-# Benchmark: per-criterion UoC evidenced (bidirectional traceability). Every PC/PE/KE/FS item
-# allocated to AT1 in the cluster assessment plan (ICTCLD504 el 1-2) is covered below.
-BENCHMARK = [
-    ("Part A — Solution Design (ICTCLD504 element 1 — analyse)", [
-        ("D1", "[ICTCLD504 PC 1.1] identify and review the business's cloud architecture design; "
-               "[PC 1.2] evaluate the architecture and identify the business impact of design "
-               "decisions."),
-        ("D2", "[ICTCLD504 PC 1.3] identify design patterns and architectural options; [PC 1.4] "
-               "determine and assess the benefits and differences against the current business model "
-               "and needs; [PC 1.5] confirm system design decisions according to business needs."),
-        ("D3", "[ICTCLD504 PC 1.6] set business goals for security, reliability, high-performance and "
-               "cost; [PC 2.1] evaluate and confirm performance metrics; [PE 3] determine performance "
-               "metrics and business goals."),
-    ]),
-    ("Part A — Solution Design (ICTCLD504 element 2 — design & improve)", [
-        ("D4", "[ICTCLD504 PC 2.2] select and improve compute, storage, database and network "
-               "resources according to business needs; [PC 2.3] review and improve the architecture "
-               "to enhance security, reliability, scalability and cost optimisation; [PE 1] assess, "
-               "identify and improve cloud architecture according to design decisions."),
-        ("D5", "[ICTCLD504 PC 1.2] business impact of the regulatory requirements; [PC 2.3] improve "
-               "the architecture to meet them (the India residency slice). [AC 5] specific "
-               "requirements and legislative requirements."),
-        ("D6", "[ICTCLD504 PC 2.4] document the proposed architecture; [FS Writing] writes technical "
-               "data logically; [KE 4] design principles for cloud applications; [KE 5] migrating "
-               "principles; [KE 9] features of cloud services to improve the four concerns."),
-        ("D7", "[ICTCLD504 KE 1] industry technology standards; [KE 2] industry-standard hardware/"
-               "software products; [KE 3] methods and impacts of cloud adoption; [KE 6] use of object "
-               "storage for static web sites; [KE 8] testing/debugging incl. avoiding single point "
-               "failures — written contextual responses against the student's own design."),
-    ]),
-    ("Part B — Design presentation (ICTCLD504 element 2 close)", [
-        ("D8", "[ICTCLD504 PC 2.4] present the proposed architecture for review to required personnel; "
-               "[FS Oral communication] presents proposed solutions using appropriate industry "
-               "language and confirms requirements through questioning."),
-        ("D9", "[ICTCLD504 PC 2.5] obtain sign off to proceed to deployment with required personnel."),
-    ]),
-    ("Document quality (Foundation Skills)", [
-        ("D10", "[ICTCLD504 FS Reading] interprets complex technical and operational documentation; "
-                "[FS Writing] writes and edits technical data in a logical manner. (FS Problem solving "
-                "and Self-management are co-evidenced through the analysis and design choices.)"),
-    ]),
-]
-
-STUDENT_INTRO = [
-    ("The engagement and your role", "Heading 2"),
-    ("YAT College is a Registered Training Organisation (RTO) based at 175 Cremorne Street, Cremorne "
-     "VIC. Following a new campus partnership in India, YAT wants the cloud infrastructure of its "
-     "Ledgerline (Accounting) system confirmed as stable, reliable and fit for purpose, and "
-     "compliant with the Indian regulatory requirements that now apply — and improved where it falls "
-     "short. The improvement is to the cloud infrastructure only; the Ledgerline application and its "
-     "data are not yours to change.", "Assessor text"),
-    ("You are an MP Tech Solutions (MTS) consultant, reporting to Pat Lin (MTS Senior Consultant), "
-     "who liaises with Sam Walker, the YAT ICT Manager. In AT1 you analyse the current cloud "
-     "infrastructure and design the improvement, then present it for approval. AT1 is your own "
-     "individual work. (The team plans and builds the agreed design in AT2, and each engineer "
-     "deploys it in AT3.)", "Assessor text"),
-    ("The engagement framing and the current-state records are provided on the intranet (the "
-     "Ledgerline Cloud Infrastructure Improvement project, and the Accounting System Baseline Design, "
-     "Infrastructure Specifications, Application Specification and Operational Costing). The analysis "
-     "and the design are yours to produce.", "Assessor text"),
-]
-
-STUDENT_TASK = [
-    ("Part A — your Solution Design", "Heading 2"),
-    ("Using the YAT Solution Design template (download from the intranet's Templates section), "
-     "analyse the current single-AZ Ledgerline infrastructure and design the improvement. Your "
-     "Solution Design must:", "Assessor text"),
-    ("• Review and evaluate the current architecture and identify the business impact of its design "
-     "(its single points of failure, its idle-profile cost, its scalability headroom, and its "
-     "position against the Indian regulatory requirements).", "Assessor text"),
-    ("• Set measurable security, reliability, scalability and cost goals and the performance metrics "
-     "you will measure the design against.", "Assessor text"),
-    ("• Design the improvement across the four components — network, compute, database and storage — "
-     "improving each across all four concerns into one integrated architecture, and include the "
-     "infrastructure changes that meet the Indian regulatory requirements.", "Assessor text"),
-    ("• Document and justify each improvement on a cost-versus-benefit basis — proportionate to an "
-     "internal, business-hours finance system (sound engineering, not gold-plating).", "Assessor text"),
-    ("Knowledge Evidence appendix (required). At the end of your Solution Design, add a Knowledge "
-     "Evidence appendix and answer the following in your own words, about your own design:", "Assessor text"),
-    ("• How does the accounting system's use of object storage differ from a system that serves "
-     "objects publicly (for example a website), and how would you provision that storage if it were "
-     "needed here?", "Assessor text"),
-    ("• How does your design avoid single points of failure, and how would you test that it does?", "Assessor text"),
-    ("• For each of the four optimisation concerns, name a cloud feature your design uses and the "
-     "improvement it delivers.", "Assessor text"),
-    ("Part B — your design presentation", "Heading 2"),
-    ("Present your proposed architecture to the required personnel (your assessor, in the role of "
-     "the YAT ICT Manager / MTS Senior Consultant) for review. Walk through the design and its "
-     "justification, respond to questions, and obtain sign-off to proceed to deployment.", "Assessor text"),
-    ("Submit the populated Solution Design (.docx) with the Knowledge Evidence appendix completed, "
-     "and deliver the Part B presentation at the scheduled time.", "Assessor text"),
-]
-
-TIPS = [
-    ("Tips for success", "Heading 2"),
-    ("Improve the infrastructure, not the application. The Ledgerline application and its data are "
-     "fixed inputs — you are improving the cloud infrastructure underneath them.", "Assessor text"),
-    ("Cover all four concerns on the whole system. Security, reliability, scalability and cost each "
-     "need to be addressed — don't leave one out.", "Assessor text"),
-    ("Be proportionate. This is an internal, business-hours finance system; justify each improvement "
-     "against the business need rather than adding capability by default.", "Assessor text"),
-    ("Scalability means the ability to scale on demand, not a forecast that load will grow — design "
-     "for elastic headroom, and be ready to explain how you would demonstrate it.", "Assessor text"),
-    ("Write to your own design. The Knowledge Evidence appendix and the presentation are about your "
-     "own design choices — answer and present in your own words.", "Assessor text"),
-]
+EXPECTED = (
+    [f"ICTCLD504 PC {n}" for n in "1.1 1.2 1.3 1.4 1.5 1.6 2.1 2.2 2.3 2.4 2.5".split()]
+    + ["ICTCLD504 PE 1", "ICTCLD504 PE 3"]
+    + [f"ICTCLD504 KE {n}" for n in "1 2 3 4 5 6 8 9".split()]
+    + [f"ICTCLD504 FS {s}" for s in ["Oral communication", "Reading", "Writing"]]
+    + ["ICTCLD504 AC 5"]
+)
 
 
-def build(path):
-    doc = Document(TEMPLATE)
+def _elements():
+    return collect_elements(content.DESIGN, content.APPROVAL, (content.QUESTIONS, "Q"))
 
-    # ---- Table 0: Details ----
-    t_details = doc.tables[0]
-    set_cell_content(t_details.rows[1].cells[1], DETAILS["qualification"])
-    set_cell_content(t_details.rows[2].cells[1], DETAILS["units"])
-    set_cell_content(t_details.rows[3].cells[1], DETAILS["task_title"])
-    set_cell_content(t_details.rows[4].cells[1], DETAILS["task_number"])
 
-    # ---- Table 1: Teacher/Assessor instructions ----
-    t_instr = doc.tables[1]
-    set_cell_content(find_instruction_row(t_instr, "Assessment overview"), OVERVIEW)
-    set_cell_content(find_instruction_row(t_instr, "Task"), TASKS)
-    set_cell_content(find_instruction_row(t_instr, "Resources required"), RESOURCES)
-    set_cell_content(find_instruction_row(t_instr, "Assessment criteria"), CRITERIA_STATEMENT)
-    cond_row = t_instr.add_row()
-    set_cell_content(cond_row.cells[0], "Assessment Conditions & Setup Requirements")
-    for r in cond_row.cells[0].paragraphs[0].runs:
-        r.bold = True
-    set_cell_content(cond_row.cells[1], CONDITIONS)
+# The mapping engine reads this: the same per-criterion tag lists the marking guide
+# uses, inverted per unit to produce the Assessment Mapping documents.
+BENCHMARK = benchmark_sections(CRITERIA_MAP, _elements(), "AT1 — Cloud Infrastructure Improvement: Design")
 
-    # ---- Table 2: Marking Guide ----
-    t_mark = doc.tables[2]
-    clear_table_rows(t_mark, 2)  # keep header rows
-    add_section_row(t_mark, "Part A — Solution Design")
-    for c in PART_A:
-        add_criterion_row(t_mark, c)
-    add_section_row(t_mark, "Part B — Design Presentation")
-    for c in PART_B:
-        add_criterion_row(t_mark, c)
-    add_section_row(t_mark, "Document quality")
-    for c in QUALITY:
-        add_criterion_row(t_mark, c)
 
-    # ---- Instructions to Student ----
-    doc.add_paragraph("Instructions to Student", style="Heading 1")
-    for text, style in (STUDENT_INTRO + STUDENT_TASK + TIPS):
-        doc.add_paragraph(text, style=style)
+def build(path, mode="assessor"):
+    elements = _elements()
+    gaps = unevidenced_items(CRITERIA_MAP, elements, None, EXPECTED)
+    if gaps:
+        raise SystemExit("No criterion evidences: " + ", ".join(gaps))
 
-    # ---- Benchmark (UoC traceability) ----
-    doc.add_paragraph("Marking Benchmark — UoC traceability", style="Heading 1")
-    doc.add_paragraph(
-        "For each criterion, the unit-of-competency items it evidences. Every PC, PE, KE and FS "
-        "item allocated to AT1 in the cluster assessment plan is covered below.", style="Assessor text")
-    for part_title, rows in BENCHMARK:
-        doc.add_paragraph(part_title, style="Heading 2")
-        for cid, uoc in rows:
-            p = doc.add_paragraph(style="Assessor text")
-            run = p.add_run(f"{cid}  —  ")
-            run.bold = True
-            p.add_run(uoc)
+    spec = dict(details=DETAILS, overview=OVERVIEW, student_overview=STUDENT_OVERVIEW,
+                tasks=TASKS, time_allowed=TIME_ALLOWED, resources=RESOURCES,
+                student_resources=STUDENT_RESOURCES, criteria=CRITERIA, conditions=CONDITIONS,
+                criteria_map=CRITERIA_MAP,
+                marking_rows=marking_guide(CRITERIA_MAP, elements))
+
+    def render_body(doc, mode):
+        def h1(t):
+            return doc.add_paragraph(t, style="Heading 1")
+
+        def h2(t):
+            return content.R.heading2(doc, t)
+
+        content.render_front_matter(doc, h1)
+        content.render(doc, h1, h2, mode=mode)
+
+    tmpl = TEMPLATES / (f"Project Assessment - "
+                        f"{'Assessor' if mode == 'assessor' else 'Student'}.docx")
+    benchmark = reverse_map_body(
+        CRITERIA_MAP, elements, CLUSTER / "consolidated_uoc.md",
+        [("ICTCLD504", "ICTCLD504 — Improve cloud infrastructure (AT1-evidenced items; "
+                       "elements 3–4 are evidenced in AT3)")], AC_CONDITIONS)
+    doc = assemble(str(tmpl), spec, mode, render_body, benchmark)
 
     Path(path).parent.mkdir(parents=True, exist_ok=True)
     doc.save(path)
-    print(f"Wrote {path}")
+    print(f"Wrote {path}  ({mode})")
 
 
 if __name__ == "__main__":
-    default = "S1-CL3-Cloud-Infrastructure-Improvement/assessments/AT1/AT1-Design-Assessor.docx"
-    out = sys.argv[1] if len(sys.argv) > 1 else default
-    build(out)
+    args = list(sys.argv[1:])
+    mode = args.pop(0) if args and args[0] in ("assessor", "student") else "assessor"
+    name = f"AT1-Design-{'Assessor' if mode == 'assessor' else 'Student'}.docx"
+    build(args[0] if args else str(CLUSTER / "assessments" / "AT1" / name), mode)

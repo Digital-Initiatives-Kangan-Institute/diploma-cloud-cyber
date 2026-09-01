@@ -1,9 +1,10 @@
 # S1-CL2 Cloud Disaster Recovery — Cluster Assessment Plan
 
-> **STATUS: COMPLETE (authoring + coverage), 2026-06-15.** All instruments, exemplars and `mappings/` are
-> built and website-framed; `validate-cluster-coverage` passes **105/105**. What remains before
-> institutional sign-off is **external only** — the colleague **Pre-Validation** meeting. Don't reopen for
-> authoring. Conforms to the assessment-plan format standard (`docs/assessment-plan-format.md`).
+> **STATUS: COMPLETE (authoring + coverage).** Both instruments and `mappings/` are built and
+> website-framed; `validate-cluster-coverage` passes **105/105**. The instruments are guided workbooks
+> (see `docs/assessment-workbook-format.md`), generated per AT from one content definition. What remains
+> before institutional sign-off is **external only** — the colleague **Pre-Validation** meeting. Conforms
+> to the assessment-plan format standard (`docs/assessment-plan-format.md`).
 >
 > **Scenario binding:** maps to the **Semester-1 YAT** scenario — the offshore-India / GIFT City **website
 > global expansion** engagement; scenario sources `scenario/cluster-2-scenario-{assessment,practice}.md` +
@@ -11,15 +12,21 @@
 >
 > **What is settled** (approved with Tim, 2026-06-06):
 > - The four-topic taxonomy and the **two-AT** division.
-> - **AT1 is three parts** — **Part A Solution Design** (ICTCLD503 design), **Part B DR Plan** (ICTCLD501),
->   **Part C presentation** covering both for approval. **AT2** is a single written **Deployment Report**.
+> - **AT1 is three parts** — **Part A Design** (ICTCLD503 design), **Part B DR Plan** (ICTCLD501),
+>   **Part C approval** covering both. **AT2** is the microservice and infrastructure-as-code build.
+> - **Both instruments are guided workbooks.** Each is one document the student works through task by
+>   task, rendered two ways from one definition — blank for the student, worked for the assessor.
+>   A separate fillable template survives only where a UoC requirement demands one, which here is
+>   the DR Plan alone (`[ICTCLD501 AC 3]` — reporting standards for documenting and communicating
+>   it). ICTCLD503's and ICTCLD505's assessment conditions name no document format, so Part A,
+>   Part C and AT2 are captured in the worksheet itself.
 > - **DR ≠ regulatory ≠ design — three separate concerns:** the DR plan (501) = "what if the system goes
 >   down"; the Solution Design (503) holds the web-scale architecture **and the microservice**; data
 >   residency is an **input constraint**, not a deliverable. The microservice lives in the Solution Design
 >   (its regulatory purpose is *why* it exists), never in the DR plan.
 > - The scenario spine (offshore-India / **website** assessed, **LMS** practised); the **light**
->   India-residency slice; the two approval gates; KE in written appendices + verbal contextual Q&A at AT1's
->   presentation.
+>   India-residency slice; the two approval gates; KE as contextual knowledge questions in each
+>   workbook, plus verbal contextual questions at AT1's Part C session.
 >
 > **Companion documents:** `consolidated_uoc.md` (every PC/FS/PE/KE/AC verbatim, 13 groups under 4 topics);
 > the CL1 plan (the pilot this parallels in shape).
@@ -36,7 +43,7 @@ hand-over — one scenario, one stakeholder voice, one artefact thread.
 ```
    Phase 1 — Design & Plan                Phase 2 — Implement
         AT1                                    AT2
-   Part A  Solution Design (503 design)   Deployment Report
+   Part A  Design         (503 design)   Microservice + IaC build
    Part B  DR Plan         (501)          - microservice build (503) + IaC (505)
    Part C  Presentation    (501 el 5 —    - monitoring + IaC user docs + build sign-off
            the approval gate, covers A+B)
@@ -49,9 +56,9 @@ implementing; 503/505 element 4 = build sign-off. **Part A before Part B** becau
 a designed system.
 
 **Knowledge evidence — contextual, not abstract recall** (carried from CL1): students reason about *their
-own* design/build choices. **Locations (settled):** a written KE appendix in each document (Part A, Part B,
-AT2 — mandatory), plus verbal contextual questions at the AT1 Part C presentation (covering Part A + B KE);
-AT2 has no presentation, so its KE is written-only.
+own* design/build choices. **Locations:** a knowledge-questions section in each workbook — Part A, Part B and
+AT2 — asked about the student's own design and build; plus verbal contextual questions at the AT1 Part C
+session. AT2 has no session, so its knowledge evidence is written-only.
 
 ---
 
@@ -77,15 +84,16 @@ the inputs + the AWS Academy lab environment.
 
 | AT | Working title | Mode | Format | Unit focus |
 |----|---|---|---|---|
-| **AT1** | Cloud Expansion: Design & DR Plan | Individual | **Project Assessment**, three parts — A Solution Design · B DR Plan · C presentation | **ICTCLD503** *design* + **ICTCLD501** |
-| **AT2** | Cloud Microservice & IaC Implementation | Individual | Single written **Deployment Report** (+ provided artefacts as appendices) | **ICTCLD503** *build* + **ICTCLD505** + monitoring |
+| **AT1** | Cloud Expansion: Design & DR Plan | Individual | **Project Assessment** workbook, three parts — A Design · B DR Plan (assembled into the DR Plan template) · C approval | **ICTCLD503** *design* + **ICTCLD501** |
+| **AT2** | Cloud Microservice & IaC Implementation | Individual | **Project Assessment** workbook — 22 build tasks + knowledge questions; provided artefacts supplied inline | **ICTCLD503** *build* + **ICTCLD505** + monitoring |
 
 ### AT1 — Cloud Expansion: Design & DR Plan
 - **Mode / Format / Unit focus:** Individual; **Part A** Solution Design (web-scale architecture for the
   global user base + the audit-log microservice; residency as a design input — `503 PC 1.7/2.4`); **Part B**
   DR Plan (recovery for the Part-A system: risk/impact, RTO/RPO, backup-restore, recovery steps — 501
-  el 1–4); **Part C** presentation (walkthrough of A+B, feedback, lodgement, sign-off — 501 el 5, the design
-  approval gate). ICTCLD503 *design* + ICTCLD501.
+  el 1–4), whose closing task assembles the worked answers into the YAT DR Plan template; **Part C**
+  approval (verbal walkthrough of A+B, feedback, lodgement, sign-off — 501 el 5, the design approval
+  gate). One continuous workbook, 43 tasks and 7 knowledge questions. ICTCLD503 *design* + ICTCLD501.
 - **UoC coverage:** [ICTCLD501 PC 1.1–1.3, 2.1–2.5, 3.1–3.4, 4.1–4.3, 5.1–5.4] · [ICTCLD501 PE 1–3] · [ICTCLD501 KE 1–6] · [ICTCLD501 FS Oral communication] · [ICTCLD501 FS Planning and organising] · [ICTCLD501 FS Problem solving] · [ICTCLD501 FS Reading] · [ICTCLD501 FS Self-management] · [ICTCLD503 PC 1.1–1.7, 2.1–2.4] · [ICTCLD503 PE 1, 2, 5] · [ICTCLD503 KE 3, 4, 6] · [ICTCLD503 FS Problem solving] · [ICTCLD503 FS Reading] · [ICTCLD503 FS Self-management] · [ICTCLD503 FS Writing]
 - **Scenario requirements:** SR-CL2-02 · SR-CL2-03 · SR-CL2-05 · SR-CL2-06
 
@@ -93,17 +101,22 @@ the inputs + the AWS Academy lab environment.
 - **Mode / Format / Unit focus:** Individual; operate a provided data-store template (505 el 1–2), author
   the microservice template + deploy from the provided code (505 el 3 + 503 el 3), configure monitoring,
   produce the IaC user documentation (`505 PC 4.1`, `PE 4`), obtain build sign-off (`503 PC 4.2/4.3`,
-  `505 PC 4.2`). Provided artefacts (data-store template, microservice code, webhook contract) are
-  appendices — no separate lab pack. ICTCLD503 *build* + ICTCLD505 + monitoring.
+  `505 PC 4.2`). 22 build tasks and 3 knowledge questions. Provided artefacts (data-store template,
+  microservice code, webhook contract) are supplied inline in the workbook — no separate lab pack. The
+  data-store template carries a deliberate fault the student must diagnose (`505 PC 2.6`, `KE 7`).
+  ICTCLD503 *build* + ICTCLD505 + monitoring.
 - **UoC coverage:** [ICTCLD503 PC 3.1–3.4, 4.1–4.3] · [ICTCLD503 PE 3, 4] · [ICTCLD503 KE 1, 2, 5] · [ICTCLD503 FS Writing] · [ICTCLD505 PC 1.1–1.4, 2.1–2.6, 3.1–3.7, 4.1, 4.2] · [ICTCLD505 PE 1–4] · [ICTCLD505 KE 1–11] · [ICTCLD505 FS Oral communication] · [ICTCLD505 FS Problem solving] · [ICTCLD505 FS Reading] · [ICTCLD505 FS Self-management] · [ICTCLD505 FS Writing]
 - **Scenario requirements:** SR-CL2-01 · SR-CL2-02 · SR-CL2-04
 
 **Two approval moments (UoC-faithful):** end of AT1 Part C = design approval (501 el 5) before any build;
 end of AT2 = build sign-off (503 el 4 + 505 el 4).
 
-**Template basis:** AT1 uses the institutional **Project Assessment** template (multi-part, as CL1); the DR
-Plan template + AT1 DR-Plan exemplar are built; the Solution Design (Part A) + Part C presentation reuse the
-Solution Design / Business-Case-Presentation document types.
+**Template basis:** both instruments are built on the institutional **Project Assessment** template
+(assessor + student), with the workbook rendered inside it. One YAT deliverable template survives — the
+**DR Plan**, with its exemplar — because `[ICTCLD501 AC 3]` requires the plan to be documented to a reporting
+standard. Part A, Part C and AT2 need none: their units' assessment conditions are environment conditions and
+name no document format. Part C requires no presentation deck — `[ICTCLD501 PC 5.1]` asks for a **verbal**
+walkthrough of the plan.
 
 ---
 
@@ -114,9 +127,9 @@ material exists) and the ICTCLD501 / ICTCLD503 standalone source assessments are
 scenario element worth recovering has been recovered, and the ATs are authored against the consolidated UoC
 directly.
 
-**Reused as structure (not provenance):** the CL1 **Solution Design** and **Business-Case-Presentation**
-document types (Part A / Part C); the CL1 **AT pattern** (Project Assessment template, multi-part AT,
-appendix-bearing AT2 report, contextual reflective KE, bidirectional UoC traceability); and the **scenario
+**Reused as structure (not provenance):** the CL1 **workbook** pattern (one content definition rendered
+blank for the student and worked for the assessor, per-element `Evidences:` + `Satisfactory when`,
+contextual knowledge questions, bidirectional UoC traceability) and its shared engine; and the **scenario
 inputs** on the intranet (`website-global-expansion` documents incl. the residency requirements;
 `lms-global-expansion` as the parallel practice worked-example).
 
@@ -149,8 +162,8 @@ environmental requirement discharges.
 | **SR-CL2-01** | AWS Academy Learner Lab (us-east-1; LabRole for serverless/IaC) — cloud vendor, managed DB, serverless/IaC services, console/CLI, IDE, browser, SSH/RDP | AT1, AT2 | [ICTCLD503 AC 1] · [ICTCLD503 AC 2] · [ICTCLD503 AC 3] · [ICTCLD503 AC 6] · [ICTCLD503 AC 8] · [ICTCLD505 AC 1] · [ICTCLD505 AC 2] · [ICTCLD505 AC 5] · [ICTCLD505 AC 6] · [ICTCLD505 AC 7] · [ICTCLD505 AC 8] |
 | **SR-CL2-02** | The `website-global-expansion` scenario inputs — the offshore-India/GIFT City engagement, the HA-hardened website baseline, the global-user-base driver, requirements + data sources | AT1, AT2 | [ICTCLD503 AC 5] · [ICTCLD503 AC 7] · [ICTCLD503 AC 9] · [ICTCLD505 AC 3] · [ICTCLD505 AC 4] |
 | **SR-CL2-03** | The `Data Residency & Sovereignty Requirements` document (the light India slice) — the input constraint driving Part A's web-scale design + the microservice | AT1 | [ICTCLD501 AC 2] |
-| **SR-CL2-04** | Provided AT2 artefacts supplied **inline as Deployment-Report appendices (deliberately NOT a lab-pack)**: (a) a data-store CloudFormation template (written in-scenario by another contractor) carrying a **deliberate fault the student must debug and deploy**; (b) the audit-log microservice **application code** (the student authors their own IaC to deploy it); (c) the webhook payload contract. Inline by design — authoring/operating the deployment YAML is the assessed skill (ICTCLD505), so a pre-built/validated lab-pack would remove the assessed work | AT2 | [ICTCLD503 AC 4] |
-| **SR-CL2-05** | A required-personnel stakeholder to role-play the AT1 Part C presentation feedback + design sign-off | AT1 | — |
+| **SR-CL2-04** | Provided AT2 artefacts supplied **inline in the workbook (deliberately NOT a lab-pack)**: (a) a data-store CloudFormation template (written in-scenario by another contractor) carrying a **deliberate fault the student must debug and deploy**; (b) the audit-log microservice **application code** (the student authors their own IaC to deploy it); (c) the webhook payload contract. Inline by design — authoring/operating the deployment YAML is the assessed skill (ICTCLD505), so a pre-built/validated lab-pack would remove the assessed work | AT2 | [ICTCLD503 AC 4] |
+| **SR-CL2-05** | A required-personnel stakeholder to role-play the AT1 Part C walkthrough feedback + design sign-off | AT1 | — |
 | **SR-CL2-06** | The **data required to assess the website's risk events** — the organisational/business context, IT stack and project requirements (Website Global Expansion engagement brief, requirements, ICT-manager consultation notes, website spec, HA-hardened baseline, data-residency requirements, deprecated on-prem DR plan for context) — **plus** the DR **reporting standard** (the YAT Disaster Recovery Plan template + lodgement protocol). The risk register / impact analysis itself is **student-authored** (the assessed risk assessment), so no pre-built register is provided | AT1 | [ICTCLD501 AC 1] · [ICTCLD501 AC 3] |
 
 *(The LMS `lms-global-expansion` is the **practice** vehicle — teaching context, not an assessment
@@ -160,9 +173,12 @@ requirement — so it is not an `SR-*`; see §2.)*
 
 ## 7. Worklist
 
-**Complete** — all instruments (AT1 Parts A/B/C, AT2), exemplars, templates and `mappings/` are built and
-website-framed; coverage validates 105/105. The DR-Plan exemplar's regulatory/microservice material has been
-de-weaved into the Part A Solution Design. No authoring remains.
+**Complete** — both instruments (AT1 Parts A/B/C, AT2), the DR Plan template and its exemplar, and
+`mappings/` are built and website-framed; coverage validates 105/105. No authoring remains.
+
+**Retired by the workbook conversion:** the Solution Design and Deployment Report templates are no longer
+used by this cluster (they still serve CL3 until it is reviewed), and their exemplars are orphaned — under
+the standing rule an exemplar exists only where a student-fillable template does.
 
 ---
 

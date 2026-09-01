@@ -30,7 +30,7 @@ spans two zones — task 9 is what finds out whether the student checked.
 """
 from pathlib import Path  # noqa: E402
 
-import run_sheet_render as R  # noqa: E402  (shared primitives; AT2 keeps its own copies for now)
+from helpers import run_sheet as R  # noqa: E402  (the shared workbook engine, in the umbrella)
 
 SITE = "https://yat.timbaird.com"
 
@@ -871,30 +871,7 @@ REFLECTIONS = [
 # ---------------------------------------------------------------- rendering
 
 
-def _element(doc, h2, el, mode, label="Task", notes=False):
-    """A Part A design task or a close-out task — prompt, tags, capture. Both carry performance
-    criteria, so both are framed as tasks; only the knowledge section asks questions."""
-    R.flag(doc, f"{label} {el['n']}")
-    h2(el["title"])
-    R.p(doc, el["prompt"], after=6)
-    if el.get("resources"):
-        R.resources_block(doc, el["resources"])
-    if el.get("table"):
-        cols, rows = el["table"]
-        R.design_table(doc, cols, rows, mode,
-                       blank_rows=el.get("blank_rows", 3), given=el.get("given", 0),
-                       exemplar=el.get("exemplar", 0))
-    if el.get("points"):
-        R.response_slot(doc, None, mode, points=el["points"])
-    if el.get("diagram"):
-        R.diagram_slot(doc, el["diagram"], mode)
-    R.uoc_line(doc, el.get("uoc", []), mode)
-    if el.get("standard"):
-        R.standard_line(doc, el["standard"], mode)
-    if el.get("consider"):
-        R.consider(doc, el["consider"])
-    if notes:
-        R.notes_box(doc)
+_element = R.element
 
 
 def render_front_matter(doc, h1):
